@@ -1,0 +1,21 @@
+<input
+  type="text"
+  placeholder="Buscar contacto o zona"
+  [(ngModel)]="searchText"
+  (input)="onSearchChange()"
+  class="search"
+  />
+
+@for (t of filteredTelefonos; track t) {
+  <div
+    class="telefono"
+    [class.no-phone]="!t.telefono"
+    (click)="call(t.telefono)"
+    >
+    <h3>{{ t.name }}</h3>
+    @if (t.telefono) {
+      <p>📞 {{ t.telefono }}</p>
+    }
+    <p>Zona: {{ t.zona }}</p>
+  </div>
+}

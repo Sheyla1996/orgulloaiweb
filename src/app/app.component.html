@@ -1,0 +1,26 @@
+
+
+<main>
+  <router-outlet></router-outlet>
+  <mat-fab-menu color="primary" [fabButtons]="menu" direction="top" (onFabMenuItemSelected)="onChangeMenu($event)"></mat-fab-menu>
+</main>
+
+<!--<footer>
+    <mat-toolbar class="toolbarNav">
+      <button matButton routerLink="asociaciones" routerLinkActive="active-link">
+        <mat-icon class="material-icons color_blue">
+          groups</mat-icon>
+        <span>Asociaciones</span>
+      </button>
+      <button matButton routerLink="/carrozas" routerLinkActive="active-link">
+        <mat-icon class="material-icons color_blue">local_shipping
+        </mat-icon>
+        <span>Carrozas</span>
+      </button>
+      <button matButton routerLink="/telefonos" routerLinkActive="active-link">
+        <mat-icon class="material-icons color_blue">contact_phone</mat-icon>
+        <span>Teléfonos</span>
+      </button>
+    </mat-toolbar>
+  </footer>-->
+

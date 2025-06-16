@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <path d="M878.23,782.68a50.19,50.19,0,1,0-99.87,5.82H365.23a51.13,51.13,0,1,0-101.79-7,51.79,51.79,0,0,0,0.47,7h-37L76.62,746.08V389.92a16.72,16.72,0,0,1,0.51-4.09,16.32,16.32,0,0,1,15.78-12.21h4.18V489h925.2A27.84,27.84,0,0,0,1050,458l-8-70.51a12.44,12.44,0,0,1,12.35-13.84h31.33l7.87,204.63,4.67,121.36,3.42,88.89H877.76A50.75,50.75,0,0,0,878.23,782.68Z" fill="#E1BEE7"></path>
+  <path d="M878.2,782.7a50.2,50.2 0,1 0,-99.9 5.8H365.2a51.1,51.1 0,1 0,-101.8 -7,51.8 51.8,0 0,0 0.5,7h-37L76.6,746.1V389.9a16.7,16.7 0,0 1,0.5 -4.1,16.3 16.3,0 0,1 15.8,-12.2h4.2V489h925.2A27.8,27.8 0,0 0,1050 458l-8,-70.5a12.4,12.4 0,0 1,12.4 -13.8h31.3l7.9,204.6 4.7,121.4 3.4,88.9H877.8A50.8,50.8 0,0 0,878.2 782.7Z" stroke="#1d252e" stroke-width="2" fill="none"></path>
+  <path d="M253.2,787.9c0,-37.4 27.5,-67.8 61.3,-67.8s61.3,30.4 61.3,67.8" fill="none" stroke="#1d252e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  <path d="M765.6,787.9c0,-37.4 27.5,-67.8 61.3,-67.8s61.3,30.4 61.3,67.8" fill="none" stroke="#1d252e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  <path d="M314.6,781.5m-44.8,0a44.8,44.8 0,1 1,89.7 0a44.8,44.8 0,1 1,-89.7 0" fill="none" stroke="#1d252e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  <path d="M828.2,781.5m-44.8,0a44.8,44.8 0,1 1,89.7 0a44.8,44.8 0,1 1,-89.7 0" fill="none" stroke="#1d252e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  <path d="M1098.1,699.6l-24.2,-6.3a5.4,5.4 0,0 1,-5.4 -5.4V583.7a5.4,5.4 0,0 1,5.4 -5.4h19.5Z" fill="#1d252e"></path>
+  <path d="M1085.6,385.8v80s-17.1,-9.2 -17.1,-12.2V391.3a5.4,5.4 0,0 1,5.4 -5.4Z" fill="#1d252e"></path>
+  <path d="M89.2,391.3v62.4c0,2 -7.5,6.7 -12.6,9.6V389.9a16.7,16.7 0,0 1,0.5 -4.1h6.7A5.4,5.4 0,0 1,89.2 391.3Z" fill="#1d252e"></path>
+  <path d="M1101.8,764.2v25.1h-10.2a4.4,4.4 0,0 1,-0.5 -2.1V769.1c0,-2.7 2.6,-5 5.7,-5h4.4Z" fill="#1d252e"></path>
+  <path d="M1099.2,727h-6.6a1.6,1.6 0,0 0,-1.6 1.6v28.1a1.6,1.6 0,0 0,1.6 1.6h7.8" fill="none" stroke="#1d252e" stroke-width="2"></path>
+  <path d="M91,467.1L1055.2,467.1" fill="none" stroke="#1d252e" stroke-width="3.3"></path>
+  <path d="M218.7,466.7L218.7,500.5" fill="none" stroke="#1d252e" stroke-width="3.3"></path>
+  <path d="M370.1,466.7L370.1,500.5" fill="none" stroke="#1d252e" stroke-width="3.3"></path>
+  <path d="M521.6,466.7L521.6,500.5" fill="none" stroke="#1d252e" stroke-width="3.3"></path>
+  <path d="M673,466.7L673,500.5" fill="none" stroke="#1d252e" stroke-width="3.3"></path>
+  <path d="M824.5,466.7L824.5,500.5" fill="none" stroke="#1d252e" stroke-width="3.3"></path>
+  <path d="M975.9,466.7L975.9,500.5" fill="none" stroke="#1d252e" stroke-width="3.3"></path>
+  <path d="M76.6,716.8h6.2a3.1,3.1 0,0 0,3.1 -3.1v-66a3.1,3.1 0,0 0,-3.1 -3.1h-6.2" fill="none" stroke="#1d252e" stroke-width="2"></path>
+  <path d="M111.4,752.7V729.3a3.1,3.1 0,0 1,3.1 -3.1h75.8a3.1,3.1 0,0 1,3.1 3.1V774.5" fill="none" stroke="#1d252e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  <path d="M122.8,755.8L122.8,736.4" fill="none" stroke="#1d252e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  <path d="M132.4,758.5L132.4,736.4" fill="none" stroke="#1d252e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  <path d="M142,761.2L142,736.4" fill="none" stroke="#1d252e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  <path d="M151.5,763.9L151.5,736.4" fill="none" stroke="#1d252e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  <path d="M161.1,766.6L161.1,736.4" fill="none" stroke="#1d252e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  <path d="M170.7,769.3L170.7,736.4" fill="none" stroke="#1d252e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  <path d="M180.2,772L180.2,736.4" fill="none" stroke="#1d252e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
