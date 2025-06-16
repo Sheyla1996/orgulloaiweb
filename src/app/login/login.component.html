@@ -1,6 +1,6 @@
 <!-- login.component.html -->
-<form (ngSubmit)="login()">
-  <input type="password" [(ngModel)]="password" name="password" placeholder="Contraseña" required>
-  <button type="submit">Entrar</button>
+<form class="form" (ngSubmit)="login()">
+  <input class="input" type="password" [(ngModel)]="password" name="password" placeholder="Contraseña" required>
+  <button matButton="filled" type="submit">Acceder</button>
 </form>
 <p *ngIf="error" style="color:red;">Contraseña incorrecta</p>

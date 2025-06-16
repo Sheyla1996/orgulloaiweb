@@ -1,30 +1,35 @@
 <div class="page">
-<div class="head">
-    <input
-      type="text"
-      placeholder="Buscar asociación"
-      [(ngModel)]="searchText"
-      (input)="onSearchChange()"
-      class="search"
-    />
-
-  <!-- Mapa fijo debajo del buscador -->
-  <div id="map-asociaciones" class="map-container"></div>
-</div>  <!-- Buscador fijo arriba -->
-  
+  <div class="head">
+    <div class="search-content">
+      <input
+        type="text"
+        placeholder="Buscar asociación"
+        [(ngModel)]="searchText"
+        (input)="onSearchChange()"
+        class="search"
+      />
+      <mat-icon fontIcon="search"></mat-icon>
+    </div>
+    <!-- Mapa fijo debajo del buscador -->
+    <div id="map-asociaciones" class="map-container"></div>
+  </div>
 
   <!-- Listado con scroll ocupa el resto -->
-  <div class="list " id="list-container">
-    <div
-      *ngFor="let asociacion of filteredAsociaciones"
-      class="list-item"
-      [attr.id]="'asoc-' + asociacion.id"
-    >
-      <div class="list-item__logo" [ngClass]="asociacion.zona">
-        <img *ngIf="asociacion.logo" [src]="'https://laalisedadetormes.com/orgullo/' + asociacion.logo + '.webp'" alt="{{ asociacion.name }}">
+  <div class="list" id="list-container">
+    <ng-container *ngFor="let asociacion of filteredAsociaciones">
+      <div
+        class="list-item"
+        [attr.id]="'asoc-' + asociacion.id"
+      >
+        <div class="list-item__logo" [ngClass]="asociacion.zona">
+          <img
+            *ngIf="asociacion.logo"
+            [src]="'https://laalisedadetormes.com/orgullo/' + asociacion.logo + '.webp'"
+            [alt]="asociacion.name"
+          />
+        </div>
+        <div class="list-item__name">{{asociacion.position}}. {{ asociacion.name }}</div>
       </div>
-
-      <div class="list-item__name">{{ asociacion.name }}</div>
-    </div>
+    </ng-container>
   </div>
 </div>

@@ -26,10 +26,9 @@ import { CommonModule } from '@angular/common';
   ],
   templateUrl: './list-asociaciones.component.html',
   styleUrls: ['./list-asociaciones.component.scss'],
-  encapsulation: ViewEncapsulation.None,
   schemas: [NO_ERRORS_SCHEMA]
 })
-export class ListAsociacionesComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ListAsociacionesComponent implements OnInit, OnDestroy {
   asociaciones: Asociacion[] = [];
   filteredAsociaciones: Asociacion[] = [];
   map!: L.Map;
@@ -48,13 +47,13 @@ export class ListAsociacionesComponent implements OnInit, AfterViewInit, OnDestr
         .sort((a, b) => a.position - b.position);
 
       this.filteredAsociaciones = [...this.asociaciones];
-      setTimeout(() => this.initMap(), 0);
+      setTimeout(() => {
+        this.initMap();
+        this.initObserver();
+      }, 0);
     });
   }
 
-  ngAfterViewInit(): void {
-    this.initObserver();
-  }
 
   ngOnDestroy(): void {
     if (this.observer) this.observer.disconnect();
@@ -89,7 +88,7 @@ export class ListAsociacionesComponent implements OnInit, AfterViewInit, OnDestr
       maxZoom: 20
     }).addTo(this.map);
 
-    this.filteredAsociaciones.forEach((a, i, arr) => {
+    this.asociaciones.forEach((a, i, arr) => {
       if (i > 0) {
         const prev = arr[i - 1];
         const color = this.getZonaColor(a.zona);

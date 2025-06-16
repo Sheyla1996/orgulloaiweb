@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/orgullo2022",
+            "outputPath": "dist/orgullo2022/browser",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": [
@@ -99,6 +99,59 @@
             ],
             "scripts": []
           }
+        },
+        "server": {
+          "builder": "@angular-devkit/build-angular:server",
+          "options": {
+            "outputPath": "dist/orgullo2022/server",
+            "main": "src/server.ts",
+            "tsConfig": "tsconfig.server.json",
+            "inlineStyleLanguage": "scss"
+          },
+          "configurations": {
+            "production": {
+              "outputHashing": "media"
+            },
+            "development": {
+              "optimization": false,
+              "sourceMap": true,
+              "extractLicenses": false
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve-ssr": {
+          "builder": "@angular-devkit/build-angular:ssr-dev-server",
+          "configurations": {
+            "development": {
+              "browserTarget": "orgullo2022:build:development",
+              "serverTarget": "orgullo2022:server:development"
+            },
+            "production": {
+              "browserTarget": "orgullo2022:build:production",
+              "serverTarget": "orgullo2022:server:production"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "prerender": {
+          "builder": "@angular-devkit/build-angular:prerender",
+          "options": {
+            "routes": [
+              "/"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "orgullo2022:build:production",
+              "serverTarget": "orgullo2022:server:production"
+            },
+            "development": {
+              "browserTarget": "orgullo2022:build:development",
+              "serverTarget": "orgullo2022:server:development"
+            }
+          },
+          "defaultConfiguration": "production"
         }
       }
     }

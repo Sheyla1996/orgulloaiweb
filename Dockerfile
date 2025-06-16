@@ -11,7 +11,7 @@ RUN npm install --legacy-peer-deps
 COPY . .
 
 # Construye la app Angular
-RUN npm run build
+RUN npm run build:ssr
 
 FROM node:lts-slim AS production
 WORKDIR /app
@@ -20,4 +20,4 @@ COPY --from=builder /app/package.json /app
 COPY --from=builder /app/dist /app/dist
 
 EXPOSE 4001
-CMD npm start
+CMD npm start:ssr

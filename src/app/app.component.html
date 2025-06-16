@@ -2,7 +2,7 @@
 
 <main>
   <router-outlet></router-outlet>
-  <mat-fab-menu color="primary" [fabButtons]="menu" direction="top" (onFabMenuItemSelected)="onChangeMenu($event)"></mat-fab-menu>
+  <mat-fab-menu *ngIf="currentUrl !== '/login'" [color]="'warn'" [fabButtons]="menu" direction="top" (onFabMenuItemSelected)="onChangeMenu($event)" icon="menu"></mat-fab-menu>
 </main>
 
 <!--<footer>

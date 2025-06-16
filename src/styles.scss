@@ -17,3 +17,10 @@ $my-theme: mat.define-light-theme((
 ));
 
 @include mat.all-component-themes($my-theme);*/
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #262626;
+    color: white;
+  }
+}

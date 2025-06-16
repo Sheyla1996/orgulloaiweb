@@ -21,7 +21,6 @@ import { CommonModule } from '@angular/common';
     MatButtonModule,
     MatIconModule
   ],
-  encapsulation: ViewEncapsulation.None,
   templateUrl: './list-carrozas.component.html',
   styleUrls: ['./list-carrozas.component.scss']
 })
@@ -44,12 +43,11 @@ export class ListCarrozasComponent implements OnInit {
         .sort((a, b) => a.position - b.position);
 
       this.filteredCarrozas = [...this.carrozas];
-      setTimeout(() => this.initMap(), 0);
+      setTimeout(() => {
+        this.initMap();
+        this.initObserver();
+      }, 0);
     });
-  }
-
-  ngAfterViewInit(): void {
-    this.initObserver();
   }
 
   ngOnDestroy(): void {
@@ -89,13 +87,13 @@ export class ListCarrozasComponent implements OnInit {
 
     const path: [number, number][] = [];
 
-    this.filteredCarrozas.forEach(a => {
+    this.carrozas.forEach(a => {
       path.push([a.lat, a.lng]);
     });
 
-    for (let i = 1; i < this.filteredCarrozas.length; i++) {
-      const prev = this.filteredCarrozas[i - 1];
-      const curr = this.filteredCarrozas[i];
+    for (let i = 1; i < this.carrozas.length; i++) {
+      const prev = this.carrozas[i - 1];
+      const curr = this.carrozas[i];
       const color = this.getZoneColor(curr.zona);
 
       L.polyline(
