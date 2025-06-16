@@ -1,23 +1,26 @@
 FROM node:lts-slim AS builder
 WORKDIR /app
 
-# Copia solo los archivos de dependencias primero para aprovechar la cache de Docker
 COPY package.json package-lock.json ./
-
-# Instala dependencias
 RUN npm install --legacy-peer-deps
 
-# Copia el resto del código
 COPY . .
 
-# Construye la app Angular
-RUN npm run build
+# ⚠️ Este es el build correcto para SSR
+RUN npm run build:ssr
 
 FROM node:lts-slim AS production
 WORKDIR /app
 
-COPY --from=builder /app/package.json /app
-COPY --from=builder /app/dist /app/dist
+# Solo necesitas las dependencias de producción
+COPY package.json package-lock.json ./
+RUN npm install --only=production --legacy-peer-deps
+
+# Copia el resultado del build SSR
+COPY --from=builder /app/dist/orgullo2022 /app/dist/orgullo2022
 
 EXPOSE 4001
-CMD npm run serve:ssr
+
+# Sirve con Node.js (Angular Universal)
+CMD ["node", "dist/orgullo2022/server/main.js"]
+
