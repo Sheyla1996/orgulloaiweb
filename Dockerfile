@@ -16,4 +16,4 @@ COPY --from=builder /app/dist /app/dist
 # Expose the port the app runs in
 EXPOSE 4001
 # Serve the app
-CMD yarn serve:ssr
+CMD yarn start
