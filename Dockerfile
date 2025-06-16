@@ -3,6 +3,7 @@ ENV NODE_ENV=production
 WORKDIR /app
 COPY ./package.json ./package-lock.json /app/
 RUN apt-get update && apt-get upgrade -y && npm ci --legacy-peer-deps
+RUN npm install -g @angular/cli
 COPY . /app
 RUN npm run build
 
