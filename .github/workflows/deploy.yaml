@@ -28,7 +28,7 @@ jobs:
       - name: Build and Publish to Github Packages Registry
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
-          name: ghcr.io/sheyla1996/orgulloai-web/orgulloai-web
+          name: ghcr.io/sheyla1996/orgulloaiweb/orgulloaiweb
           registry: ghcr.io
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.GITHUB_TOKEN }}
@@ -48,7 +48,7 @@ jobs:
           envs: GITHUB_USERNAME, GITHUB_TOKEN
           script: |
             docker login ghcr.io -u $GITHUB_USERNAME -p $GITHUB_TOKEN
-            docker pull ghcr.io/sheyla1996/orgulloai-web/orgulloai-web:latest
-            docker stop orgulloai-web
+            docker pull ghcr.io/sheyla1996/orgulloaiweb/orgulloaiweb:latest
+            docker stop orgulloaiweb
             docker system prune -f
-            docker run --name orgulloai-web -dit -p 4001:4001 ghcr.io/sheyla1996/orgulloai-web/orgulloai-web:latest
+            docker run --name orgulloaiweb -dit -p 4001:4001 ghcr.io/sheyla1996/orgulloaiweb/orgulloaiweb:latest
