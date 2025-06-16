@@ -20,4 +20,4 @@ COPY --from=builder /app/package.json /app
 COPY --from=builder /app/dist /app/dist
 
 EXPOSE 4001
-CMD npm run start
+CMD npm run serve:ssr

@@ -1,12 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { TelefonosService } from '../../services/telefonos.service';
 import { Telefono } from '../../models/telefono.model';
 import { FormsModule } from '@angular/forms';
+import { isPlatformBrowser } from '@angular/common';
 
 
 @Component({
     selector: 'app-list-telefonos',
     imports: [FormsModule],
+    standalone: true,
     templateUrl: './list-telefonos.component.html',
     styleUrls: ['./list-telefonos.component.scss']
 })
@@ -15,7 +17,9 @@ export class ListTelefonosComponent implements OnInit {
   filteredTelefonos: Telefono[] = [];
   searchText = '';
 
-  constructor(private telefonosService: TelefonosService) {}
+  constructor(private telefonosService: TelefonosService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
   ngOnInit(): void {
     this.telefonosService.getTelefonos().subscribe(data => {
@@ -32,6 +36,7 @@ export class ListTelefonosComponent implements OnInit {
   }
 
   call(number: string): void {
-    if (number) window.location.href = `tel:${number}`;
+
+    if (number && isPlatformBrowser(this.platformId)) window.location.href = `tel:${number}`;
   }
 }

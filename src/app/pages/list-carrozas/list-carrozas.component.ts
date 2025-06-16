@@ -1,14 +1,13 @@
-import * as L from 'leaflet';
 import { CarrozasService } from '../../services/carrozas.service';
 import { Carroza } from '../../models/carroza.model';
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, Inject, OnInit, PLATFORM_ID, ViewEncapsulation } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-list-carrozas',
@@ -27,27 +26,35 @@ import { CommonModule } from '@angular/common';
 export class ListCarrozasComponent implements OnInit {
   carrozas: Carroza[] = [];
   filteredCarrozas: Carroza[] = [];
-  map!: L.Map;
+  map!: any;
   searchText = '';
   observer!: IntersectionObserver;
-  markerMap: { [id: number]: L.Marker } = {};
-  marker: L.Marker | null = null;
+  markerMap: { [id: number]: any } = {};
+  marker: any = null;
   activeCarrozaId: number | null = null;
+  private leaflet: any;
 
-  constructor(private carrozasService: CarrozasService) {}
+  constructor(
+    private carrozasService: CarrozasService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
-  ngOnInit(): void {
-    this.carrozasService.getCarrozas().subscribe(data => {
-      this.carrozas = data
-        .map(a => ({ ...a, lat: a.lat, lng: a.lng }))
-        .sort((a, b) => a.position - b.position);
+  async ngOnInit(): Promise<void> {
+    if (isPlatformBrowser(this.platformId)) {
+      this.leaflet = await import('leaflet');
+      this.carrozasService.getCarrozas().subscribe(data => {
+        this.carrozas = data
+          .map(a => ({ ...a, lat: a.lat, lng: a.lng }))
+          .sort((a, b) => a.position - b.position);
 
-      this.filteredCarrozas = [...this.carrozas];
-      setTimeout(() => {
-        this.initMap();
-        this.initObserver();
-      }, 0);
-    });
+        this.filteredCarrozas = [...this.carrozas];
+        setTimeout(() => {
+          this.initMap();
+          this.initObserver();
+        }, 0);
+      });
+    }
+    
   }
 
   ngOnDestroy(): void {
@@ -66,8 +73,8 @@ export class ListCarrozasComponent implements OnInit {
   }
 
   private clearMapLayers(): void {
-    this.map.eachLayer(layer => {
-      if (layer instanceof L.Marker || layer instanceof L.Polyline) {
+    this.map.eachLayer((layer: any) => {
+      if (layer instanceof this.leaflet.Marker || layer instanceof this.leaflet.Polyline) {
         this.map.removeLayer(layer);
       }
     });
@@ -76,8 +83,8 @@ export class ListCarrozasComponent implements OnInit {
 
   initMap(): void {
     if (!this.map) {
-      this.map = L.map('map-carrozas').setView([40.412, -3.692], 17);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      this.map = this.leaflet.map('map-carrozas').setView([40.412, -3.692], 17);
+      this.leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap',
         maxZoom: 20
       }).addTo(this.map);
@@ -96,7 +103,7 @@ export class ListCarrozasComponent implements OnInit {
       const curr = this.carrozas[i];
       const color = this.getZoneColor(curr.zona);
 
-      L.polyline(
+      this.leaflet.polyline(
         [
           [prev.lat, prev.lng],
           [curr.lat, curr.lng]
@@ -155,7 +162,7 @@ export class ListCarrozasComponent implements OnInit {
 
   setMapItem(a: Carroza): void {
     if (a && this.map) {
-      const customIcon = L.icon({
+      const customIcon = this.leaflet.icon({
         iconUrl: '/icons/marker.svg',
         iconSize: [60, 60],
         iconAnchor: [30, 60],
@@ -164,7 +171,7 @@ export class ListCarrozasComponent implements OnInit {
       const popupContent = a.logo
         ? `<img src="https://laalisedadetormes.com/orgullo/${a.logo}.webp" alt="${a.name}" style="max-width:100px;max-height:100px;display:block;padding-top:8px;">`
         : `<b style="max-width:100px;max-height:100px;display:block;">${a.name}</b>`;
-      this.marker = L.marker([a.lat, a.lng], { icon: customIcon })
+      this.marker = this.leaflet.marker([a.lat, a.lng], { icon: customIcon })
         .addTo(this.map)
         .bindPopup(popupContent)
         .openPopup();

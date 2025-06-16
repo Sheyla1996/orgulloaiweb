@@ -1,14 +1,13 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, NO_ERRORS_SCHEMA, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, OnDestroy, NO_ERRORS_SCHEMA, PLATFORM_ID, Inject } from '@angular/core';
 import { AsociacionesService } from '../../services/asociaciones.service';
 import { Asociacion } from '../../models/asociacion.model';
-import * as L from 'leaflet';
 import { FormsModule } from '@angular/forms';
 
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 
 
@@ -31,27 +30,34 @@ import { CommonModule } from '@angular/common';
 export class ListAsociacionesComponent implements OnInit, OnDestroy {
   asociaciones: Asociacion[] = [];
   filteredAsociaciones: Asociacion[] = [];
-  map!: L.Map;
+  map!: any;
   searchText = '';
   observer!: IntersectionObserver;
-  markerMap: { [id: number]: L.Marker } = {};
-  marker: L.Marker | null = null;
+  markerMap: { [id: number]: any } = {};
+  marker: any = null;
   activeAsociacionId: number | null = null;
+  private leaflet: any;
 
-  constructor(private asociacionesService: AsociacionesService) {}
+  constructor(
+    private asociacionesService: AsociacionesService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
-  ngOnInit(): void {
-    this.asociacionesService.getAsociaciones().subscribe(data => {
-      this.asociaciones = data
-        .map(a => ({ ...a, lat: a.lat, lng: a.lng }))
-        .sort((a, b) => a.position - b.position);
+  async ngOnInit(): Promise<void> {
+    if (isPlatformBrowser(this.platformId)) {
+      this.leaflet = await import('leaflet');
+      this.asociacionesService.getAsociaciones().subscribe(data => {
+        this.asociaciones = data
+          .map(a => ({ ...a, lat: a.lat, lng: a.lng }))
+          .sort((a, b) => a.position - b.position);
 
-      this.filteredAsociaciones = [...this.asociaciones];
-      setTimeout(() => {
-        this.initMap();
-        this.initObserver();
-      }, 0);
-    });
+        this.filteredAsociaciones = [...this.asociaciones];
+        setTimeout(() => {
+          this.initMap();
+          this.initObserver();
+        }, 0);
+      });
+    }
   }
 
 
@@ -71,8 +77,8 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
     }
   }
 
-  private createCustomIcon(): L.Icon {
-    return L.icon({
+  private createCustomIcon(): any {
+    return this.leaflet.icon({
       iconUrl: '/icons/marker.svg',
       iconSize: [60, 60],
       iconAnchor: [30, 60],
@@ -81,9 +87,9 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
   }
 
   initMap(): void {
-    this.map = L.map('map-asociaciones').setView([40.412, -3.692], 17);
+    this.map = this.leaflet.map('map-asociaciones').setView([40.412, -3.692], 17);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    this.leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap',
       maxZoom: 20
     }).addTo(this.map);
@@ -92,7 +98,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
       if (i > 0) {
         const prev = arr[i - 1];
         const color = this.getZonaColor(a.zona);
-        L.polyline(
+        this.leaflet.polyline(
           [
             [prev.lat, prev.lng],
             [a.lat, a.lng]
@@ -104,7 +110,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
 
     const first = this.filteredAsociaciones[0];
     if (first) {
-      this.marker = L.marker([first.lat, first.lng], { icon: this.createCustomIcon() })
+      this.marker = this.leaflet.marker([first.lat, first.lng], { icon: this.createCustomIcon() })
         .addTo(this.map)
         .bindPopup(`<b>${first.name}</b>`)
         .openPopup();
@@ -137,7 +143,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
         this.activeAsociacionId = id;
         const a = this.filteredAsociaciones.find(a => a.id === id);
         if (a && this.map) {
-          this.marker = L.marker([a.lat, a.lng], { icon: this.createCustomIcon() })
+          this.marker = this.leaflet.marker([a.lat, a.lng], { icon: this.createCustomIcon() })
             .addTo(this.map)
             .bindPopup(`<b>${a.name}</b>`)
             .openPopup();
@@ -154,8 +160,8 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
       a.lema?.toLowerCase().includes(term)
     );
 
-    this.map.eachLayer(layer => {
-      if (layer instanceof L.Marker || layer instanceof L.Polyline) {
+    this.map.eachLayer((layer: any) => {
+      if (layer instanceof this.leaflet.Marker || layer instanceof this.leaflet.Polyline) {
         this.map.removeLayer(layer);
       }
     });
