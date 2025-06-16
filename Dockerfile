@@ -2,7 +2,7 @@ FROM node:lts-slim AS builder
 ENV NODE_ENV=production
 WORKDIR /app
 COPY ./package.json ./package-lock.json /app/
-RUN apt-get update && apt-get upgrade -y && npm ci
+RUN apt-get update && apt-get upgrade -y && npm ci --legacy-peer-deps
 COPY . /app
 RUN npm run build
 
