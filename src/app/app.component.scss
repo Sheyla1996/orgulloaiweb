@@ -180,7 +180,7 @@ mat-fab-menu {
 .list {
   overflow-y: auto;
   overflow-x: hidden;
-  max-height: calc(100vh - 382px);
+  max-height: calc(100vh - 340px);
 
   &-item {
     display: flex;
@@ -201,15 +201,17 @@ mat-fab-menu {
   align-items: center;
   justify-content: center;
 
-  &.roja    { background-color: var(--color-red); }
-  &.naranja { background-color: var(--color-orange); }
-  &.amarilla{ background-color: var(--color-yellow); }
-  &.verde   { background-color: var(--color-green); }
-  &.violeta { background-color: var(--color-purple); }
-  &.azul    { background-color: var(--color-blue); }
-  &.rosa    { background-color: var(--color-rose); }
-  &.blanca  { background-color: var(--color-white); }
+  
 }
+
+.roja    { background-color: var(--color-red); }
+.naranja { background-color: var(--color-orange); }
+.amarilla{ background-color: var(--color-yellow); }
+.verde   { background-color: var(--color-green); }
+.violeta { background-color: var(--color-purple); }
+.azul    { background-color: var(--color-blue); }
+.rosa    { background-color: var(--color-rose); }
+.blanca  { background-color: var(--color-white); }
 
 /* Nombre */
 .list-item__name {
@@ -223,6 +225,6 @@ mat-fab-menu {
   position: relative;
 }
 .page {
-  max-height: 90vh;
+  //max-height: 90vh;
   overflow: hidden;
 }

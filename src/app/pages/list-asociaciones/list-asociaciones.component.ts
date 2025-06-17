@@ -8,6 +8,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { min } from 'rxjs';
 
 
 
@@ -46,16 +47,27 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
   async ngOnInit(): Promise<void> {
     if (isPlatformBrowser(this.platformId)) {
       this.leaflet = await import('leaflet');
-      this.asociacionesService.getAsociaciones().subscribe(data => {
-        this.asociaciones = data
-          .map(a => ({ ...a, lat: a.lat, lng: a.lng }))
-          .sort((a, b) => a.position - b.position);
+      const cached = localStorage.getItem('asociaciones');
+      if (cached) {
+        this.asociaciones = JSON.parse(cached);
+        this.filteredAsociaciones = this.asociaciones;
+      }
+      this.asociacionesService.getAsociaciones().subscribe({
+        next: async data => {
+          this.asociaciones = data
+            .map(a => ({ ...a, lat: a.lat, lng: a.lng }))
+            .sort((a, b) => a.position - b.position);
 
-        this.filteredAsociaciones = [...this.asociaciones];
-        setTimeout(() => {
+          this.filteredAsociaciones = [...this.asociaciones];
+          localStorage.setItem('asociaciones', JSON.stringify(this.asociaciones));
+          await this.waitForMapDiv();
           this.initMap();
           this.initObserver();
-        }, 0);
+        },
+        error: err => {
+          console.error('Error fetching asociaciones:', err);
+          // Optionally, you can handle the error by showing a message to the user
+        }
       });
     }
   }
@@ -77,45 +89,63 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
     }
   }
 
-  private createCustomIcon(): any {
-    return this.leaflet.icon({
-      iconUrl: '/icons/marker.svg',
-      iconSize: [60, 60],
-      iconAnchor: [30, 60],
-      popupAnchor: [0, -60],
+  private clearMapLayers(): void {
+    this.map.eachLayer((layer: any) => {
+      if (layer instanceof this.leaflet.Marker || layer instanceof this.leaflet.Polyline) {
+        this.map.removeLayer(layer);
+      }
     });
+    this.markerMap = {};
   }
 
   initMap(): void {
-    this.map = this.leaflet.map('map-asociaciones').setView([40.412, -3.692], 17);
+    if (!this.map) {
+      this.map = this.leaflet.map('map-asociaciones').setView([40.412, -3.692], 17);
+      this.leaflet.tileLayer('/map/{z}/{x}/{y}.jpg', {
+        attribution: '© OpenStreetMap',
+        maxZoom: 18,
+        minZoom: 15,
+      }).addTo(this.map);
+    } else {
+      this.clearMapLayers();
+    }
 
-    this.leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap',
-      maxZoom: 20
-    }).addTo(this.map);
+    const path: [number, number][] = [];
 
-    this.asociaciones.forEach((a, i, arr) => {
-      if (i > 0) {
-        const prev = arr[i - 1];
-        const color = this.getZonaColor(a.zona);
-        this.leaflet.polyline(
-          [
-            [prev.lat, prev.lng],
-            [a.lat, a.lng]
-          ],
-          { color, weight: 6 }
-        ).addTo(this.map);
-      }
+    this.asociaciones.forEach(a => {
+      path.push([a.lat, a.lng]);
     });
 
-    const first = this.filteredAsociaciones[0];
-    if (first) {
-      this.marker = this.leaflet.marker([first.lat, first.lng], { icon: this.createCustomIcon() })
-        .addTo(this.map)
-        .bindPopup(`<b>${first.name}</b>`)
-        .openPopup();
-      this.map.setView([first.lat, first.lng], 19, { animate: true });
+    for (let i = 1; i < this.asociaciones.length; i++) {
+      const prev = this.asociaciones[i - 1];
+      const curr = this.asociaciones[i];
+      const color = this.getZonaColor(curr.zona);
+
+      this.leaflet.polyline(
+        [
+          [prev.lat, prev.lng],
+          [curr.lat, curr.lng]
+        ],
+        { color, weight: 6 }
+      ).addTo(this.map);
     }
+
+    if (this.filteredAsociaciones.length > 0) {
+      this.setMapItem(this.filteredAsociaciones[0]);
+    }
+  }
+
+  private async waitForMapDiv(): Promise<void> {
+    return new Promise(resolve => {
+      const check = () => {
+        if (document.getElementById('map-asociaciones')) {
+          resolve();
+        } else {
+          setTimeout(check, 50);
+        }
+      };
+      check();
+    });
   }
 
   initObserver(): void {
@@ -142,13 +172,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
         this.marker?.remove();
         this.activeAsociacionId = id;
         const a = this.filteredAsociaciones.find(a => a.id === id);
-        if (a && this.map) {
-          this.marker = this.leaflet.marker([a.lat, a.lng], { icon: this.createCustomIcon() })
-            .addTo(this.map)
-            .bindPopup(`<b>${a.name}</b>`)
-            .openPopup();
-          this.map.setView([a.lat, a.lng], 19, { animate: true });
-        }
+        if (a) this.setMapItem(a);
       }
     });
   }
@@ -156,18 +180,34 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
   onSearchChange(): void {
     const term = this.searchText.toLowerCase();
     this.filteredAsociaciones = this.asociaciones.filter(a =>
-      a.name.toLowerCase().includes(term) ||
-      a.lema?.toLowerCase().includes(term)
+      a.name.toLowerCase().includes(term)
     );
-
-    this.map.eachLayer((layer: any) => {
-      if (layer instanceof this.leaflet.Marker || layer instanceof this.leaflet.Polyline) {
-        this.map.removeLayer(layer);
-      }
-    });
-    this.markerMap = {};
-    this.initMap();
-    this.observer.disconnect();
-    this.initObserver();
+    setTimeout(() => {
+      const container = document.getElementById('list-container');
+      if (!container) return;
+      const items = container.querySelectorAll('.list-item');
+      const id = parseInt(items[0].id.replace('asoc-', ''), 10);
+      if (id === this.activeAsociacionId) return;
+      this.marker?.remove();
+      this.activeAsociacionId = id;
+      const a = this.filteredAsociaciones.find(a => a.id === id);
+      if (a) this.setMapItem(a);
+    }, 10);
   }
+
+  setMapItem(a: Asociacion): void {
+      if (a && this.map) {
+        const customIcon = this.leaflet.icon({
+          iconUrl: '/icons/marker.svg',
+          iconSize: [60, 60],
+          iconAnchor: [30, 60],
+          popupAnchor: [0, -60],
+        });
+        this.marker = this.leaflet.marker([a.lat, a.lng], { icon: customIcon })
+          .addTo(this.map)
+          .bindPopup(`<b>${a.name}</b>`)
+          .openPopup();
+        this.map.setView([a.lat, a.lng], 18, { animate: true });
+      }
+    }
 }

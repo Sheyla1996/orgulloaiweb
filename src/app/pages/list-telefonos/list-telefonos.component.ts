@@ -2,12 +2,17 @@ import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { TelefonosService } from '../../services/telefonos.service';
 import { Telefono } from '../../models/telefono.model';
 import { FormsModule } from '@angular/forms';
-import { isPlatformBrowser } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 
 
 @Component({
     selector: 'app-list-telefonos',
-    imports: [FormsModule],
+    imports: [
+      CommonModule,
+      FormsModule,
+      MatIconModule
+    ],
     standalone: true,
     templateUrl: './list-telefonos.component.html',
     styleUrls: ['./list-telefonos.component.scss']
@@ -22,10 +27,24 @@ export class ListTelefonosComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.telefonosService.getTelefonos().subscribe(data => {
-      this.telefonos = data;
-      this.filteredTelefonos = data;
-    });
+    if (isPlatformBrowser(this.platformId)) {
+      const cached = localStorage.getItem('telefonos');
+      if (cached) {
+        this.telefonos = JSON.parse(cached);
+        this.filteredTelefonos = this.telefonos;
+      }
+      this.telefonosService.getTelefonos().subscribe({
+        next: data => {
+          this.telefonos = data;
+          this.filteredTelefonos = data;
+          localStorage.setItem('telefonos', JSON.stringify(data));
+        },
+        error: err => {
+          console.error('Error fetching telefonos:', err);
+          // Optionally, you can handle the error by showing a message to the user
+        }
+      });
+    }
   }
 
   onSearchChange(): void {
@@ -35,8 +54,4 @@ export class ListTelefonosComponent implements OnInit {
     );
   }
 
-  call(number: string): void {
-
-    if (number && isPlatformBrowser(this.platformId)) window.location.href = `tel:${number}`;
-  }
 }

@@ -42,19 +42,42 @@ export class ListCarrozasComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     if (isPlatformBrowser(this.platformId)) {
       this.leaflet = await import('leaflet');
-      this.carrozasService.getCarrozas().subscribe(data => {
-        this.carrozas = data
-          .map(a => ({ ...a, lat: a.lat, lng: a.lng }))
-          .sort((a, b) => a.position - b.position);
+      const cached = localStorage.getItem('carrozas');
+      if (cached) {
+        this.carrozas = JSON.parse(cached);
+        this.filteredCarrozas = this.carrozas;
+      }
+      this.carrozasService.getCarrozas().subscribe({
+        next: async data => {
+          this.carrozas = data
+            .map(a => ({ ...a, lat: a.lat, lng: a.lng }))
+            .sort((a, b) => a.position - b.position);
 
-        this.filteredCarrozas = [...this.carrozas];
-        setTimeout(() => {
+          this.filteredCarrozas = [...this.carrozas];
+          localStorage.setItem('carrozas', JSON.stringify(this.carrozas));
+          await this.waitForMapDiv();
           this.initMap();
           this.initObserver();
-        }, 0);
+        },
+        error: err => {
+          console.error('Error fetching carrozas:', err);
+          // Optionally, you can handle the error by showing a message to the user
+        }
       });
     }
-    
+  }
+
+  private async waitForMapDiv(): Promise<void> {
+    return new Promise(resolve => {
+      const check = () => {
+        if (document.getElementById('map-carrozas')) {
+          resolve();
+        } else {
+          setTimeout(check, 50);
+        }
+      };
+      check();
+    });
   }
 
   ngOnDestroy(): void {
@@ -84,9 +107,10 @@ export class ListCarrozasComponent implements OnInit {
   initMap(): void {
     if (!this.map) {
       this.map = this.leaflet.map('map-carrozas').setView([40.412, -3.692], 17);
-      this.leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      this.leaflet.tileLayer('/map/{z}/{x}/{y}.jpg', {
         attribution: '© OpenStreetMap',
-        maxZoom: 20
+        maxZoom: 18,
+        minZoom: 15,
       }).addTo(this.map);
     } else {
       this.clearMapLayers();
@@ -152,12 +176,17 @@ export class ListCarrozasComponent implements OnInit {
       a.name.toLowerCase().includes(term)
     );
 
-    if (this.map) {
-      this.clearMapLayers();
-      this.initMap();
-    }
-    if (this.observer) this.observer.disconnect();
-    this.initObserver();
+    setTimeout(() => {
+      const container = document.getElementById('list-container');
+      if (!container) return;
+      const items = container.querySelectorAll('.list-item');
+      const id = parseInt(items[0].id.replace('carr-', ''), 10);
+      if (id === this.activeCarrozaId) return;
+      this.marker?.remove();
+      this.activeCarrozaId = id;
+      const a = this.filteredCarrozas.find(a => a.id === id);
+      if (a) this.setMapItem(a);
+    }, 10);
   }
 
   setMapItem(a: Carroza): void {
@@ -175,7 +204,7 @@ export class ListCarrozasComponent implements OnInit {
         .addTo(this.map)
         .bindPopup(popupContent)
         .openPopup();
-      this.map.setView([a.lat, a.lng], 19, { animate: true });
+      this.map.setView([a.lat, a.lng], 18, { animate: true });
     }
   }
 }
