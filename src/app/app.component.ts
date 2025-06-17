@@ -33,6 +33,7 @@ export class AppComponent {
   get currentUrl(): string {
     return this.router.url;
   }
+  
   constructor(private router: Router) {}
   title = 'orgullo2022';
   menu: MatFabMenu[] = [
@@ -53,33 +54,31 @@ export class AppComponent {
       if (userType === 'mañana') {
       this.menu = [
         {
-        id: 'logout',
-        icon: 'logout'
+          id: 'phones',
+          icon: 'contact_phone'
         },
         {
-        id: 'phones',
-        icon: 'contact_phone'
+          id: 'carrozas',
+          icon: 'local_shipping'
         },
         {
-        id: 'carrozas',
-        icon: 'local_shipping'
-        },
-        {
-        id: 'asociaciones',
-        icon: 'groups'
+          id: 'asociaciones',
+          icon: 'groups',
+          tooltip: 'Asociaciones',
+          tooltipPosition: 'right'
         }
       ];
       } else {
         this.menu = [
-    {
-      id: 'phones',
-      icon: 'contact_phone'
-    },
-    {
-      id: 'asociaciones',
-      icon: 'groups'
-    }
-  ]
+          {
+            id: 'phones',
+            icon: 'contact_phone'
+          },
+          {
+            id: 'asociaciones',
+            icon: 'groups'
+          }
+        ];
       }
     });
 
