@@ -23,6 +23,7 @@ export class ListTelefonosComponent implements OnInit {
   filteredTelefonos: Telefono[] = [];
   searchText = '';
   version = '';
+  userZone: string | null = null;
 
   constructor(private telefonosService: TelefonosService,
     @Inject(PLATFORM_ID) private platformId: Object,
@@ -34,6 +35,7 @@ export class ListTelefonosComponent implements OnInit {
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       const cached = localStorage.getItem('telefonos');
+      this.userZone = localStorage.getItem('zone');
       if (cached) {
         this.telefonos = JSON.parse(cached);
         this.filteredTelefonos = this.telefonos;
@@ -75,6 +77,12 @@ export class ListTelefonosComponent implements OnInit {
       });
     }
     // Opcional: recarga la página para aplicar los cambios
+    window.location.reload();
+  }
+
+  onShortClick() {
+    localStorage.removeItem('userType');
+    localStorage.removeItem('zone');
     window.location.reload();
   }
 

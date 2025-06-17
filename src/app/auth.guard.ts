@@ -1,7 +1,7 @@
 // auth.guard.ts
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import { ActivatedRouteSnapshot, CanActivate, Router, UrlTree } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class AuthGuard implements CanActivate {
@@ -10,12 +10,18 @@ export class AuthGuard implements CanActivate {
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
-  canActivate(): boolean {
+  canActivate(route: ActivatedRouteSnapshot): boolean | UrlTree {
     if (isPlatformBrowser(this.platformId)) {
-      if (localStorage.getItem('logueado') === 'true') {
+      const userType = localStorage.getItem('userType');
+      const allowed = route.data['allowed'] as string[] | undefined;
+
+      if ((!allowed || allowed.includes(userType || ''))) {
         return true;
       }
-      this.router.navigate(['/login']);
+      if (userType) {
+        return this.router.parseUrl('/asociaciones');
+      }
+      return this.router.parseUrl('/login');
     }
     return false;
   }

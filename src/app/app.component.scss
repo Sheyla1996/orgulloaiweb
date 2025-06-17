@@ -228,3 +228,15 @@ mat-fab-menu {
   //max-height: 90vh;
   overflow: hidden;
 }
+
+mat-form-field {
+  width: -webkit-fill-available;
+
+  select {
+    width: -webkit-fill-available;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    border-radius: 25px;
+  }
+}

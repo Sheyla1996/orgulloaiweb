@@ -1,6 +1,19 @@
 <!-- login.component.html -->
 <form class="form" (ngSubmit)="login()">
+  <mat-form-field>
+    <mat-label>Selecciona la zona</mat-label>
+    <select matNativeControl [(ngModel)]="selectZone" name="zona">
+      <option value="blanca">Zona Blanca</option>
+      <option value="roja">Zona Roja</option>
+      <option value="naranja">Zona Naranja</option>
+      <option value="amarilla">Zona Amarilla</option>
+      <option value="verde">Zona Verde</option>
+      <option value="azul">Zona Azul</option>
+      <option value="violeta">Zona Violeta</option>
+      <option value="rosa">Zona Rosa</option>
+    </select>
+  </mat-form-field>
   <input class="input" type="password" [(ngModel)]="password" name="password" placeholder="Contraseña" required>
   <button matButton="filled" type="submit">Acceder</button>
 </form>
-<p *ngIf="error" style="color:red;">Contraseña incorrecta</p>
+<p *ngIf="error" style="color:red;">No tienes permisos para acceder</p>

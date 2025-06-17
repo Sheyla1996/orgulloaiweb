@@ -37,22 +37,53 @@ export class AppComponent {
   title = 'orgullo2022';
   menu: MatFabMenu[] = [
     {
-      id: 'logout',
-      icon: 'logout'
-    },
-    {
       id: 'phones',
       icon: 'contact_phone'
-    },
-    {
-      id: 'carrozas',
-      icon: 'local_shipping'
     },
     {
       id: 'asociaciones',
       icon: 'groups'
     }
   ];
+
+  ngOnInit(): void {
+    // Check if the user is logged in
+    this.router.events.subscribe(() => {
+      const userType = localStorage.getItem('userType');
+      if (userType === 'mañana') {
+      this.menu = [
+        {
+        id: 'logout',
+        icon: 'logout'
+        },
+        {
+        id: 'phones',
+        icon: 'contact_phone'
+        },
+        {
+        id: 'carrozas',
+        icon: 'local_shipping'
+        },
+        {
+        id: 'asociaciones',
+        icon: 'groups'
+        }
+      ];
+      } else {
+        this.menu = [
+    {
+      id: 'phones',
+      icon: 'contact_phone'
+    },
+    {
+      id: 'asociaciones',
+      icon: 'groups'
+    }
+  ]
+      }
+    });
+
+  }
 
   onChangeMenu(event: any): void {
     console.log('Menu changed:', event);
@@ -67,7 +98,8 @@ export class AppComponent {
         this.router.navigate(['/telefonos']);
         break;
       case 'logout': 
-        sessionStorage.removeItem('logueado');
+        localStorage.removeItem('userType');
+        localStorage.removeItem('zone');
         this.router.navigate(['/login']);
         break;
       default:

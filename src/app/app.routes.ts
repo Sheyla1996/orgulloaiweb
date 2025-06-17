@@ -8,7 +8,22 @@ import { LoginComponent } from './login/login.component';
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
     { path: '', redirectTo: '/asociaciones', pathMatch: 'full' },
-    { path: 'carrozas', component: ListCarrozasComponent, canActivate: [AuthGuard] },
-    { path: 'asociaciones', component: ListAsociacionesComponent, canActivate: [AuthGuard] },
-    { path: 'telefonos', component: ListTelefonosComponent, canActivate: [AuthGuard] }
+    {
+        path: 'carrozas',
+        component: ListCarrozasComponent,
+        canActivate: [AuthGuard],
+        data: { allowed: ['mañana'] }
+    },
+    {
+        path: 'asociaciones',
+        component: ListAsociacionesComponent,
+        canActivate: [AuthGuard],
+        data: { allowed: ['normal', 'mañana', 'coor'] }
+    },
+    {
+        path: 'telefonos',
+        component: ListTelefonosComponent,
+        canActivate: [AuthGuard],
+        data: { allowed: ['normal', 'mañana', 'coor'] }
+    }
 ];
