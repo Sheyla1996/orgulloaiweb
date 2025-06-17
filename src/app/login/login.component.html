@@ -18,6 +18,6 @@
 </form>
 <p *ngIf="error" style="color:red;">No tienes permisos para acceder</p>
 
-<button style="margin: 0 auto;display: block;" matButton="filled" *ngIf="!showInstallButton" (click)="onInstallPwa()">
+<button style="margin: 0 auto;display: block;" matButton="filled" *ngIf="showInstallButton" (click)="onInstallPwa()">
   Instalar aplicación
 </button>
