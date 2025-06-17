@@ -4,6 +4,7 @@ import { Telefono } from '../../models/telefono.model';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { VersionService } from '../../services/version.service';
 
 
 @Component({
@@ -21,10 +22,14 @@ export class ListTelefonosComponent implements OnInit {
   telefonos: Telefono[] = [];
   filteredTelefonos: Telefono[] = [];
   searchText = '';
+  version = '';
 
   constructor(private telefonosService: TelefonosService,
-    @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private versionService: VersionService
+  ) {
+    this.versionService.getVersion().subscribe(v => this.version = v);
+  }
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -52,6 +57,25 @@ export class ListTelefonosComponent implements OnInit {
     this.filteredTelefonos = this.telefonos.filter(t =>
       t.name.toLowerCase().includes(term) || t.zona.toLowerCase().includes(term)
     );
+  }
+
+  clearPwaCache() {
+    if ('caches' in window) {
+      caches.keys().then(names => {
+        for (let name of names) {
+          caches.delete(name);
+        }
+      });
+    }
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
+    // Opcional: recarga la página para aplicar los cambios
+    window.location.reload();
   }
 
 }

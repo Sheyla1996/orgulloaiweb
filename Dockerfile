@@ -9,6 +9,11 @@ COPY . .
 # ⚠️ Este es el build correcto para SSR
 RUN npm run build:ssr
 
+# Añade el archivo de versión (usa commit corto o fecha)
+ARG VERSION=dev
+RUN echo "$VERSION" > /app/dist/orgullo2022/browser/assets/version.txt
+
+
 FROM node:lts-slim AS production
 WORKDIR /app
 
