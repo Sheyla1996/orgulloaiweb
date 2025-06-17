@@ -16,6 +16,7 @@ export function app(): express.Express {
     : join(distFolder, 'index.html');
 
   const commonEngine = new CommonEngine();
+  server.use(express.static(__dirname + '/browser'));
 
   server.set('view engine', 'html');
   server.set('views', distFolder);

@@ -101,7 +101,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
   initMap(): void {
     if (!this.map) {
       this.map = this.leaflet.map('map-asociaciones').setView([40.412, -3.692], 17);
-      this.leaflet.tileLayer('/map/{z}/{x}/{y}.jpg', {
+      this.leaflet.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
         attribution: '© OpenStreetMap',
         maxZoom: 18,
         minZoom: 15,
@@ -198,7 +198,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
   setMapItem(a: Asociacion): void {
       if (a && this.map) {
         const customIcon = this.leaflet.icon({
-          iconUrl: '/icons/marker.svg',
+          iconUrl: '/assets/icons/marker.svg',
           iconSize: [60, 60],
           iconAnchor: [30, 60],
           popupAnchor: [0, -60],
