@@ -9,7 +9,8 @@ import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { min } from 'rxjs';
-
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import { ModalComponent } from '../../components/modal.component';
 
 
 
@@ -22,7 +23,8 @@ import { min } from 'rxjs';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    MatDialogModule
   ],
   templateUrl: './list-asociaciones.component.html',
   styleUrls: ['./list-asociaciones.component.scss'],
@@ -37,16 +39,36 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
   marker: any = null;
   activeAsociacionId: number | null = null;
   private leaflet: any;
+  installPromptEvent: any = null;
 
   constructor(
     private asociacionesService: AsociacionesService,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private _dialog: MatDialog
   ) {}
 
   async ngOnInit(): Promise<void> {
     if (isPlatformBrowser(this.platformId)) {
       this.leaflet = await import('leaflet');
       const cached = localStorage.getItem('asociaciones');
+      const hideModal = localStorage.getItem('hideModal');
+      if (hideModal !== 'hide') {
+        window.addEventListener('beforeinstallprompt', (event: any) => {
+          event.preventDefault();
+          this.installPromptEvent = event;
+          const dialogRef = this._dialog.open(ModalComponent);
+
+          dialogRef.afterClosed().subscribe(result => {
+            if (result === 'install') {
+              this.onInstallPwa();
+            } else {
+              console.log('The dialog was closed');
+              localStorage.setItem('hideModal', 'hide');
+            }
+          });
+        });
+      }
+
       if (cached) {
         this.asociaciones = JSON.parse(cached);
       }
@@ -72,6 +94,17 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.observer) this.observer.disconnect();
+  }
+
+  onInstallPwa() {
+    if (this.installPromptEvent) {
+      this.installPromptEvent.prompt();
+      this.installPromptEvent.userChoice.then((choiceResult: any) => {
+        console.log('User choice:', choiceResult);
+        // Puedes ocultar el botón si el usuario acepta o rechaza
+        this.installPromptEvent = null;
+      });
+    }
   }
 
   private getZonaColor(zona: string): string {
