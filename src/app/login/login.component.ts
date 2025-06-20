@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { Router } from '@angular/router';
 import {MatSelectModule} from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
+import { LoginService } from '../services/login.service';
 
 @Component({
   selector: 'app-login',
@@ -24,16 +25,13 @@ import { MatInputModule } from '@angular/material/input';
 export class LoginComponent implements OnInit {
   password = '';
   error = false;
-  selectZone: string | null = null;
-  // Cambia 'tu_clave' por la contraseña que quieras
-  private readonly clave = 'orgullo25';
-  private readonly claveManana = 'manana';
-  private readonly claveCoor = 'coor';
-installPromptEvent: any = null;
-showInstallButton = false;
+  selectZone: string = '';
+  installPromptEvent: any = null;
+  showInstallButton = false;
   constructor(
     private router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private _loginService: LoginService
   ) {}
 
   ngOnInit(): void {
@@ -44,31 +42,41 @@ showInstallButton = false;
         this.installPromptEvent = event;
         this.showInstallButton = true;
       });
+
+      const params = new URLSearchParams(window.location.search);
+      const pass = params.get('pass');
+      const type = params.get('type');
+      if (pass && type) {
+        this.password = pass;
+        this.selectZone = type;
+        this.login();
+      }
     }
   }
 
   login() {
     if (isPlatformBrowser(this.platformId)) {
-      switch (this.password) {
-        case this.clave:
-          localStorage.setItem('userType', 'normal');
-          localStorage.setItem('zone', this.selectZone || '');
-          this.router.navigate(['/asociaciones']);
-          break;
-        case this.claveManana:
-          localStorage.setItem('userType', 'mañana');
-          localStorage.setItem('zone', 'coor');
-          this.router.navigate(['/asociaciones']);
-          break;
-        case this.claveCoor:
-          localStorage.setItem('userType', 'coor');
-          localStorage.setItem('zone', 'coor');
-          this.router.navigate(['/asociaciones']);
-          break;
-        default:
+      const params = new URLSearchParams();
+      params.set('pass', this.password);
+      params.set('type', this.selectZone);
+
+      this._loginService.login(this.password, this.selectZone).subscribe({
+        next: (response: any) => {
+          if (response.ok) {
+        localStorage.setItem('userType', response.type || 'normal');
+        localStorage.setItem('zone', response.zona || '');
+        // Navega usando los parámetros en la URL
+        this.router.navigate(['/asociaciones'], { queryParams: { pass: this.password, type: this.selectZone } });
+          } else {
+        localStorage.removeItem('userType');
+        this.error = true;
+          }
+        }, 
+        error: (error) => {
           localStorage.removeItem('userType');
           this.error = true;
-      }
+        }
+      });
     }
   }
 

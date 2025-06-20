@@ -25,7 +25,6 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 })
 export class ListCarrozasComponent implements OnInit {
   carrozas: Carroza[] = [];
-  filteredCarrozas: Carroza[] = [];
   map!: any;
   searchText = '';
   observer!: IntersectionObserver;
@@ -45,7 +44,6 @@ export class ListCarrozasComponent implements OnInit {
       const cached = localStorage.getItem('carrozas');
       if (cached) {
         this.carrozas = JSON.parse(cached);
-        this.filteredCarrozas = this.carrozas;
       }
       this.carrozasService.getCarrozas().subscribe({
         next: async data => {
@@ -53,7 +51,6 @@ export class ListCarrozasComponent implements OnInit {
             .map(a => ({ ...a, lat: a.lat, lng: a.lng }))
             .sort((a, b) => a.position - b.position);
 
-          this.filteredCarrozas = [...this.carrozas];
           localStorage.setItem('carrozas', JSON.stringify(this.carrozas));
           await this.waitForMapDiv();
           this.initMap();
@@ -136,8 +133,8 @@ export class ListCarrozasComponent implements OnInit {
       ).addTo(this.map);
     }
 
-    if (this.filteredCarrozas.length > 0) {
-      this.setMapItem(this.filteredCarrozas[0]);
+    if (this.carrozas.length > 0) {
+      this.setMapItem(this.carrozas[0]);
     }
   }
 
@@ -164,7 +161,7 @@ export class ListCarrozasComponent implements OnInit {
         if (id === this.activeCarrozaId) return;
         this.marker?.remove();
         this.activeCarrozaId = id;
-        const a = this.filteredCarrozas.find(a => a.id === id);
+        const a = this.carrozas.find(a => a.id === id);
         if (a) this.setMapItem(a);
       }
     });
@@ -172,21 +169,20 @@ export class ListCarrozasComponent implements OnInit {
 
   onSearchChange(): void {
     const term = this.searchText.toLowerCase();
-    this.filteredCarrozas = this.carrozas.filter(a =>
-      a.name.toLowerCase().includes(term)
+    const index = this.carrozas.findIndex(a =>
+      a.name.toLowerCase().includes(term) ||
+      a.position.toString().includes(term)
     );
-
-    setTimeout(() => {
+    if (index !== -1) {
+      setTimeout(() => {
       const container = document.getElementById('list-container');
       if (!container) return;
       const items = container.querySelectorAll('.list-item');
-      const id = parseInt(items[0].id.replace('carr-', ''), 10);
-      if (id === this.activeCarrozaId) return;
-      this.marker?.remove();
-      this.activeCarrozaId = id;
-      const a = this.filteredCarrozas.find(a => a.id === id);
-      if (a) this.setMapItem(a);
-    }, 10);
+      if (items[index]) {
+        (items[index] as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      }, 10);
+    }
   }
 
   setMapItem(a: Carroza): void {

@@ -30,7 +30,6 @@ import { min } from 'rxjs';
 })
 export class ListAsociacionesComponent implements OnInit, OnDestroy {
   asociaciones: Asociacion[] = [];
-  filteredAsociaciones: Asociacion[] = [];
   map!: any;
   searchText = '';
   observer!: IntersectionObserver;
@@ -50,7 +49,6 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
       const cached = localStorage.getItem('asociaciones');
       if (cached) {
         this.asociaciones = JSON.parse(cached);
-        this.filteredAsociaciones = this.asociaciones;
       }
       this.asociacionesService.getAsociaciones().subscribe({
         next: async data => {
@@ -58,7 +56,6 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
             .map(a => ({ ...a, lat: a.lat, lng: a.lng }))
             .sort((a, b) => a.position - b.position);
 
-          this.filteredAsociaciones = [...this.asociaciones];
           localStorage.setItem('asociaciones', JSON.stringify(this.asociaciones));
           await this.waitForMapDiv();
           this.initMap();
@@ -130,8 +127,8 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
       ).addTo(this.map);
     }
 
-    if (this.filteredAsociaciones.length > 0) {
-      this.setMapItem(this.filteredAsociaciones[0]);
+    if (this.asociaciones.length > 0) {
+      this.setMapItem(this.asociaciones[0]);
     }
   }
 
@@ -171,7 +168,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
         if (id === this.activeAsociacionId) return;
         this.marker?.remove();
         this.activeAsociacionId = id;
-        const a = this.filteredAsociaciones.find(a => a.id === id);
+        const a = this.asociaciones.find(a => a.id === id);
         if (a) this.setMapItem(a);
       }
     });
@@ -179,20 +176,20 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
 
   onSearchChange(): void {
     const term = this.searchText.toLowerCase();
-    this.filteredAsociaciones = this.asociaciones.filter(a =>
-      a.name.toLowerCase().includes(term)
+    const index = this.asociaciones.findIndex(a =>
+      a.name.toLowerCase().includes(term) ||
+      a.position.toString().includes(term)
     );
-    setTimeout(() => {
+    if (index !== -1) {
+      setTimeout(() => {
       const container = document.getElementById('list-container');
       if (!container) return;
       const items = container.querySelectorAll('.list-item');
-      const id = parseInt(items[0].id.replace('asoc-', ''), 10);
-      if (id === this.activeAsociacionId) return;
-      this.marker?.remove();
-      this.activeAsociacionId = id;
-      const a = this.filteredAsociaciones.find(a => a.id === id);
-      if (a) this.setMapItem(a);
-    }, 10);
+      if (items[index]) {
+        (items[index] as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      }, 10);
+    }
   }
 
   setMapItem(a: Asociacion): void {
