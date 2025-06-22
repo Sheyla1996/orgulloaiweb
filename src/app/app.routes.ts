@@ -7,8 +7,8 @@ import { LoginComponent } from './login/login.component';
 import { AdminComponent } from './pages/admin/admin.component';
 
 export const routes: Routes = [
-    { path: 'login', component: LoginComponent },
     { path: '', redirectTo: '/asociaciones', pathMatch: 'full' },
+    { path: 'login', component: LoginComponent },
     {
         path: 'carrozas',
         component: ListCarrozasComponent,
