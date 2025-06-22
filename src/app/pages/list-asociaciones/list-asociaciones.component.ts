@@ -8,9 +8,10 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { min } from 'rxjs';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import { ModalComponent } from '../../components/modal.component';
-import * as L from 'leaflet';
+
 
 
 @Component({
@@ -49,6 +50,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
   // ...existing code...
   async ngOnInit(): Promise<void> {
     if (isPlatformBrowser(this.platformId)) {
+      this.leaflet = await import('leaflet');
       const hideModal = localStorage.getItem('hideModal');
       if (hideModal !== 'hide') {
         window.addEventListener('beforeinstallprompt', (event: any) => {
@@ -146,7 +148,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
 
   private clearMapLayers(): void {
     this.map.eachLayer((layer: any) => {
-      if (layer instanceof L.Marker || layer instanceof L.Polyline) {
+      if (layer instanceof this.leaflet.Marker || layer instanceof this.leaflet.Polyline) {
         this.map.removeLayer(layer);
       }
     });
@@ -155,8 +157,8 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
 
   initMap(): void {
     if (!this.map) {
-      this.map = L.map('map-asociaciones').setView([40.412, -3.692], 17);
-      L.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
+      this.map = this.leaflet.map('map-asociaciones').setView([40.412, -3.692], 17);
+      this.leaflet.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
         attribution: '© OpenStreetMap',
         maxZoom: 18,
         minZoom: 15,
@@ -176,7 +178,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
       const curr = this.asociaciones[i];
       const color = this.getZonaColor(curr.zona);
 
-      L.polyline(
+      this.leaflet.polyline(
         [
           [prev.lat, prev.lng],
           [curr.lat, curr.lng]
@@ -252,13 +254,13 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
 
   setMapItem(a: Asociacion): void {
       if (a && this.map) {
-        const customIcon = L.icon({
+        const customIcon = this.leaflet.icon({
           iconUrl: '/assets/icons/marker.svg',
           iconSize: [60, 60],
           iconAnchor: [30, 60],
           popupAnchor: [0, -60],
         });
-        this.marker = L.marker([a.lat, a.lng], { icon: customIcon })
+        this.marker = this.leaflet.marker([a.lat, a.lng], { icon: customIcon })
           .addTo(this.map)
           .bindPopup(`<b>${a.name}</b>`)
           .openPopup();

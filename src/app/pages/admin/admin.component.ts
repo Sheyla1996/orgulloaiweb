@@ -1,6 +1,6 @@
 import { CommonModule, isPlatformBrowser } from "@angular/common";
 import { ChangeDetectionStrategy, Component, Inject, NO_ERRORS_SCHEMA, OnInit, PLATFORM_ID } from "@angular/core";
-import { MatTabsModule } from '@angular/material/tabs';
+import {MatTabsModule} from '@angular/material/tabs';
 import { AsociacionesService } from "../../services/asociaciones.service";
 import { CarrozasService } from "../../services/carrozas.service";
 import { TelefonosService } from "../../services/telefonos.service";
@@ -11,7 +11,7 @@ import { MapService } from "../../services/map.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from "@angular/material/dialog";
 import { MatButtonToggleModule } from "@angular/material/button-toggle";
-import * as L from 'leaflet';
+
 
 @Component({
   selector: 'app-admin',
@@ -52,6 +52,7 @@ export class AdminComponent implements OnInit {
 
     async ngOnInit(): Promise<void> {
         if (isPlatformBrowser(this.platformId)) {
+            this._leaflet = await import('leaflet');
             this.waitForMapDiv().then(() => {
                 this._createMap();
                 this.createMapHide();
@@ -112,7 +113,7 @@ export class AdminComponent implements OnInit {
 
     private _clearMapLayers(): void {
         this.map.eachLayer((layer: any) => {
-        if (layer instanceof L.Marker || layer instanceof L.Polyline) {
+        if (layer instanceof this._leaflet.Marker || layer instanceof this._leaflet.Polyline) {
             this.map.removeLayer(layer);
         }
         });
@@ -121,8 +122,8 @@ export class AdminComponent implements OnInit {
 
     private _createMap(): void {
         if (!this.map) {
-            this.map = L.map('map').setView([40.412, -3.692], 17);
-            L.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
+            this.map = this._leaflet.map('map').setView([40.412, -3.692], 17);
+            this._leaflet.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
                 attribution: '© OpenStreetMap',
                 maxZoom: 18,
                 minZoom: 15,
@@ -134,7 +135,7 @@ export class AdminComponent implements OnInit {
 
     setMapItem(a: any): void {
       if (a && this.map) {
-        const customIcon = L.icon({
+        const customIcon = this._leaflet.icon({
           iconUrl: '/assets/icons/marker.svg',
           iconSize: [60, 60],
           iconAnchor: [30, 60],
@@ -146,7 +147,7 @@ export class AdminComponent implements OnInit {
                 ? `<img src="https://laalisedadetormes.com/orgullo/${a.logo}.webp" alt="${a.name}" style="max-width:100px;max-height:100px;display:block;padding-top:8px;">`
                 : `<b style="max-width:100px;max-height:100px;display:block;">${a.name}</b>`;
         }
-        this.marker = L.marker([a.lat, a.lng], { icon: customIcon })
+        this.marker = this._leaflet.marker([a.lat, a.lng], { icon: customIcon })
           .addTo(this.map)
           .bindPopup(popupContent)
           .openPopup();
@@ -243,7 +244,7 @@ export class AdminComponent implements OnInit {
             const curr = this.asociaciones[i];
             const color = this._getZonaColor(curr.zona);
 
-            L.polyline(
+            this._leaflet.polyline(
                 [
                 [prev.lat, prev.lng],
                 [curr.lat, curr.lng]
@@ -270,7 +271,7 @@ export class AdminComponent implements OnInit {
             const curr = this.carrozas[i];
             const color = this._getZonaColor(curr.zona);
 
-            L.polyline(
+            this._leaflet.polyline(
                 [
                 [prev.lat, prev.lng],
                 [curr.lat, curr.lng]
@@ -310,7 +311,7 @@ export class AdminComponent implements OnInit {
         zoom: 16
         });
 
-        L.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
+        this._leaflet.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
             attribution: '© OpenStreetMap',
             maxZoom: 18,
             minZoom: 15,
@@ -322,24 +323,24 @@ export class AdminComponent implements OnInit {
         this._mapService.clearMapLayers();
         if (type === 'asociaciones') {
             const recorrido = [
-                L.latLng(40.412416, -3.692842), //Inicio
-                L.latLng(40.409798, -3.692232),//Semaforo
-                L.latLng(40.409486, -3.692095), //Moyano
-                L.latLng(40.408929, -3.691708), //Glorieta
-                L.latLng(40.408045, -3.690157) //Final
+                this._leaflet.latLng(40.412416, -3.692842), //Inicio
+                this._leaflet.latLng(40.409798, -3.692232),//Semaforo
+                this._leaflet.latLng(40.409486, -3.692095), //Moyano
+                this._leaflet.latLng(40.408929, -3.691708), //Glorieta
+                this._leaflet.latLng(40.408045, -3.690157) //Final
             ];
             markers = this._mapService.getAsocMarkers(this._mapService.map, recorrido, this.asociaciones.length, true);
         } else if (type === 'carrozas') {
             const lines = [];
-            lines.push([new L.LatLng(40.407099, -3.692758), new L.LatLng(40.406359, -3.691967) ]);
-            lines.push([new L.LatLng(40.405928, -3.691514), new L.LatLng(40.405662, -3.691192) ]);
-            lines.push([new L.LatLng(40.405567, -3.691090), new L.LatLng(40.404914, -3.690375) ]);
-            lines.push([new L.LatLng(40.404832, -3.690295), new L.LatLng(40.403159, -3.688455) ]);
-            lines.push([new L.LatLng(40.402966, -3.688234), new L.LatLng(40.401832, -3.686979) ]);
-            lines.push([new L.LatLng(40.401751, -3.686896), new L.LatLng(40.401666, -3.686790) ]);
-            lines.push([new L.LatLng(40.401390, -3.686665), new L.LatLng(40.400735, -3.685780) ]);
-            lines.push([new L.LatLng(40.400656, -3.685687), new L.LatLng(40.400068, -3.685120) ]);
-            lines.push([new L.LatLng(40.399837, -3.684794), new L.LatLng(40.399596, -3.684513) ]);
+            lines.push([new this._leaflet.LatLng(40.407099, -3.692758), new this._leaflet.LatLng(40.406359, -3.691967) ]);
+            lines.push([new this._leaflet.LatLng(40.405928, -3.691514), new this._leaflet.LatLng(40.405662, -3.691192) ]);
+            lines.push([new this._leaflet.LatLng(40.405567, -3.691090), new this._leaflet.LatLng(40.404914, -3.690375) ]);
+            lines.push([new this._leaflet.LatLng(40.404832, -3.690295), new this._leaflet.LatLng(40.403159, -3.688455) ]);
+            lines.push([new this._leaflet.LatLng(40.402966, -3.688234), new this._leaflet.LatLng(40.401832, -3.686979) ]);
+            lines.push([new this._leaflet.LatLng(40.401751, -3.686896), new this._leaflet.LatLng(40.401666, -3.686790) ]);
+            lines.push([new this._leaflet.LatLng(40.401390, -3.686665), new this._leaflet.LatLng(40.400735, -3.685780) ]);
+            lines.push([new this._leaflet.LatLng(40.400656, -3.685687), new this._leaflet.LatLng(40.400068, -3.685120) ]);
+            lines.push([new this._leaflet.LatLng(40.399837, -3.684794), new this._leaflet.LatLng(40.399596, -3.684513) ]);
             markers = this._mapService.getCarrMarkers(this._mapService.map, lines, this.carrozas.length, true);
         }
         return markers;

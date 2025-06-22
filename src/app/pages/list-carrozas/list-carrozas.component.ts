@@ -2,7 +2,7 @@ import { CarrozasService } from '../../services/carrozas.service';
 import { Carroza } from '../../models/carroza.model';
 import { Component, Inject, OnInit, PLATFORM_ID, ViewEncapsulation } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import * as L from 'leaflet';
+
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatInputModule} from '@angular/material/input';
@@ -42,6 +42,7 @@ export class ListCarrozasComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     if (isPlatformBrowser(this.platformId)) {
+      this.leaflet = await import('leaflet');
       const cached = localStorage.getItem('carrozas');
       let shouldUseCache = false;
 
@@ -130,7 +131,7 @@ export class ListCarrozasComponent implements OnInit {
 
   private clearMapLayers(): void {
     this.map.eachLayer((layer: any) => {
-      if (layer instanceof L.Marker || layer instanceof L.Polyline) {
+      if (layer instanceof this.leaflet.Marker || layer instanceof this.leaflet.Polyline) {
         this.map.removeLayer(layer);
       }
     });
@@ -139,8 +140,8 @@ export class ListCarrozasComponent implements OnInit {
 
   initMap(): void {
     if (!this.map) {
-      this.map = L.map('map-carrozas').setView([40.412, -3.692], 17);
-      L.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
+      this.map = this.leaflet.map('map-carrozas').setView([40.412, -3.692], 17);
+      this.leaflet.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
         attribution: '© OpenStreetMap',
         maxZoom: 18,
         minZoom: 15,
@@ -160,7 +161,7 @@ export class ListCarrozasComponent implements OnInit {
       const curr = this.carrozas[i];
       const color = this.getZoneColor(curr.zona);
 
-      L.polyline(
+      this.leaflet.polyline(
         [
           [prev.lat, prev.lng],
           [curr.lat, curr.lng]
@@ -223,7 +224,7 @@ export class ListCarrozasComponent implements OnInit {
 
   setMapItem(a: Carroza): void {
     if (a && this.map) {
-      const customIcon = L.icon({
+      const customIcon = this.leaflet.icon({
         iconUrl: '/assets/icons/marker.svg',
         iconSize: [60, 60],
         iconAnchor: [30, 60],
@@ -232,7 +233,7 @@ export class ListCarrozasComponent implements OnInit {
       const popupContent = a.logo
         ? `<img src="https://laalisedadetormes.com/orgullo/${a.logo}.webp" alt="${a.name}" style="max-width:100px;max-height:100px;display:block;padding-top:8px;">`
         : `<b style="max-width:100px;max-height:100px;display:block;">${a.name}</b>`;
-      this.marker = L.marker([a.lat, a.lng], { icon: customIcon })
+      this.marker = this.leaflet.marker([a.lat, a.lng], { icon: customIcon })
         .addTo(this.map)
         .bindPopup(popupContent)
         .openPopup();
