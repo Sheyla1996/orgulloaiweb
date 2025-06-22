@@ -5,6 +5,7 @@ import { ListTelefonosComponent } from './pages/list-telefonos/list-telefonos.co
 import { AuthGuard } from './auth.guard';
 import { LoginComponent } from './login/login.component';
 import { AdminComponent } from './pages/admin/admin.component';
+import { ChatComponent } from './pages/list-messages/list-messages.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: '/asociaciones', pathMatch: 'full' },
@@ -24,6 +25,12 @@ export const routes: Routes = [
     {
         path: 'telefonos',
         component: ListTelefonosComponent,
+        canActivate: [AuthGuard],
+        data: { allowed: ['normal', 'mañana', 'coor', 'boss'] }
+    },
+    {
+        path: 'messages',
+        component: ChatComponent,
         canActivate: [AuthGuard],
         data: { allowed: ['normal', 'mañana', 'coor', 'boss'] }
     },

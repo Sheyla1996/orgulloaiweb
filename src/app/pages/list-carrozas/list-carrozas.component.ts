@@ -44,7 +44,6 @@ export class ListCarrozasComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     if (isPlatformBrowser(this.platformId)) {
-      this._wsService.connect();
       this.leaflet = await import('leaflet');
       const cached = localStorage.getItem('carrozas');
       let shouldUseCache = false;

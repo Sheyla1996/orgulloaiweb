@@ -40,4 +40,11 @@ export class WebSocketService {
       this.socket.send(JSON.stringify(data));
     }
   }
+
+  disconnect(): void {
+    if (this.socket) {
+      this.socket.close();
+      this.socket = null;
+    }
+  }
 }

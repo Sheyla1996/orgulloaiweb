@@ -6,6 +6,7 @@ import { provideClientHydration, withEventReplay, withIncrementalHydration } fro
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideServiceWorker } from '@angular/service-worker';
+import { provideToastr } from 'ngx-toastr';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -17,6 +18,7 @@ export const appConfig: ApplicationConfig = {
           }), provideServiceWorker('ngsw-worker.js', {
             enabled: !isDevMode(),
             registrationStrategy: 'registerWhenStable:30000'
-          }), provideClientHydration(withIncrementalHydration())
+          }), provideClientHydration(withIncrementalHydration()),
+          provideToastr()
   ]
 };

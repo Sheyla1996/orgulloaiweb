@@ -8,6 +8,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFabMenu, MatFabMenuModule } from '@angular-material-extensions/fab-menu';
 import { filter } from 'rxjs/operators';
+import { WebSocketService } from './services/websocket.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-root',
@@ -32,29 +34,44 @@ export class AppComponent implements OnInit {
   title = 'orgullo2022';
   menu: MatFabMenu[] = [];
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private _wsService: WebSocketService,
+    private toastr: ToastrService
+  ) {}
 
   get currentUrl(): string {
     return this.router.url;
   }
 
   ngOnInit(): void {
+    this._wsService.connect();
     this.setMenu();
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(() => this.setMenu());
+    this._wsService.messages$.subscribe((msg) => {
+        if (msg && msg.type === 'message') {
+            this.toastr.success(msg.message, 'Nuevo mensaje:', {
+              closeButton: true,
+              timeOut: 20000,
+            });
+        }
+      });
   }
 
   private setMenu(): void {
     const userType = localStorage.getItem('userType');
     if (userType === 'mañana') {
       this.menu = [
+        { id: 'messages', icon: 'chat' },
         { id: 'phones', icon: 'contact_phone' },
         { id: 'carrozas', icon: 'local_shipping' },
         { id: 'asociaciones', icon: 'groups', tooltip: 'Asociaciones', tooltipPosition: 'right' }
       ];
     } else if (userType === 'boss') {
       this.menu = [
+        { id: 'messages', icon: 'chat' },
         { id: 'phones', icon: 'contact_phone' },
         { id: 'carrozas', icon: 'local_shipping' },
         { id: 'asociaciones', icon: 'groups', tooltip: 'Asociaciones', tooltipPosition: 'right' },
@@ -62,6 +79,7 @@ export class AppComponent implements OnInit {
       ];
     } else {
       this.menu = [
+        { id: 'messages', icon: 'chat' },
         { id: 'phones', icon: 'contact_phone' },
         { id: 'asociaciones', icon: 'groups' }
       ];
@@ -81,6 +99,9 @@ export class AppComponent implements OnInit {
         break;
       case 'admin':
         this.router.navigate(['/admin']);
+        break;
+      case 'messages':
+        this.router.navigate(['/messages']);
         break;
       case 'logout':
         localStorage.removeItem('userType');
