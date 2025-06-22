@@ -80,28 +80,31 @@ export class ListTelefonosComponent implements OnInit {
   }
 
   clearPwaCache() {
-    if ('caches' in window) {
-      caches.keys().then(names => {
-        for (let name of names) {
-          caches.delete(name);
-        }
-      });
+    if (isPlatformBrowser(this.platformId)) {
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          for (let name of names) {
+            caches.delete(name);
+          }
+        });
+      }
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          for (let registration of registrations) {
+            registration.unregister();
+          }
+        });
+      }
+      // Opcional: recarga la página para aplicar los cambios
+      window.location.reload();
     }
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(registrations => {
-        for (let registration of registrations) {
-          registration.unregister();
-        }
-      });
-    }
-    // Opcional: recarga la página para aplicar los cambios
-    window.location.reload();
   }
 
   onShortClick() {
-    localStorage.removeItem('userType');
-    localStorage.removeItem('zone');
-    window.location.reload();
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem('userType');
+      localStorage.removeItem('zone');
+      window.location.reload();
+    }
   }
-
 }

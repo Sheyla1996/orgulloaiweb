@@ -51,6 +51,7 @@
                 }
               ],
               "outputHashing": "all",
+              "sourceMap": true,
               "serviceWorker": true
             },
             "development": {
