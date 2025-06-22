@@ -9,6 +9,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { SseService } from '../../services/sse.service';
+import { WebSocketService } from '../../services/websocket.service';
 
 @Component({
   selector: 'app-list-carrozas',
@@ -37,11 +38,13 @@ export class ListCarrozasComponent implements OnInit {
   constructor(
     private carrozasService: CarrozasService,
     private _sseService: SseService,
+    private _wsService: WebSocketService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   async ngOnInit(): Promise<void> {
     if (isPlatformBrowser(this.platformId)) {
+      this._wsService.connect();
       this.leaflet = await import('leaflet');
       const cached = localStorage.getItem('carrozas');
       let shouldUseCache = false;
@@ -70,6 +73,18 @@ export class ListCarrozasComponent implements OnInit {
         next: (data) => {
           console.log('Actualización recibida:', data);
           this.getCarrozas(cached); // o actualizar solo el elemento
+        }
+      });
+      this._wsService.messages$.subscribe((msg) => {
+        console.log('Mensaje recibido por WebSocket:', msg);
+        if (msg.tipo === 'actualizar_listado') {
+          console.log('🟢 Evento recibido para actualizar:', msg);
+
+          // Actualiza lista completa
+          this.getCarrozas(cached);
+
+          // O actualiza solo un elemento:
+          // this.updateElemento(msg.id, msg.lat, msg.lng);
         }
       });
     }
