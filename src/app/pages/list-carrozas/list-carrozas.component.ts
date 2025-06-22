@@ -8,6 +8,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { SseService } from '../../services/sse.service';
 
 @Component({
   selector: 'app-list-carrozas',
@@ -35,6 +36,7 @@ export class ListCarrozasComponent implements OnInit {
 
   constructor(
     private carrozasService: CarrozasService,
+    private _sseService: SseService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -42,26 +44,61 @@ export class ListCarrozasComponent implements OnInit {
     if (isPlatformBrowser(this.platformId)) {
       this.leaflet = await import('leaflet');
       const cached = localStorage.getItem('carrozas');
-      if (cached) {
-        this.carrozas = JSON.parse(cached);
-      }
-      this.carrozasService.getCarrozas().subscribe({
-        next: async data => {
-          this.carrozas = data
-            .map(a => ({ ...a, lat: a.lat, lng: a.lng }))
-            .sort((a, b) => a.position - b.position);
+      let shouldUseCache = false;
 
-          localStorage.setItem('carrozas', JSON.stringify(this.carrozas));
-          await this.waitForMapDiv();
-          this.initMap();
-          this.initObserver();
-        },
-        error: err => {
-          console.error('Error fetching carrozas:', err);
-          // Optionally, you can handle the error by showing a message to the user
+      // Detectar calidad de conexión
+      const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+      if (connection) {
+        // Puedes ajustar los valores según tus necesidades
+        const slowTypes = ['slow-2g', '2g', '3g'];
+        if (connection.saveData || slowTypes.includes(connection.effectiveType)) {
+          shouldUseCache = true;
+        }
+      } else if (!navigator.onLine) {
+        shouldUseCache = true;
+      }
+
+      if (shouldUseCache && cached) {
+        this.carrozas = JSON.parse(cached);
+        await this.waitForMapDiv();
+        this.initMap();
+        this.initObserver();
+      } else {
+        this.getCarrozas(cached);
+      }
+      this._sseService.getEventSource('https://tudominio.com/sse').subscribe({
+        next: (data) => {
+          console.log('Actualización recibida:', data);
+          this.getCarrozas(cached); // o actualizar solo el elemento
         }
       });
     }
+  }
+
+  getCarrozas(cached: any): void {
+    this.carrozasService.getCarrozas().subscribe({
+      next: async data => {
+        this.carrozas = data
+          .map(a => ({ ...a, lat: a.lat, lng: a.lng }))
+          .sort((a, b) => a.position - b.position);
+
+        localStorage.setItem('carrozas', JSON.stringify(this.carrozas));
+        await this.waitForMapDiv();
+        this.initMap();
+        this.initObserver();
+      },
+      error: err => {
+        console.error('Error fetching carrozas:', err);
+        // Optionally, you can handle the error by showing a message to the user
+        if (cached) {
+          this.carrozas = JSON.parse(cached);
+          this.waitForMapDiv().then(() => {
+            this.initMap();
+            this.initObserver();
+          });
+        }
+      }
+    });
   }
 
   private async waitForMapDiv(): Promise<void> {

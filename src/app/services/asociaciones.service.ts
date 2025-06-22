@@ -12,4 +12,12 @@ export class AsociacionesService {
   getAsociaciones(): Observable<Asociacion[]> {
     return this.http.get<Asociacion[]>(this.apiUrl);
   }
+
+  getAsociacionesFromSheet(): Observable<Asociacion[]> {
+    return this.http.get<Asociacion[]>(`${this.apiUrl}/from-sheet`);
+  }
+
+  updatePosition(asociacion: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/posicion`, asociacion);
+  }
 }

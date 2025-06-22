@@ -47,10 +47,10 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
     private _dialog: MatDialog
   ) {}
 
+  // ...existing code...
   async ngOnInit(): Promise<void> {
     if (isPlatformBrowser(this.platformId)) {
       this.leaflet = await import('leaflet');
-      const cached = localStorage.getItem('asociaciones');
       const hideModal = localStorage.getItem('hideModal');
       if (hideModal !== 'hide') {
         window.addEventListener('beforeinstallprompt', (event: any) => {
@@ -69,27 +69,54 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
         });
       }
 
-      if (cached) {
-        this.asociaciones = JSON.parse(cached);
-      }
-      this.asociacionesService.getAsociaciones().subscribe({
-        next: async data => {
-          this.asociaciones = data
-            .map(a => ({ ...a, lat: a.lat, lng: a.lng }))
-            .sort((a, b) => a.position - b.position);
+      const cached = localStorage.getItem('asociaciones');
+      let shouldUseCache = false;
 
-          localStorage.setItem('asociaciones', JSON.stringify(this.asociaciones));
-          await this.waitForMapDiv();
-          this.initMap();
-          this.initObserver();
-        },
-        error: err => {
-          console.error('Error fetching asociaciones:', err);
-          // Optionally, you can handle the error by showing a message to the user
+      // Detectar calidad de conexión
+      const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+      if (connection) {
+        // Puedes ajustar los valores según tus necesidades
+        const slowTypes = ['slow-2g', '2g', '3g'];
+        if (connection.saveData || slowTypes.includes(connection.effectiveType)) {
+          shouldUseCache = true;
         }
-      });
+      } else if (!navigator.onLine) {
+        shouldUseCache = true;
+      }
+
+      if (shouldUseCache && cached) {
+        this.asociaciones = JSON.parse(cached);
+        await this.waitForMapDiv();
+        this.initMap();
+        this.initObserver();
+      } else {
+        this.asociacionesService.getAsociaciones().subscribe({
+          next: async data => {
+            this.asociaciones = data
+              .map(a => ({ ...a, lat: a.lat, lng: a.lng }))
+              .sort((a, b) => a.position - b.position);
+
+            localStorage.setItem('asociaciones', JSON.stringify(this.asociaciones));
+            await this.waitForMapDiv();
+            this.initMap();
+            this.initObserver();
+          },
+          error: err => {
+            console.error('Error fetching asociaciones:', err);
+            // Si falla la petición, intenta cargar del caché
+            if (cached) {
+              this.asociaciones = JSON.parse(cached);
+              this.waitForMapDiv().then(() => {
+                this.initMap();
+                this.initObserver();
+              });
+            }
+          }
+        });
+      }
     }
   }
+  // ...existing code...
 
 
   ngOnDestroy(): void {

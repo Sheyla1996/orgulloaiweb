@@ -190,7 +190,13 @@ mat-fab-menu {
     &:last-child {
       padding-bottom: calc(100vh - 442px);
     }
+    &__name {
+      font-family: var(--mat-tab-label-text-font, var(--mat-sys-title-small-font));
+      font-weight: normal;
+    }
   }
+
+  
 }
 
 /* Logo colores */
@@ -225,7 +231,6 @@ mat-fab-menu {
 /* Nombre */
 .list-item__name {
   font-size: 1.2rem;
-  font-weight: bold;
   margin-left: 10px;
 }
 
@@ -260,4 +265,14 @@ mat-fab-menu {
   .mdc-fab {
     border-radius: 50%;
   }
+}
+
+a {
+    color: inherit !important;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .mdc-tab__text-label {
+        color: var(--color-text) !important;
+    }
 }

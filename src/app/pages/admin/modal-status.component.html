@@ -1,0 +1,10 @@
+<h2 mat-dialog-title>Cambiar estado</h2>
+<mat-button-toggle-group  (change)="onSelectChange($event)" [value]="selected" style="margin: 0 24px;">
+  <mat-button-toggle value="pendiente">Pendiente</mat-button-toggle>
+  <mat-button-toggle value="aparcando">Aparcando</mat-button-toggle>
+  <mat-button-toggle value="situado">Situado</mat-button-toggle>
+</mat-button-toggle-group>
+<mat-dialog-actions>
+  <button matButton (click)="onClose()">Cerrar</button>
+  <button matButton (click)="onSave()">Guardar</button>
+</mat-dialog-actions>

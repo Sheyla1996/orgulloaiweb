@@ -4,6 +4,7 @@ import { ListAsociacionesComponent } from './pages/list-asociaciones/list-asocia
 import { ListTelefonosComponent } from './pages/list-telefonos/list-telefonos.component';
 import { AuthGuard } from './auth.guard';
 import { LoginComponent } from './login/login.component';
+import { AdminComponent } from './pages/admin/admin.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -12,18 +13,24 @@ export const routes: Routes = [
         path: 'carrozas',
         component: ListCarrozasComponent,
         canActivate: [AuthGuard],
-        data: { allowed: ['mañana'] }
+        data: { allowed: ['mañana', 'boss'] }
     },
     {
         path: 'asociaciones',
         component: ListAsociacionesComponent,
         canActivate: [AuthGuard],
-        data: { allowed: ['normal', 'mañana', 'coor'] }
+        data: { allowed: ['normal', 'mañana', 'coor', 'boss'] }
     },
     {
         path: 'telefonos',
         component: ListTelefonosComponent,
         canActivate: [AuthGuard],
-        data: { allowed: ['normal', 'mañana', 'coor'] }
+        data: { allowed: ['normal', 'mañana', 'coor', 'boss'] }
+    },
+    {
+        path: 'admin',
+        component: AdminComponent,
+        canActivate: [AuthGuard],
+        data: { allowed: ['boss'] }
     }
 ];

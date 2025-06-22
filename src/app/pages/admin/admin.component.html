@@ -1,0 +1,67 @@
+<div id="map" class="map-container map-admin" [ngClass]="mapType"></div>
+<div id="map-hide" style="height: 500px; display: none;"></div>
+<div class="section-buttons">
+  <button matButton="outlined" (click)="getListFromSheet()">Obtener Sheet</button>
+  <button matButton="outlined" (click)="getPosition()">Posición</button>
+</div>
+<mat-tab-group (selectedTabChange)="onTabChange($event)">
+  <mat-tab label="Asociaciones">
+    <div class="list list-asociaciones" id="list-container-asoc">
+    <ng-container *ngFor="let asociacion of asociaciones">
+      <div
+        class="list-item list-asociaciones-item"
+        [attr.id]="'asoc-' + asociacion.id"
+      >
+        <div class="list-item__logo list-asociaciones-item__logo" [ngClass]="asociacion.zona">
+          <img
+            *ngIf="asociacion.logo"
+            [src]="'https://laalisedadetormes.com/orgullo/' + asociacion.logo + '.webp'"
+            [alt]="asociacion.name"
+          />
+        </div>
+        <div class="list-item__name list-asociaciones-item__name">{{asociacion.position}}. {{ asociacion.name }}</div>
+      </div>
+    </ng-container>
+  </div>
+  </mat-tab>
+  <mat-tab label="Carrozas">
+    <div class="list list-carrozas" id="list-container-carr">
+        <ng-container *ngFor="let carroza of carrozas">
+        <div class="list-item list-carrozas-item" [id]="'carr-' + carroza.id">
+            <div class="list-item__logo list-carrozas-item__logo">
+              <img
+                  *ngIf="carroza.logo"
+                  [src]="'https://laalisedadetormes.com/orgullo/' + carroza.logo + '.webp'"
+                  [alt]="carroza.name"
+              />
+            </div>
+            <div style="display: flex; justify-content: space-between; width: -webkit-fill-available;">
+              <div>
+                <div class="list-item__name list-carrozas-item__name">{{carroza.position}}. {{ carroza.name }}</div>
+                <div class="tag" [ngClass]="carroza.status?.toLocaleLowerCase()">{{carroza.status | titlecase}}</div>
+              </div>
+                <button style="min-width: auto;" matButton="outlined" (click)="openDialog(carroza.id, carroza.sheet_row, carroza.status)">Estado</button>
+            </div>
+          </div>
+        </ng-container>
+    </div>
+  </mat-tab>
+  <mat-tab label="Teléfonos">
+    <div class="phone-list">
+        @for (t of telefonos; track t) {
+            <div
+                class="telefono"
+                [class.no-phone]="!t.telefono"
+                >
+                <div class="name">
+                <div class="dot" [ngClass]="t.zona"></div>
+                <h3>{{ t.name }}</h3>
+                </div>
+                @if (t.telefono) {
+                {{t.telefono}}
+                }
+            </div>
+        }
+        </div>
+  </mat-tab>
+</mat-tab-group>

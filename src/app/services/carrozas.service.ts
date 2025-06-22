@@ -12,4 +12,16 @@ export class CarrozasService {
   getCarrozas(): Observable<Carroza[]> {
     return this.http.get<Carroza[]>(this.apiUrl);
   }
+
+  getCarrozasFromSheet(): Observable<Carroza[]> {
+    return this.http.get<Carroza[]>(`${this.apiUrl}/from-sheet`);
+  }
+
+  updatePosition(carrozas: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/posicion`, carrozas);
+  }
+
+  updateState(id:number, carroza: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}/estado`, carroza);
+  }
 }
