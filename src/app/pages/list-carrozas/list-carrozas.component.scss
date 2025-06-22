@@ -13,3 +13,22 @@
     }
   }
 }
+.tag {
+  border-radius: 12px;
+  padding: 2px 8px;
+  width: fit-content;
+  color: black;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  font-family: var(--mat-tab-label-text-font, var(--mat-sys-title-small-font));
+
+  &.pendiente{
+    background-color: rgb(255, 116, 116);
+  }
+  &.aparcando {
+    background-color: #f5f77d;
+  }
+  &.situado {
+    background-color: #7df57d;
+  }
+}

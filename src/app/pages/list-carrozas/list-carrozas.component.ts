@@ -69,22 +69,9 @@ export class ListCarrozasComponent implements OnInit {
       } else {
         this.getCarrozas(cached);
       }
-      this._sseService.getEventSource('https://apiorgullo.sheylamartinez.es/sse').subscribe({
-        next: (data) => {
-          console.log('Actualización recibida:', data);
-          this.getCarrozas(cached); // o actualizar solo el elemento
-        }
-      });
       this._wsService.messages$.subscribe((msg) => {
-        console.log('Mensaje recibido por WebSocket:', msg);
-        if (msg.tipo === 'actualizar_listado') {
-          console.log('🟢 Evento recibido para actualizar:', msg);
-
-          // Actualiza lista completa
+        if (msg === 'actualizar_listado_carr') {
           this.getCarrozas(cached);
-
-          // O actualiza solo un elemento:
-          // this.updateElemento(msg.id, msg.lat, msg.lng);
         }
       });
     }

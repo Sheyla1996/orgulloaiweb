@@ -25,7 +25,10 @@
             [alt]="carroza.name"
           />
         </div>
-        <div class="list-item__name">{{carroza.position}}. {{ carroza.name }}</div>
+        <div>
+            <div class="list-item__name list-carrozas-item__name">{{carroza.position}}. {{ carroza.name }}</div>
+            <div class="tag" [ngClass]="carroza.status?.toLocaleLowerCase()">{{carroza.status | titlecase}}</div>
+          </div>
       </div>
     </ng-container>
   </div>
