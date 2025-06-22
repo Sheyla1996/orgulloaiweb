@@ -35,59 +35,59 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      // Check for install prompt event
-      window.addEventListener('beforeinstallprompt', (event: any) => {
-        event.preventDefault();
-        this.installPromptEvent = event;
-        this.showInstallButton = true;
-      });
+    if (!isPlatformBrowser(this.platformId)) return;
 
-      const params = new URLSearchParams(window.location.search);
-      const pass = params.get('pass');
-      const type = params.get('type');
-      if (pass && type) {
-        this.password = pass;
-        this.selectZone = type;
-        this.login();
-      }
+    //this.setupPwaInstallPrompt();
+    this.handleAutoLoginFromUrl();
+  }
+
+  private setupPwaInstallPrompt(): void {
+    window.addEventListener('beforeinstallprompt', (event: any) => {
+      event.preventDefault();
+      this.installPromptEvent = event;
+      this.showInstallButton = true;
+    });
+  }
+
+  private handleAutoLoginFromUrl(): void {
+    const params = new URLSearchParams(window.location.search);
+    const pass = params.get('pass');
+    const type = params.get('type');
+    if (pass && type) {
+      this.password = pass;
+      this.selectZone = type;
+      this.login();
     }
   }
 
-  login() {
-    if (isPlatformBrowser(this.platformId)) {
-      const params = new URLSearchParams();
-      params.set('pass', this.password);
-      params.set('type', this.selectZone);
+  login(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
 
-      this._loginService.login(this.password, this.selectZone).subscribe({
-        next: (response: any) => {
-          if (response.ok) {
-        localStorage.setItem('userType', response.type || 'normal');
-        localStorage.setItem('zone', response.zona || '');
-        // Navega usando los parámetros en la URL
-        this.router.navigate(['/asociaciones'], { queryParams: { pass: this.password, type: this.selectZone } });
-          } else {
-        localStorage.removeItem('userType');
-        this.error = true;
-          }
-        }, 
-        error: (error) => {
+    this._loginService.login(this.password, this.selectZone).subscribe({
+      next: (response: any) => {
+        if (response.ok) {
+          localStorage.setItem('userType', response.type || 'normal');
+          localStorage.setItem('zone', response.zona || '');
+          this.router.navigate(['/asociaciones'], { queryParams: { pass: this.password, type: this.selectZone } });
+        } else {
           localStorage.removeItem('userType');
           this.error = true;
         }
-      });
-    }
+      },
+      error: () => {
+        localStorage.removeItem('userType');
+        this.error = true;
+      }
+    });
   }
 
-  onInstallPwa() {
-    if (this.installPromptEvent) {
-      this.installPromptEvent.prompt();
-      this.installPromptEvent.userChoice.then((choiceResult: any) => {
-        // Puedes ocultar el botón si el usuario acepta o rechaza
-        this.showInstallButton = false;
-        this.installPromptEvent = null;
-      });
-    }
+  onInstallPwa(): void {
+    if (!this.installPromptEvent) return;
+
+    this.installPromptEvent.prompt();
+    this.installPromptEvent.userChoice.then(() => {
+      this.showInstallButton = false;
+      this.installPromptEvent = null;
+    });
   }
 }
