@@ -1,6 +1,6 @@
-/* To learn more about this file see: https://angular.io/config/tsconfig. */
 {
   "compileOnSave": false,
+  "module": "esnext",
   "compilerOptions": {
     "outDir": "./dist/out-tsc",
     "strict": true,
