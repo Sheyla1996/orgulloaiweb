@@ -5,11 +5,11 @@ import { Asociacion } from "../models/asociacion.model";
 
 @Injectable({ providedIn: 'root' })
 export class LoginService {
-  private apiUrl = 'https://voluntariadolgtbapp.es';
+  private apiUrl = 'https://apiorgullo.sheylamartinez.es';
 
   constructor(private http: HttpClient) {}
 
   login(pass: string, type: string): Observable<Asociacion[]> {
-    return this.http.get<Asociacion[]>(this.apiUrl + `/login.php?pass=${encodeURIComponent(pass)}&type=${type}`);
+    return this.http.get<Asociacion[]>(this.apiUrl + `/login?pass=${encodeURIComponent(pass)}&type=${type}`);
   }
 }
