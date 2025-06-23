@@ -6,10 +6,12 @@ import { AuthGuard } from './auth.guard';
 import { LoginComponent } from './login/login.component';
 import { AdminComponent } from './pages/admin/admin.component';
 import { ChatComponent } from './pages/list-messages/list-messages.component';
+import { HomeComponent } from './pages/home/home.component';
 
 export const routes: Routes = [
+    { path: '', component: HomeComponent },
     {
-        path: '',
+        path: '/asociaciones',
         component: ListAsociacionesComponent,
         canActivate: [AuthGuard],
         data: { allowed: ['normal', 'mañana', 'coor', 'boss'] }
