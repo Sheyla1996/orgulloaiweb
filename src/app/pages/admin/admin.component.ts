@@ -329,8 +329,8 @@ export class AdminComponent implements OnInit {
 
     createMapHide(): void {
         this._mapService.initializeMap('map-hide', {
-        center: [40.4094783, -3.69111],
-        zoom: 16
+        center: [40.412, -3.692],
+        zoom: 18
         });
 
         setTimeout(() => {
@@ -342,7 +342,7 @@ export class AdminComponent implements OnInit {
         }, 100);
     }
 
-    getListPosition(type: string): any {
+    async getListPosition(type: string): Promise<any> {
         let markers;
         this._mapService.clearMapLayers();
         if (type === 'asociaciones') {
@@ -353,7 +353,7 @@ export class AdminComponent implements OnInit {
                 this._leaflet.latLng(40.408929, -3.691708), //Glorieta
                 this._leaflet.latLng(40.408045, -3.690157) //Final
             ];
-            markers = this._mapService.getAsocMarkers(this._mapService.map, recorrido, this.asociaciones.length, true);
+            markers = await this._mapService.getAsocMarkers(this._mapService.map, recorrido, this.asociaciones.length, true);
         } else if (type === 'carrozas') {
             const lines = [];
             lines.push([new this._leaflet.LatLng(40.407099, -3.692758), new this._leaflet.LatLng(40.406359, -3.691967) ]);
@@ -365,13 +365,13 @@ export class AdminComponent implements OnInit {
             lines.push([new this._leaflet.LatLng(40.401390, -3.686665), new this._leaflet.LatLng(40.400735, -3.685780) ]);
             lines.push([new this._leaflet.LatLng(40.400656, -3.685687), new this._leaflet.LatLng(40.400068, -3.685120) ]);
             lines.push([new this._leaflet.LatLng(40.399837, -3.684794), new this._leaflet.LatLng(40.399596, -3.684513) ]);
-            markers = this._mapService.getCarrMarkers(this._mapService.map, lines, this.carrozas.length, true);
+            markers = await this._mapService.getCarrMarkers(this._mapService.map, lines, this.carrozas.length, true);
         }
         return markers;
     }
 
-    getListAscociaciones(): void {
-        const markers = this.getListPosition('asociaciones');
+    async getListAscociaciones(): Promise<void> {
+        const markers = await this.getListPosition('asociaciones');
         console.log('Markers Asociaciones:', markers);
         const asocs = this.asociaciones.map((asoc, index) => {
             const marker = markers[index];
@@ -395,8 +395,8 @@ export class AdminComponent implements OnInit {
         });
     }
 
-    getListCarrozas(): void {
-        const markers = this.getListPosition('carrozas');
+    async getListCarrozas(): Promise<void> {
+        const markers = await this.getListPosition('carrozas');
         console.log('Markers carrozas:', markers);
         const carrs = this.carrozas.map((carr, index) => {
             const marker = markers[index];
@@ -425,15 +425,21 @@ export class AdminComponent implements OnInit {
     getListFromSheet() {
         switch(this.tab) {
             case 0: // Asociaciones
-                this._asociacionesService.getAsociacionesFromSheet().subscribe(asociaciones => {
+                this._asociacionesService.getAsociacionesFromSheet().subscribe(async asociaciones => {
                     this.asociaciones = asociaciones;
-                    this.getListAscociaciones();
+                    await this.getListAscociaciones();
                 });
                 break;
             case 1: // Carrozas
-                this._carrozasService.getCarrozasFromSheet().subscribe(carrozas => {
+                this._carrozasService.getCarrozasFromSheet().subscribe(async carrozas => {
                     this.carrozas = carrozas;
-                    this.getListCarrozas();
+                    await this.getListCarrozas();
+                });
+                break;
+            case 2:
+                // Telefonos
+                this._telefonosService.getTelefonosFromSheet().subscribe(telefonos => {
+                    this.telefonos = telefonos;
                 });
                 break;
             default:

@@ -12,4 +12,8 @@ export class TelefonosService {
   getTelefonos(): Observable<Telefono[]> {
     return this.http.get<Telefono[]>(this.apiUrl);
   }
+
+  getTelefonosFromSheet(): Observable<Telefono[]> {
+    return this.http.get<Telefono[]>(`${this.apiUrl}/from-sheet`);
+  }
 }
