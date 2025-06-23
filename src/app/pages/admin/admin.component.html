@@ -1,4 +1,20 @@
-<div id="map" class="map-container map-admin" [ngClass]="mapType"></div>
+
+<div class="head">
+    <div class="search-content">
+      <input
+        type="text"
+        placeholder="Buscar asociación"
+        [(ngModel)]="searchText"
+        (input)="onSearchChange()"
+        class="search"
+      />
+      <mat-icon fontIcon="search"></mat-icon>
+    </div>
+    @defer {
+    <!-- Mapa fijo debajo del buscador -->
+    <div id="map" class="map-container map-admin" [ngClass]="mapType"></div>
+    }
+  </div>
 <div id="map-hide" style="height: 500px; display: none;"></div>
 <div class="section-buttons">
   <button matButton="outlined" (click)="getListFromSheet()">Obtener Sheet</button>

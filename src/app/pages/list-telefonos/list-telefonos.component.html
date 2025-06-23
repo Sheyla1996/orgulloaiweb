@@ -3,7 +3,7 @@
 <h2>Teléfonos</h2>
 <div class="phone-list">
   @for (t of filteredTelefonos; track t) {
-    @if (userZone === 'coor' || t.zona === userZone) {
+    @if (['coor', 'boss'].includes(userZone!) || t.zona === userZone) {
       <div
         class="telefono"
         [class.no-phone]="!t.telefono"

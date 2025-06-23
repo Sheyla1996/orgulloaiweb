@@ -34,8 +34,8 @@ export class WebSocketService {
         console.error('❌ WebSocket error:', error);
       };
 
-      this.socket.onclose = () => {
-        console.warn('🔌 WebSocket desconectado');
+      this.socket.onclose = (error) => {
+        console.warn('🔌 WebSocket desconectado', error);
         this.socket = null;
       };
     }

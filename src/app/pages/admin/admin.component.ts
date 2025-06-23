@@ -11,6 +11,9 @@ import { MapService } from "../../services/map.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from "@angular/material/dialog";
 import { MatButtonToggleModule } from "@angular/material/button-toggle";
+import { MatInputModule } from "@angular/material/input";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { FormsModule } from "@angular/forms";
 
 
 @Component({
@@ -19,7 +22,10 @@ import { MatButtonToggleModule } from "@angular/material/button-toggle";
   imports: [
     CommonModule,
     MatTabsModule,
-    MatButtonModule
+    MatButtonModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule
   ],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.scss'],
@@ -40,6 +46,8 @@ export class AdminComponent implements OnInit {
     private _observerCleanup: (() => void) | null = null;
     private _observerType: string | null = null;
     mapType = 'map-asociaciones';
+    searchText = '';
+    showMap = true;
 
     constructor(
         private _asociacionesService: AsociacionesService,
@@ -92,14 +100,18 @@ export class AdminComponent implements OnInit {
 
     onTabChange(event: any): void {
         this.tab = event.index;
+        this.searchText = '';
         switch (event.index) {
             case 0:
+                this.showMap = true;
                 this.getAsociaciones();
                 break;
             case 1:
+                this.showMap = true;
                 this.getCarrozas();
                 break;
             case 2:
+                this.showMap = false;
                 this.getTelefonos();
                 break;
             default:
@@ -311,11 +323,13 @@ export class AdminComponent implements OnInit {
         zoom: 16
         });
 
-        this._leaflet.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
-            attribution: '© OpenStreetMap',
-            maxZoom: 18,
-            minZoom: 15,
-        }).addTo(this._mapService['map']);
+        setTimeout(() => {
+            this._leaflet.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
+                attribution: '© OpenStreetMap',
+                maxZoom: 18,
+                minZoom: 15,
+            }).addTo(this._mapService['map']);
+        }, 100);
     }
 
     getListPosition(type: string): any {
@@ -458,7 +472,37 @@ export class AdminComponent implements OnInit {
         });
     }
 
-
+    onSearchChange(): void {
+        const term = this.searchText.toLowerCase();
+        let index = 0;
+        let containerName = '';
+        let itemName = '';
+        if (this.tab === 0) {
+            index = this.asociaciones.findIndex(a =>
+                a.name.toLowerCase().includes(term) ||
+                a.position.toString().includes(term)
+            );
+            containerName = 'list-container-asoc';
+            itemName = '.list-asociaciones-item';
+        } else if (this.tab === 1) {
+            index = this.carrozas.findIndex(a =>
+                a.name.toLowerCase().includes(term) ||
+                a.position.toString().includes(term)
+            );
+            containerName = 'list-container-carr';
+            itemName = '.list-carrozas-item';
+        }
+        if (index !== -1) {
+            setTimeout(() => {
+                const container = document.getElementById(containerName);
+                if (!container) return;
+                const items = container.querySelectorAll(itemName);
+                if (items[index]) {
+                    (items[index] as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                }, 10);
+            }
+        }
 
 }
 
@@ -492,4 +536,5 @@ export class ModalStatusComponent {
     onClose(): void {
         this.dialogRef.close();
     }
+
 }

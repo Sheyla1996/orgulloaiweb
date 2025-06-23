@@ -8,7 +8,12 @@ import { AdminComponent } from './pages/admin/admin.component';
 import { ChatComponent } from './pages/list-messages/list-messages.component';
 
 export const routes: Routes = [
-    { path: '', redirectTo: '/asociaciones', pathMatch: 'full' },
+    {
+        path: '',
+        component: ListAsociacionesComponent,
+        canActivate: [AuthGuard],
+        data: { allowed: ['normal', 'mañana', 'coor', 'boss'] }
+    },
     { path: 'login', component: LoginComponent },
     {
         path: 'carrozas',
@@ -16,12 +21,7 @@ export const routes: Routes = [
         canActivate: [AuthGuard],
         data: { allowed: ['mañana', 'boss'] }
     },
-    {
-        path: 'asociaciones',
-        component: ListAsociacionesComponent,
-        canActivate: [AuthGuard],
-        data: { allowed: ['normal', 'mañana', 'coor', 'boss'] }
-    },
+    
     {
         path: 'telefonos',
         component: ListTelefonosComponent,

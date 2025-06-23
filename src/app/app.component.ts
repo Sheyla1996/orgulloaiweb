@@ -89,7 +89,7 @@ export class AppComponent implements OnInit {
   onChangeMenu(event: string | number): void {
     switch (event) {
       case 'asociaciones':
-        this.router.navigate(['/asociaciones']);
+        this.router.navigate(['/']);
         break;
       case 'carrozas':
         this.router.navigate(['/carrozas']);

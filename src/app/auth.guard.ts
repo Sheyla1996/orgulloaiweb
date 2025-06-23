@@ -20,7 +20,7 @@ export class AuthGuard implements CanActivate {
       }
 
       if (userType) {
-        return this.router.parseUrl('/asociaciones');
+        return this.router.parseUrl('/');
       }
 
       // 🚫 Evita redirigir a login si ya estás en login
