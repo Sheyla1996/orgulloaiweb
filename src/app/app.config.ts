@@ -1,21 +1,25 @@
-import { ApplicationConfig, provideZoneChangeDetection, isDevMode } from '@angular/core';
+import { ApplicationConfig, isDevMode } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
+import { provideServiceWorker } from '@angular/service-worker';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideClientHydration, withIncrementalHydration } from '@angular/platform-browser';
+import { provideZoneChangeDetection } from '@angular/core';
+import { provideToastr } from 'ngx-toastr';
 
 import { routes } from './app.routes';
-import { provideClientHydration, withEventReplay, withIncrementalHydration } from '@angular/platform-browser';
-import { provideHttpClient } from '@angular/common/http';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideServiceWorker } from '@angular/service-worker';
-import { provideToastr } from 'ngx-toastr';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZoneChangeDetection({ eventCoalescing: true }), 
-    provideRouter(routes), 
-    provideHttpClient(), provideAnimationsAsync(), provideServiceWorker('ngsw-worker.js', {
-            enabled: !isDevMode(),
-            registrationStrategy: 'registerWhenStable:30000'
-          }), provideClientHydration(withIncrementalHydration()),
-          provideToastr()
+    provideRouter(routes),
+    provideHttpClient(),
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideAnimations(),
+    provideToastr(),
+    provideClientHydration(withIncrementalHydration()),
+    provideServiceWorker('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      registrationStrategy: 'registerWhenStable:30000',
+    }),
   ]
 };
