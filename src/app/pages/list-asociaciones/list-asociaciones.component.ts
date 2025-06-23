@@ -52,7 +52,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
     if (isPlatformBrowser(this.platformId)) {
       this.leaflet = await import('leaflet');
       const hideModal = localStorage.getItem('hideModal');
-      if (hideModal !== 'hide') {
+      if (typeof window !== 'undefined' && hideModal !== 'hide') {
         window.addEventListener('beforeinstallprompt', (event: any) => {
           event.preventDefault();
           this.installPromptEvent = event;
