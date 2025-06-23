@@ -66,7 +66,7 @@ export class LoginComponent implements OnInit {
         localStorage.setItem('userType', response.type || 'normal');
         localStorage.setItem('zone', response.zona || '');
         // Navega usando los parámetros en la URL
-        this.router.navigate(['/asociaciones'], { queryParams: { pass: this.password, type: this.selectZone } });
+        this.router.navigate([''], { queryParams: { pass: this.password, type: this.selectZone } });
           } else {
         localStorage.removeItem('userType');
         this.error = true;
