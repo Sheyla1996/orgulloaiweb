@@ -27,6 +27,7 @@
           <img
             *ngIf="asociacion.logo"
             [src]="'https://laalisedadetormes.com/orgullo/' + asociacion.logo + '.webp'"
+            onerror="this.onerror=null;this.src='assets/img/lgtb.webp';"
             [alt]="asociacion.name"
           />
         </div>

@@ -2,8 +2,8 @@
   "name": "Voluntariado Orgullo",
   "short_name": "Voluntariado",
   "display": "standalone",
-  "scope": "./",
-  "start_url": "./",
+  "scope": "/",
+  "start_url": "/",
   "icons": [
     {
       "src": "assets/icons/icon-192x192.png",
