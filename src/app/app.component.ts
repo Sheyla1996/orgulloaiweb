@@ -1,7 +1,7 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, ViewEncapsulation, OnInit } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, ViewEncapsulation, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { Router, RouterModule, RouterOutlet, NavigationEnd } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -37,7 +37,8 @@ export class AppComponent implements OnInit {
   constructor(
     private router: Router,
     private _wsService: WebSocketService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    @Inject(PLATFORM_ID) private platformId: Object,
   ) {}
 
   get currentUrl(): string {
@@ -58,7 +59,16 @@ export class AppComponent implements OnInit {
             });
         }
       });
+      if (isPlatformBrowser(this.platformId)) {
+        this.setViewportHeight();
+        window.visualViewport?.addEventListener('resize', this.setViewportHeight);
+      }
   }
+
+  setViewportHeight = () => {
+    const vh = (window.visualViewport?.height || window.innerHeight) * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+  };
 
   private setMenu(): void {
     const userType = localStorage.getItem('userType');
@@ -89,7 +99,7 @@ export class AppComponent implements OnInit {
   onChangeMenu(event: string | number): void {
     switch (event) {
       case 'asociaciones':
-        this.router.navigate(['/']);
+        this.router.navigate(['']);
         break;
       case 'carrozas':
         this.router.navigate(['/carrozas']);

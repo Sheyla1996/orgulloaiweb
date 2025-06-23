@@ -133,7 +133,8 @@ mat-fab-menu {
 
 /* Map container */
 .map-container {
-  height: 300px;
+  height: calc(var(--vh, 1vh) * 40);
+  min-height: 200px;
   border-radius: 8px;
   border: 1px solid #ccc;
   overflow: hidden;

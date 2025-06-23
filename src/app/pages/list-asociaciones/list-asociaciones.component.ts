@@ -157,7 +157,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
 
   initMap(): void {
     if (!this.map) {
-      this.map = this.leaflet.map('map-asociaciones').setView([40.412, -3.692], 17);
+      this.map = this.leaflet.map('map-asociaciones').setView([40.412, -3.692], 18);
       this.leaflet.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
         attribution: '© OpenStreetMap',
         maxZoom: 18,
@@ -246,7 +246,14 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
       if (!container) return;
       const items = container.querySelectorAll('.list-item');
       if (items[index]) {
-        (items[index] as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const item = items[index] as HTMLElement;
+        const containerTop = container.scrollTop;
+        const itemOffsetTop = item.offsetTop - container.offsetTop;
+
+        container.scrollTo({
+          top: itemOffsetTop,
+          behavior: 'smooth'
+        });
       }
       }, 10);
     }
@@ -264,7 +271,20 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
           .addTo(this.map)
           .bindPopup(`<b>${a.name}</b>`)
           .openPopup();
-        this.map.setView([a.lat, a.lng], 18, { animate: true });
+        // Centra el marcador, ajustando el desplazamiento según el tamaño del mapa
+        setTimeout(() => {
+          const mapDiv = document.getElementById('map-asociaciones');
+          if (mapDiv) {
+            const mapHeight = mapDiv.clientHeight;
+            // Desplaza el centro hacia arriba para que el popup no tape el marcador
+            const offsetY = mapHeight > 0 ? (mapHeight / 6) : 0;
+            const targetPoint = this.map.project([a.lat, a.lng], this.map.getZoom()).subtract([0, offsetY]);
+            const targetLatLng = this.map.unproject(targetPoint, this.map.getZoom());
+            this.map.setView(targetLatLng, 18, { animate: true });
+          } else {
+            this.map.setView([a.lat, a.lng], 18, { animate: true });
+          }
+        }, 100);
       }
     }
 }

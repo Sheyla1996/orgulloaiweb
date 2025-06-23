@@ -134,7 +134,7 @@ export class AdminComponent implements OnInit {
 
     private _createMap(): void {
         if (!this.map) {
-            this.map = this._leaflet.map('map').setView([40.412, -3.692], 17);
+            this.map = this._leaflet.map('map').setView([40.412, -3.692], 18);
             this._leaflet.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
                 attribution: '© OpenStreetMap',
                 maxZoom: 18,
@@ -163,7 +163,17 @@ export class AdminComponent implements OnInit {
           .addTo(this.map)
           .bindPopup(popupContent)
           .openPopup();
-        this.map.setView([a.lat, a.lng], 18, { animate: true });
+        const mapDiv = document.getElementById('map');
+        if (mapDiv) {
+          const mapHeight = mapDiv.clientHeight;
+          // Desplaza el centro hacia arriba para que el popup no tape el marcador
+          const offsetY = mapHeight > 0 ? (mapHeight / 6) : 0;
+          const targetPoint = this.map.project([a.lat, a.lng], this.map.getZoom()).subtract([0, offsetY]);
+          const targetLatLng = this.map.unproject(targetPoint, this.map.getZoom());
+          this.map.setView(targetLatLng, 18, { animate: true });
+        } else {
+          this.map.setView([a.lat, a.lng], 18, { animate: true });
+        }
       }
     }
 
@@ -498,7 +508,14 @@ export class AdminComponent implements OnInit {
                 if (!container) return;
                 const items = container.querySelectorAll(itemName);
                 if (items[index]) {
-                    (items[index] as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    const item = items[index] as HTMLElement;
+                    const containerTop = container.scrollTop;
+                    const itemOffsetTop = item.offsetTop - container.offsetTop;
+
+                    container.scrollTo({
+                    top: itemOffsetTop,
+                    behavior: 'smooth'
+                    });
                 }
                 }, 10);
             }
