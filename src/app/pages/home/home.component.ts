@@ -21,8 +21,12 @@ export class HomeComponent implements OnInit {
     }
 
     async ngOnInit(): Promise<void> {
+        console.log('HomeComponent initialized');
+        console.log('Platform ID:', this.platformId);
         if (isPlatformBrowser(this.platformId)) {
+            console.log('Running in browser context');
             const userType = localStorage.getItem('userType');
+            console.log('User Type:', userType);
             if (!userType) {
                 this.router.navigate(['/login']);
             } else {
