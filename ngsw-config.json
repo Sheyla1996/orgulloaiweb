@@ -5,21 +5,12 @@
     {
       "name": "app",
       "installMode": "prefetch",
+      "updateMode": "prefetch",
       "resources": {
         "files": [
           "/favicon.ico",
-          "/index.csr.html",
           "/index.html",
-          "/manifest.webmanifest",
-          "/*.css",
-          "/*.js"
-        ],
-        "urls": [
-          "/",
-          "/list-carrozas",
-          "/list-asociaciones",
-          "/list-telefonos",
-          "/login"
+          "/*.css"
         ]
       }
     },
@@ -29,22 +20,9 @@
       "updateMode": "prefetch",
       "resources": {
         "files": [
-          "/**/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
+          "/assets/**",
+          "/*.(png|jpg|jpeg|svg|webp|ico|woff2|woff|ttf|eot)"
         ]
-      }
-    }
-  ],
-  "dataGroups": [
-    {
-      "name": "api-telefonos",
-      "urls": [
-        "https://tudominio.com/api/telefonos"
-      ],
-      "cacheConfig": {
-        "maxSize": 20,
-        "maxAge": "1d",
-        "timeout": "10s",
-        "strategy": "freshness"
       }
     }
   ]
