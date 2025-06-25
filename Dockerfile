@@ -11,7 +11,7 @@ RUN npm run build:ssr
 
 # Añade el archivo de versión (usa commit corto o fecha)
 ARG VERSION=dev
-RUN echo "$VERSION" > /app/dist/orgullo2022/browser/assets/version.txt
+RUN echo "$VERSION" > /app/dist/browser/assets/version.txt
 
 
 FROM node:lts-slim AS production
@@ -22,7 +22,7 @@ COPY package.json package-lock.json ./
 RUN npm install --only=production --legacy-peer-deps
 
 # Copia el resultado del build SSR
-COPY --from=builder /app/dist/orgullo2022 /app/dist/orgullo2022
+COPY --from=builder /app/dist /app/dist
 
 EXPOSE 4001
 
