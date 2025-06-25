@@ -36,6 +36,7 @@
     "@capacitor/core": "^7.3.0",
     "@capacitor/ios": "^7.3.0",
     "@material/web": "^2.3.0",
+    "@zxing/browser": "^0.1.5",
     "@zxing/library": "^0.21.3",
     "@zxing/ngx-scanner": "^20.0.0",
     "express": "^5.1.0",
