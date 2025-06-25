@@ -323,3 +323,20 @@ a {
   transform: translateX(-50%);
   right: inherit;
 }
+
+.alert {
+  display: flex;
+  gap: 16px;
+  padding: 8px 16px;
+  background-color: var(--color-blue);
+  border-radius: 16px;
+  margin-bottom: 8px;
+
+  & mat-icon {
+    min-width: fit-content;
+  }
+}
+
+.leaflet-container a {
+  color: initial !important;
+}

@@ -353,7 +353,8 @@ export class AdminComponent implements OnInit {
                 this._leaflet.latLng(40.409798, -3.692232),//Semaforo
                 this._leaflet.latLng(40.409486, -3.692095), //Moyano
                 this._leaflet.latLng(40.408929, -3.691708), //Glorieta
-                this._leaflet.latLng(40.408045, -3.690157) //Final
+                this._leaflet.latLng(40.408795, -3.691358)
+                //this._leaflet.latLng(40.408045, -3.690157) //Final
             ];
             markers = await this._mapService.getAsocMarkers(this._mapService.map, recorrido, this.asociaciones.length, true);
         } else if (type === 'carrozas') {

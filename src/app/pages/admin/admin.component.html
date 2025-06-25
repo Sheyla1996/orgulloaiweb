@@ -18,7 +18,7 @@
 <div id="map-hide" style="height: 500px; display: none;"></div>
 <div class="section-buttons">
   <button matButton="outlined" (click)="getListFromSheet()">Obtener Sheet</button>
-  <button matButton="outlined" (click)="getPosition()">Posición</button>
+  <button *ngIf="tab !== 2" matButton="outlined" (click)="getPosition()">Posición</button>
 </div>
 <mat-tab-group (selectedTabChange)="onTabChange($event)">
   <mat-tab label="Asociaciones">

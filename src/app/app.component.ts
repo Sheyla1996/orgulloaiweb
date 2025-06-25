@@ -10,6 +10,7 @@ import { MatFabMenu, MatFabMenuModule } from '@angular-material-extensions/fab-m
 import { filter } from 'rxjs/operators';
 import { WebSocketService } from './services/websocket.service';
 import { ToastrService } from 'ngx-toastr';
+import { PushService } from './services/push.service';
 
 @Component({
   selector: 'app-root',
@@ -34,12 +35,14 @@ import { ToastrService } from 'ngx-toastr';
 export class AppComponent implements OnInit {
   title = 'orgullo2022';
   menu: MatFabMenu[] = [];
+  notificationsOn = false;
 
   constructor(
     private router: Router,
     private _wsService: WebSocketService,
     private toastr: ToastrService,
     private _titleCasePipe: TitleCasePipe,
+    private _pushService: PushService,
     @Inject(PLATFORM_ID) private platformId: Object,
   ) {}
 
@@ -51,6 +54,9 @@ export class AppComponent implements OnInit {
     console.log('AppComponent initialized');
     this._wsService.connect();
     this.setMenu();
+    this._pushService.isSubscribed$.subscribe((isSubscribed) => {
+      this.notificationsOn = isSubscribed;
+    });
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(() => this.setMenu());
@@ -152,5 +158,11 @@ export class AppComponent implements OnInit {
       default:
         console.warn('Unknown menu item:', event);
     }
+  }
+
+  activarNotificaciones() {
+    this._pushService.subscribeToNotifications()
+      .then(() => alert('¡Suscripción completada!'))
+      .catch(console.error);
   }
 }

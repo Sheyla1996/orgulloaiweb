@@ -295,9 +295,4 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
       target.src = './../../../assets/icons/lgbt.png'; // Ruta a tu imagen por defecto
     }
 
-    activarNotificaciones() {
-      this.push.subscribeToNotifications()
-        .then(() => alert('¡Suscripción completada!'))
-        .catch(console.error);
-    }
 }

@@ -1,9 +1,13 @@
 {
   "name": "Voluntariado Orgullo",
   "short_name": "Voluntariado",
+  "description": "App del voluntariado del Orgullo 2022",
   "display": "standalone",
   "scope": "/",
   "start_url": "/",
+  "theme_color": "#1976d2",
+  "background_color": "#ffffff",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "assets/icons/icon-192x192.png",
