@@ -278,3 +278,48 @@ a {
         color: var(--color-text) !important;
     }
 }
+
+.toast-success {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAtOTYwIDk2MCA5NjAiIHdpZHRoPSIyNHB4IiBmaWxsPSIjZTNlM2UzIj48cGF0aCBkPSJNMTYwLTIwMHYtODBoODB2LTI4MHEwLTgzIDUwLTE0Ny41VDQyMC03OTJ2LTI4cTAtMjUgMTcuNS00Mi41VDQ4MC04ODBxMjUgMCA0Mi41IDE3LjVUNTQwLTgyMHYyOHE4MCAyMCAxMzAgODQuNVQ3MjAtNTYwdjI4MGg4MHY4MEgxNjBabTMyMC0zMDBabTAgNDIwcS0zMyAwLTU2LjUtMjMuNVQ0MDAtMTYwaDE2MHEwIDMzLTIzLjUgNTYuNVQ0ODAtODBaTTMyMC0yODBoMzIwdi0yODBxMC02Ni00Ny0xMTN0LTExMy00N3EtNjYgMC0xMTMgNDd0LTQ3IDExM3YyODBaIi8+PC9zdmc+');;
+}
+
+.toast-info,
+.toast-warning,
+.toast-error {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAtOTYwIDk2MCA5NjAiIHdpZHRoPSIyNHB4IiBmaWxsPSIjZTNlM2UzIj48cGF0aCBkPSJNMjQwLTE2MHEtNTAgMC04NS0zNXQtMzUtODVINDB2LTQ0MHEwLTMzIDIzLjUtNTYuNVQxMjAtODAwaDU2MHYxNjBoMTIwbDEyMCAxNjB2MjAwaC04MHEwIDUwLTM1IDg1dC04NSAzNXEtNTAgMC04NS0zNXQtMzUtODVIMzYwcTAgNTAtMzUgODV0LTg1IDM1Wm0wLTgwcTE3IDAgMjguNS0xMS41VDI4MC0yODBxMC0xNy0xMS41LTI4LjVUMjQwLTMyMHEtMTcgMC0yOC41IDExLjVUMjAwLTI4MHEwIDE3IDExLjUgMjguNVQyNDAtMjQwWk0xMjAtMzYwaDMycTE3LTE4IDM5LTI5dDQ5LTExcTI3IDAgNDkgMTF0MzkgMjloMjcydi0zNjBIMTIwdjM2MFptNjAwIDEyMHExNyAwIDI4LjUtMTEuNVQ3NjAtMjgwcTAtMTctMTEuNS0yOC41VDcyMC0zMjBxLTE3IDAtMjguNSAxMS41VDY4MC0yODBxMCAxNyAxMS41IDI4LjVUNzIwLTI0MFptLTQwLTIwMGgxNzBsLTkwLTEyMGgtODB2MTIwWk0zNjAtNTQwWiIvPjwvc3ZnPg==');
+  & .toast-message{
+    font-size: 1rem !important;
+  }
+}
+
+.toast-info{
+  background-color: #de6600 !important;
+}
+
+.toast-warning{
+  background-color: #008e00 !important;
+}
+
+.toast-error{
+  background-color: #d70000 !important;
+}
+
+.toast-container .ngx-toastr {
+  box-shadow: none;
+  border-radius: 14px;
+  background-color: #555555;
+
+  & .toast-title {
+    display: none;;
+  }
+
+  & .toast-message {
+    font-size: 1.2rem;
+  }
+}
+
+.toast-top-right {
+  left: 50%;
+  transform: translateX(-50%);
+  right: inherit;
+}

@@ -1,7 +1,7 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, ViewEncapsulation, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { Router, RouterModule, RouterOutlet, NavigationEnd } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { CommonModule, isPlatformBrowser, TitleCasePipe } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -25,6 +25,7 @@ import { ToastrService } from 'ngx-toastr';
     RouterModule,
     MatFabMenuModule
   ],
+  providers: [TitleCasePipe],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   encapsulation: ViewEncapsulation.None,
@@ -38,6 +39,7 @@ export class AppComponent implements OnInit {
     private router: Router,
     private _wsService: WebSocketService,
     private toastr: ToastrService,
+    private _titleCasePipe: TitleCasePipe,
     @Inject(PLATFORM_ID) private platformId: Object,
   ) {}
 
@@ -53,11 +55,39 @@ export class AppComponent implements OnInit {
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(() => this.setMenu());
     this._wsService.messages$.subscribe((msg) => {
-        if (msg && msg.type === 'message') {
+        if (msg && isPlatformBrowser(this.platformId)) {
+          const userType = localStorage.getItem('userType');
+          if (msg.type === 'message') {
             this.toastr.success(msg.message, 'Nuevo mensaje:', {
               closeButton: true,
-              timeOut: 20000,
+              timeOut: 20000
             });
+          } else if (msg.type === 'actualizar_listado_carr' && ['mañana', 'boss'].includes(userType || 'normal')) {
+            switch (msg.carroza.status) {
+              case 'pendiente':
+                this.toastr.error(`La carroza ${msg.carroza.position} - ${msg.carroza.name} está pendiente de llegar`, ``, {
+                  closeButton: true,
+                  timeOut: 20000,
+                  disableTimeOut: true
+                });
+                break;
+              case 'situado':
+                this.toastr.warning(`La carroza ${msg.carroza.position} - ${msg.carroza.name} está ya aparcada`, ``, {
+                  closeButton: true,
+                  timeOut: 20000,
+                  disableTimeOut: true
+                });
+                break;
+              case 'aparcando':
+                this.toastr.info(`La carroza ${msg.carroza.position} - ${msg.carroza.name} está aparcando`, ``, {
+                  closeButton: true,
+                  timeOut: 20000,
+                  disableTimeOut: true
+                });
+                break;
+            }
+            
+          }
         }
       });
       if (isPlatformBrowser(this.platformId)) {
@@ -75,14 +105,14 @@ export class AppComponent implements OnInit {
     const userType = localStorage.getItem('userType');
     if (userType === 'mañana') {
       this.menu = [
-        { id: 'messages', icon: 'chat' },
+        { id: 'messages', icon: 'notifications' },
         { id: 'phones', icon: 'contact_phone' },
         { id: 'carrozas', icon: 'local_shipping' },
         { id: 'asociaciones', icon: 'groups', tooltip: 'Asociaciones', tooltipPosition: 'right' }
       ];
     } else if (userType === 'boss') {
       this.menu = [
-        { id: 'messages', icon: 'chat' },
+        { id: 'messages', icon: 'notifications' },
         { id: 'phones', icon: 'contact_phone' },
         { id: 'carrozas', icon: 'local_shipping' },
         { id: 'asociaciones', icon: 'groups', tooltip: 'Asociaciones', tooltipPosition: 'right' },
@@ -90,7 +120,7 @@ export class AppComponent implements OnInit {
       ];
     } else {
       this.menu = [
-        { id: 'messages', icon: 'chat' },
+        { id: 'messages', icon: 'notifications' },
         { id: 'phones', icon: 'contact_phone' },
         { id: 'asociaciones', icon: 'groups' }
       ];

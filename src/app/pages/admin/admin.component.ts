@@ -14,6 +14,7 @@ import { MatButtonToggleModule } from "@angular/material/button-toggle";
 import { MatInputModule } from "@angular/material/input";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { FormsModule } from "@angular/forms";
+import { MatIconModule } from "@angular/material/icon";
 
 
 @Component({
@@ -25,7 +26,8 @@ import { FormsModule } from "@angular/forms";
     MatButtonModule,
     FormsModule,
     MatFormFieldModule,
-    MatInputModule
+    MatInputModule,
+    MatIconModule
   ],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.scss'],
@@ -476,14 +478,14 @@ export class AdminComponent implements OnInit {
         });
     }
 
-    openDialog(id: number, sheet_row: number, status?: string): void {
+    openDialog(carroza: Carroza): void {
         const dialogRef = this.dialog.open(ModalStatusComponent, {
-            data: { id, sheet_row, status }
+            data: { carroza }
         });
 
         dialogRef.afterClosed().subscribe(result => {
             if (result && result !== status) {
-                this.updateStatus(id, result, sheet_row);
+                this.updateStatus(carroza.id, result, carroza.sheet_row);
             }
         });
     }
@@ -526,7 +528,10 @@ export class AdminComponent implements OnInit {
                 }, 10);
             }
         }
-
+        onImgError(event: Event) {
+        const target = event.target as HTMLImageElement;
+        target.src = './../../../assets/icons/lgbt.png'; // Ruta a tu imagen por defecto
+        }
 }
 
 @Component({
@@ -542,9 +547,9 @@ export class ModalStatusComponent {
 
     constructor(
         public dialogRef: MatDialogRef<ModalStatusComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: { id: number, sheet_row: number, status: string }
+        @Inject(MAT_DIALOG_DATA) public data: { carroza: Carroza }
     ) {
-        this.selected = this.data.status.toLocaleLowerCase() || 'pendiente';
+        this.selected = this.data.carroza.status?.toLocaleLowerCase() || 'pendiente';
     }
 
     onSelectChange(event: any): void {

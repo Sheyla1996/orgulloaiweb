@@ -15,6 +15,7 @@
   </mat-form-field>
   <input class="input" type="password" [(ngModel)]="password" name="password" placeholder="Contraseña" required>
   <button matButton="filled" type="submit">Acceder</button>
+  <a style="margin-top: 24px;" matButton="filled" (click)="openDialogQr()"> <mat-icon>qr_code_scanner</mat-icon> Escanear QR</a>
 </form>
 <p *ngIf="error" style="color:red;">No tienes permisos para acceder</p>
 

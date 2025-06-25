@@ -22,5 +22,6 @@ $my-theme: mat.define-light-theme((
   body {
     background-color: #262626;
     color: white;
+    font-family: var(--mat-tab-label-text-font, var(--mat-sys-title-small-font));
   }
 }

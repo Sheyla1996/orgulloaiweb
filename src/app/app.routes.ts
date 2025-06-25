@@ -14,7 +14,7 @@ export const routes: Routes = [
         path: 'asociaciones',
         component: ListAsociacionesComponent,
         canActivate: [AuthGuard],
-        data: { allowed: ['normal', 'mañana', 'coor', 'boss'] }
+        data: { allowed: ['normal', 'mañana', 'coor', 'boss', 'tarde'] }
     },
     { path: 'login', component: LoginComponent },
     {
@@ -28,13 +28,13 @@ export const routes: Routes = [
         path: 'telefonos',
         component: ListTelefonosComponent,
         canActivate: [AuthGuard],
-        data: { allowed: ['normal', 'mañana', 'coor', 'boss'] }
+        data: { allowed: ['normal', 'mañana', 'coor', 'boss', 'tarde'] }
     },
     {
         path: 'messages',
         component: ChatComponent,
         canActivate: [AuthGuard],
-        data: { allowed: ['normal', 'mañana', 'coor', 'boss'] }
+        data: { allowed: ['normal', 'mañana', 'coor', 'boss', 'tarde'] }
     },
     {
         path: 'admin',

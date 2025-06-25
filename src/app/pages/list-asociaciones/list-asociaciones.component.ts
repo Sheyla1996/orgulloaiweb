@@ -11,6 +11,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { min } from 'rxjs';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import { ModalComponent } from '../../components/modal.component';
+import { PushService } from '../../services/push.service';
 
 
 
@@ -44,6 +45,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
   constructor(
     private asociacionesService: AsociacionesService,
     @Inject(PLATFORM_ID) private platformId: Object,
+    private push: PushService,
     private _dialog: MatDialog
   ) {}
 
@@ -286,5 +288,16 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
           }
         }, 100);
       }
+    }
+
+    onImgError(event: Event) {
+      const target = event.target as HTMLImageElement;
+      target.src = './../../../assets/icons/lgbt.png'; // Ruta a tu imagen por defecto
+    }
+
+    activarNotificaciones() {
+      this.push.subscribeToNotifications()
+        .then(() => alert('¡Suscripción completada!'))
+        .catch(console.error);
     }
 }

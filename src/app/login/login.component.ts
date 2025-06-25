@@ -1,6 +1,6 @@
 // login.component.ts
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -8,6 +8,12 @@ import { Router } from '@angular/router';
 import {MatSelectModule} from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { LoginService } from '../services/login.service';
+import { ZXingScannerModule } from '@zxing/ngx-scanner';
+import { BarcodeFormat } from '@zxing/library';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { ModalStatusComponent } from '../pages/admin/admin.component';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +23,8 @@ import { LoginService } from '../services/login.service';
     MatButtonModule,
     MatFormFieldModule,
     MatSelectModule,
-    MatInputModule
+    MatInputModule,
+    MatIconModule
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
@@ -30,6 +37,7 @@ export class LoginComponent implements OnInit {
   showInstallButton = false;
   constructor(
     private router: Router,
+    private dialog: MatDialog,
     @Inject(PLATFORM_ID) private platformId: Object,
     private _loginService: LoginService
   ) {}
@@ -90,4 +98,55 @@ export class LoginComponent implements OnInit {
       });
     }
   }
+
+  openDialogQr(): void {
+      const dialogRef = this.dialog.open(ModalScannerComponent);
+
+      dialogRef.afterClosed().subscribe((result: any) => {
+          if (result) {
+              this.onScan(result);
+          }
+      });
+  }
+
+  onScan(event: any) {
+    if (typeof event === 'string' && event.includes('voluntariadolgtbapp.es')) {
+      try {
+        const url = new URL(event);
+        const pass = url.searchParams.get('pass');
+        const type = url.searchParams.get('type');
+        if (pass && type) {
+          this.password = pass;
+          this.selectZone = type;
+          this.login();
+        }
+      } catch (e) {
+        console.error('Invalid URL scanned:', event);
+      }
+    }
+  }
+}
+
+@Component({
+  selector: 'modal-scanner',
+  templateUrl: 'modal-scanner.component.html',
+  standalone: true,
+  imports: [MatDialogModule, MatButtonModule, MatButtonToggleModule, ZXingScannerModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class ModalScannerComponent {
+    formats = [BarcodeFormat.QR_CODE];
+
+    constructor(
+        public dialogRef: MatDialogRef<ModalStatusComponent>
+    ) {}
+
+    onScan(event: any): void {
+        this.dialogRef.close(event);
+    }
+
+    onClose(): void {
+        this.dialogRef.close();
+    }
+
 }

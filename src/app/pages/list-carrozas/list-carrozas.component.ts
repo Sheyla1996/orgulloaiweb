@@ -10,6 +10,8 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { SseService } from '../../services/sse.service';
 import { WebSocketService } from '../../services/websocket.service';
+import { ModalStatusComponent } from '../admin/admin.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-list-carrozas',
@@ -36,9 +38,10 @@ export class ListCarrozasComponent implements OnInit {
   private leaflet: any;
 
   constructor(
-    private carrozasService: CarrozasService,
+    private _carrozasService: CarrozasService,
     private _sseService: SseService,
     private _wsService: WebSocketService,
+    private dialog: MatDialog,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -69,7 +72,8 @@ export class ListCarrozasComponent implements OnInit {
         this.getCarrozas(cached);
       }
       this._wsService.messages$.subscribe((msg) => {
-        if (msg === 'actualizar_listado_carr') {
+        if (msg.type === 'actualizar_listado_carr') {
+          console.log(msg.carroza);
           this.getCarrozas(cached);
         }
       });
@@ -77,7 +81,7 @@ export class ListCarrozasComponent implements OnInit {
   }
 
   getCarrozas(cached: any): void {
-    this.carrozasService.getCarrozas().subscribe({
+    this._carrozasService.getCarrozas().subscribe({
       next: async data => {
         this.carrozas = data
           .map(a => ({ ...a, lat: a.lat, lng: a.lng }))
@@ -258,4 +262,34 @@ export class ListCarrozasComponent implements OnInit {
         }
     }
   }
+
+  updateStatus(id: number, status: string, sheet_row: number) {
+      this._carrozasService.updateState(id, {
+          status: status,
+          sheet_row: sheet_row
+      }).subscribe({
+          next: () => {
+              console.log(`Carroza ${id} updated to ${status}`);
+              this.getCarrozas(null);
+          },
+          error: (error) => console.error(`Error updating Carroza ${id}`, error)
+      });
+  }
+
+  openDialog(carroza: Carroza): void {
+      const dialogRef = this.dialog.open(ModalStatusComponent, {
+          data: { carroza }
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+          if (result && result !== status) {
+              this.updateStatus(carroza.id, result, carroza.sheet_row);
+          }
+      });
+  }
+
+  onImgError(event: Event) {
+      const target = event.target as HTMLImageElement;
+      target.src = './../../../assets/icons/lgbt.png'; // Ruta a tu imagen por defecto
+    }
 }

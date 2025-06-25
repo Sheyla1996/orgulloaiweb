@@ -15,7 +15,7 @@
     <div id="map-asociaciones" class="map-container"></div>
     }
   </div>
-
+  <button (click)="activarNotificaciones()">Noti</button>
   <!-- Listado con scroll ocupa el resto -->
   <div class="list" id="list-container">
     <ng-container *ngFor="let asociacion of asociaciones">
@@ -25,9 +25,8 @@
       >
         <div class="list-item__logo" [ngClass]="asociacion.zona">
           <img
-            *ngIf="asociacion.logo || asociacion.isBatucada"
             [src]="asociacion.isBatucada ? '/assets/icons/batucada.svg' : 'https://laalisedadetormes.com/orgullo/' + asociacion.logo + '.webp'"
-            onerror="this.onerror=null;this.src='assets/img/lgtb.webp';"
+            (error)="onImgError($event)"
             [alt]="asociacion.name"
           />
         </div>
