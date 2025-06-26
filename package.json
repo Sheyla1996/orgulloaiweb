@@ -7,9 +7,9 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:orgullo2022": "node dist/orgullo2022/server/server.mjs",
+    "serve:ssr:orgullo2022": "node dist/server/server.mjs",
     "dev:ssr": "ng run orgullo2022:serve-ssr",
-    "serve:ssr": "node dist/orgullo2022/server/main.js",
+    "serve:ssr": "node dist/server/main.js",
     "build:ssr": "ng build && ng run orgullo2022:server",
     "prerender": "ng run orgullo2022:prerender"
   },
