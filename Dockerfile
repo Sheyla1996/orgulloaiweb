@@ -27,5 +27,5 @@ COPY --from=builder /app/dist /app/dist
 EXPOSE 4001
 
 # Sirve con Node.js (Angular Universal)
-CMD ["node", "dist/orgullo2022/server/main.js"]
+CMD ["node", "dist/server/main.js"]
 
