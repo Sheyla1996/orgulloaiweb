@@ -12,6 +12,7 @@ import { ToastrService } from 'ngx-toastr';
 import { PushService } from './services/push.service';
 import { NgxSpinnerModule } from "ngx-spinner";
 import { ErrorModalService } from './components/error-modal/error-modal.service';
+import { SwUpdate } from '@angular/service-worker';
 
 @Component({
   selector: 'app-root',
@@ -44,8 +45,21 @@ export class AppComponent implements OnInit {
     private toastr: ToastrService,
     private pushService: PushService,
     private errorModal: ErrorModalService,
+    private swUpdate: SwUpdate,
     @Inject(PLATFORM_ID) private platformId: Object,
-  ) {}
+  ) {
+    if (this.swUpdate.isEnabled) {
+      this.swUpdate.versionUpdates
+        .pipe(filter((evt: any) => evt.type === 'VERSION_READY'))
+        .subscribe(() => {
+          if (confirm('Hay una nueva versión disponible. ¿Deseas actualizar?')) {
+            if (isPlatformBrowser(this.platformId)) {
+              window.location.reload();
+            }
+          }
+        });
+    }
+  }
 
   get currentUrl(): string {
     return this.router.url;
