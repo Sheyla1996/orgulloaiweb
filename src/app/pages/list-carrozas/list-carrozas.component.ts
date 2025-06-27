@@ -1,17 +1,17 @@
 import { CarrozasService } from '../../services/carrozas.service';
 import { Carroza } from '../../models/carroza.model';
-import { Component, Inject, OnInit, PLATFORM_ID, ViewEncapsulation } from '@angular/core';
+import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-
-import {MatIconModule} from '@angular/material/icon';
-import {MatButtonModule} from '@angular/material/button';
-import {MatInputModule} from '@angular/material/input';
-import {MatFormFieldModule} from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { SseService } from '../../services/sse.service';
 import { WebSocketService } from '../../services/websocket.service';
 import { ModalStatusComponent } from '../admin/admin.component';
 import { MatDialog } from '@angular/material/dialog';
+import { NgxSpinnerService } from 'ngx-spinner';
+import { ErrorModalService } from '../../components/error-modal/error-modal.service';
 
 @Component({
   selector: 'app-list-carrozas',
@@ -37,11 +37,28 @@ export class ListCarrozasComponent implements OnInit {
   activeCarrozaId: number | null = null;
   private leaflet: any;
 
+  get pending() {
+    return this.carrozas.filter(a => a.status?.toLocaleLowerCase() === 'pendiente').length;
+  }
+
+  get aparcando() {
+    return this.carrozas.filter(a => a.status?.toLocaleLowerCase() === 'aparcando').length;
+  }
+
+  get situadas() {
+    return this.carrozas.filter(a => a.status?.toLocaleLowerCase() === 'situado').length;
+  }
+
+  get total() {
+    return this.carrozas.length;
+  }
+
   constructor(
     private _carrozasService: CarrozasService,
-    private _sseService: SseService,
     private _wsService: WebSocketService,
     private dialog: MatDialog,
+    private spinner: NgxSpinnerService,
+    private _errorModal: ErrorModalService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -73,7 +90,6 @@ export class ListCarrozasComponent implements OnInit {
       }
       this._wsService.messages$.subscribe((msg) => {
         if (msg.type === 'actualizar_listado_carr') {
-          console.log(msg.carroza);
           this.getCarrozas(cached);
         }
       });
@@ -81,6 +97,7 @@ export class ListCarrozasComponent implements OnInit {
   }
 
   getCarrozas(cached: any): void {
+    this.spinner.show();
     this._carrozasService.getCarrozas().subscribe({
       next: async data => {
         this.carrozas = data
@@ -91,15 +108,18 @@ export class ListCarrozasComponent implements OnInit {
         await this.waitForMapDiv();
         this.initMap();
         this.initObserver();
+        this.spinner.hide();
       },
-      error: err => {
-        console.error('Error fetching carrozas:', err);
+      error: error => {
+        console.error('Error fetching carrozas:', error);
+        this._errorModal.openDialog(error);
         // Optionally, you can handle the error by showing a message to the user
         if (cached) {
           this.carrozas = JSON.parse(cached);
           this.waitForMapDiv().then(() => {
             this.initMap();
             this.initObserver();
+            this.spinner.hide();
           });
         }
       }
@@ -264,16 +284,20 @@ export class ListCarrozasComponent implements OnInit {
   }
 
   updateStatus(id: number, status: string, sheet_row: number) {
-      this._carrozasService.updateState(id, {
-          status: status,
-          sheet_row: sheet_row
-      }).subscribe({
-          next: () => {
-              console.log(`Carroza ${id} updated to ${status}`);
-              this.getCarrozas(null);
-          },
-          error: (error) => console.error(`Error updating Carroza ${id}`, error)
-      });
+    this.spinner.show();
+    this._carrozasService.updateState(id, {
+        status: status,
+        sheet_row: sheet_row
+    }).subscribe({
+        next: () => {
+            this.getCarrozas(null);
+        },
+        error: (error) => {
+          this._errorModal.openDialog(error);
+          console.error(`Error updating Carroza ${id}`, error)
+          this.spinner.hide();
+        }
+    });
   }
 
   openDialog(carroza: Carroza): void {

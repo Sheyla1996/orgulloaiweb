@@ -44,13 +44,6 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
-      // Check for install prompt event
-      /*window.addEventListener('beforeinstallprompt', (event: any) => {
-        event.preventDefault();
-        this.installPromptEvent = event;
-        this.showInstallButton = true;
-      });*/
-
       const params = new URLSearchParams(window.location.search);
       const pass = params.get('pass');
       const type = params.get('type');

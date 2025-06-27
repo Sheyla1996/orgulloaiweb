@@ -1,86 +1,93 @@
-
 <div class="head">
-    <div class="search-content">
-      <input
-        type="text"
-        placeholder="Buscar asociación"
-        [(ngModel)]="searchText"
-        (input)="onSearchChange()"
-        class="search"
-      />
-      <mat-icon fontIcon="search"></mat-icon>
-    </div>
-    @defer {
+  <div class="search-content">
+    <input
+      type="text"
+      placeholder="Buscar asociación"
+      [(ngModel)]="searchText"
+      (input)="onSearchChange()"
+      class="search"
+    />
+    <mat-icon fontIcon="search"></mat-icon>
+  </div>
+  @defer {
     <!-- Mapa fijo debajo del buscador -->
     <div id="map" class="map-container map-admin" [ngClass]="mapType"></div>
-    }
-  </div>
-<div id="map-hide" style="height: 500px; display: none;"></div>
-<div class="section-buttons">
-  <button matButton="outlined" (click)="getListFromSheet()">Obtener Sheet</button>
-  <button *ngIf="tab !== 2" matButton="outlined" (click)="getPosition()">Posición</button>
+  }
 </div>
+
+<div id="map-hide" style="height: 500px; display: none;"></div>
+
+<div class="section-buttons">
+  <button mat-stroked-button (click)="getListFromSheet()">Obtener Sheet</button>
+  <button *ngIf="tab !== 2" mat-stroked-button (click)="getPosition()">Posición</button>
+</div>
+
 <mat-tab-group (selectedTabChange)="onTabChange($event)">
   <mat-tab label="Asociaciones">
     <div class="list list-asociaciones" id="list-container-asoc">
-    <ng-container *ngFor="let asociacion of asociaciones">
-      <div
-        class="list-item list-asociaciones-item"
-        [attr.id]="'asoc-' + asociacion.id"
-      >
-        <div class="list-item__logo list-asociaciones-item__logo" [ngClass]="asociacion.zona">
-          <img
-            [src]="asociacion.isBatucada ? '/assets/icons/batucada.svg' : 'https://laalisedadetormes.com/orgullo/' + asociacion.logo + '.webp'"
-            (error)="onImgError($event)"
-            [alt]="asociacion.name"
-          />
+      @for (asociacion of asociaciones; track asociacion) {
+        <div
+          class="list-item list-asociaciones-item"
+          [attr.id]="'asoc-' + asociacion.id"
+        >
+          <div class="list-item__logo list-asociaciones-item__logo" [ngClass]="asociacion.zona">
+        <img
+          [src]="asociacion.isBatucada ? '/assets/icons/batucada.svg' : 'https://laalisedadetormes.com/orgullo/' + asociacion.logo + '.webp'"
+          (error)="onImgError($event)"
+          [alt]="asociacion.name"
+          loading="lazy"
+        />
+          </div>
+          <div class="list-item__name list-asociaciones-item__name">
+        {{asociacion.position}}. {{ asociacion.name }}
+          </div>
         </div>
-        <div class="list-item__name list-asociaciones-item__name">{{asociacion.position}}. {{ asociacion.name }}</div>
-      </div>
-    </ng-container>
-  </div>
+      }
+    </div>
   </mat-tab>
   <mat-tab label="Carrozas">
     <div class="list list-carrozas" id="list-container-carr">
-        <ng-container *ngFor="let carroza of carrozas">
+      <ng-container *ngFor="let carroza of carrozas">
         <div class="list-item list-carrozas-item" [id]="'carr-' + carroza.id">
-            <div class="list-item__logo list-carrozas-item__logo">
-              <img
-                  *ngIf="carroza.logo"
-                  [src]="'https://laalisedadetormes.com/orgullo/' + carroza.logo + '.webp'"
-                  (error)="onImgError($event)"
-                  [alt]="carroza.name"
-              />
-            </div>
-            <div style="display: flex; justify-content: space-between; width: -webkit-fill-available;">
-              <div>
-                <div class="list-item__name list-carrozas-item__name">{{carroza.position}}. {{ carroza.name }}</div>
-                <div class="tag" [ngClass]="carroza.status?.toLocaleLowerCase()">{{carroza.status | titlecase}}</div>
-              </div>
-              <button matIconButton class="list-carrozas-item__buttom" (click)="openDialog(carroza)" >
-            <mat-icon>edit</mat-icon>
-          </button>
-            </div>
+          <div class="list-item__logo list-carrozas-item__logo">
+            <img
+              *ngIf="carroza.logo"
+              [src]="'https://laalisedadetormes.com/orgullo/' + carroza.logo + '.webp'"
+              (error)="onImgError($event)"
+              [alt]="carroza.name"
+              loading="lazy"
+            />
           </div>
-        </ng-container>
+          <div class="list-item__details">
+            <div>
+              <div class="list-item__name list-carrozas-item__name">
+                {{carroza.position}}. {{ carroza.name }}
+              </div>
+              <div class="tag" [ngClass]="carroza.status?.toLocaleLowerCase()">
+                {{carroza.status | titlecase}}
+              </div>
+            </div>
+            <button mat-icon-button class="list-carrozas-item__button" (click)="openDialog(carroza)">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </div>
+        </div>
+      </ng-container>
     </div>
   </mat-tab>
   <mat-tab label="Teléfonos">
     <div class="phone-list">
-        @for (t of telefonos; track t) {
-            <div
-                class="telefono"
-                [class.no-phone]="!t.telefono"
-                >
-                <div class="name">
-                <div class="dot" [ngClass]="t.zona"></div>
-                <h3>{{ t.name }}</h3>
-                </div>
-                @if (t.telefono) {
-                {{t.telefono}}
-                }
-            </div>
-        }
+      @for (t of telefonos; track t) {
+        <div class="telefono" [class.no-phone]="!t.telefono">
+          <div class="name">
+            <div class="dot" [ngClass]="t.zona"></div>
+            <h3>{{ t.name }}</h3>
+          </div>
+          @if (t.telefono) {
+            {{t.telefono}}
+          }
         </div>
+      }
+    </div>
   </mat-tab>
 </mat-tab-group>

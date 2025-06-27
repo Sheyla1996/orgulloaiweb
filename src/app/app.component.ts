@@ -1,6 +1,5 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, ViewEncapsulation, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { Router, RouterModule, RouterOutlet, NavigationEnd } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
 import { CommonModule, isPlatformBrowser, TitleCasePipe } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,6 +10,8 @@ import { filter } from 'rxjs/operators';
 import { WebSocketService } from './services/websocket.service';
 import { ToastrService } from 'ngx-toastr';
 import { PushService } from './services/push.service';
+import { NgxSpinnerModule } from "ngx-spinner";
+import { ErrorModalService } from './components/error-modal/error-modal.service';
 
 @Component({
   selector: 'app-root',
@@ -18,13 +19,13 @@ import { PushService } from './services/push.service';
   imports: [
     CommonModule,
     RouterOutlet,
-    HttpClientModule,
     MatToolbarModule,
     MatIconModule,
     MatButtonModule,
     MatButtonToggleModule,
     RouterModule,
-    MatFabMenuModule
+    MatFabMenuModule,
+    NgxSpinnerModule
   ],
   providers: [TitleCasePipe],
   templateUrl: './app.component.html',
@@ -39,10 +40,10 @@ export class AppComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private _wsService: WebSocketService,
+    private wsService: WebSocketService,
     private toastr: ToastrService,
-    private _titleCasePipe: TitleCasePipe,
-    private _pushService: PushService,
+    private pushService: PushService,
+    private errorModal: ErrorModalService,
     @Inject(PLATFORM_ID) private platformId: Object,
   ) {}
 
@@ -52,117 +53,124 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     console.log('AppComponent initialized');
-    this._wsService.connect();
-    this.setMenu();
-    this._pushService.isSubscribed$.subscribe((isSubscribed) => {
-      this.notificationsOn = isSubscribed;
-    });
-    this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe(() => this.setMenu());
-    this._wsService.messages$.subscribe((msg) => {
-        if (msg && isPlatformBrowser(this.platformId)) {
-          const userType = localStorage.getItem('userType');
-          if (msg.type === 'message') {
-            this.toastr.success(msg.message, 'Nuevo mensaje:', {
-              closeButton: true,
-              timeOut: 20000
-            });
-          } else if (msg.type === 'actualizar_listado_carr' && ['mañana', 'boss'].includes(userType || 'normal')) {
-            switch (msg.carroza.status) {
-              case 'pendiente':
-                this.toastr.error(`La carroza ${msg.carroza.position} - ${msg.carroza.name} está pendiente de llegar`, ``, {
-                  closeButton: true,
-                  timeOut: 20000,
-                  disableTimeOut: true
-                });
-                break;
-              case 'situado':
-                this.toastr.warning(`La carroza ${msg.carroza.position} - ${msg.carroza.name} está ya aparcada`, ``, {
-                  closeButton: true,
-                  timeOut: 20000,
-                  disableTimeOut: true
-                });
-                break;
-              case 'aparcando':
-                this.toastr.info(`La carroza ${msg.carroza.position} - ${msg.carroza.name} está aparcando`, ``, {
-                  closeButton: true,
-                  timeOut: 20000,
-                  disableTimeOut: true
-                });
-                break;
-            }
-            
-          }
-        }
-      });
-      if (isPlatformBrowser(this.platformId)) {
-        this.setViewportHeight();
-        window.visualViewport?.addEventListener('resize', this.setViewportHeight);
-      }
+    this.wsService.connect();
+    this.updateMenu();
+    this.subscribeToPushNotifications();
+    this.subscribeToRouterEvents();
+    this.subscribeToWebSocketMessages();
+    if (isPlatformBrowser(this.platformId)) {
+      this.setViewportHeight();
+      window.visualViewport?.addEventListener('resize', this.setViewportHeight);
+    }
   }
 
-  setViewportHeight = () => {
+  private subscribeToPushNotifications(): void {
+    this.pushService.isSubscribed$.subscribe({
+      next: (isSubscribed) => this.notificationsOn = isSubscribed,
+      error: (err) => this.handleError('Error checking subscription status:', err)
+    });
+  }
+
+  private subscribeToRouterEvents(): void {
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => this.updateMenu());
+  }
+
+  private subscribeToWebSocketMessages(): void {
+    this.wsService.messages$.subscribe({
+      next: (msg) => this.handleWebSocketMessage(msg),
+      error: (err) => this.handleError('Error in WebSocket messages subscription:', err)
+    });
+  }
+
+  private handleWebSocketMessage(msg: any): void {
+    if (!msg || !isPlatformBrowser(this.platformId)) return;
+    const userType = localStorage.getItem('userType') || 'normal';
+    if (msg.type === 'message') {
+      this.toastr.success(msg.message, 'Nuevo mensaje:', {
+        closeButton: true,
+        timeOut: 20000
+      });
+    } else if (msg.type === 'actualizar_listado_carr' && ['mañana', 'boss', 'willy'].includes(userType)) {
+      this.showCarrozaNotification(msg.carroza);
+    }
+  }
+
+  private showCarrozaNotification(carroza: any): void {
+    const baseOptions = {
+      closeButton: true,
+      timeOut: 20000,
+      disableTimeOut: true
+    };
+    switch (carroza.status) {
+      case 'pendiente':
+        this.toastr.error(`La carroza ${carroza.position} - ${carroza.name} está pendiente de llegar`, '', baseOptions);
+        break;
+      case 'situado':
+        this.toastr.warning(`La carroza ${carroza.position} - ${carroza.name} está ya aparcada`, '', baseOptions);
+        break;
+      case 'aparcando':
+        this.toastr.info(`La carroza ${carroza.position} - ${carroza.name} está aparcando`, '', baseOptions);
+        break;
+    }
+  }
+
+  private handleError(message: string, error: any): void {
+    this.errorModal.openDialog(error);
+    console.error(message, error);
+  }
+
+  setViewportHeight = (): void => {
     const vh = (window.visualViewport?.height || window.innerHeight) * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
   };
 
-  private setMenu(): void {
+  private updateMenu(): void {
     const userType = localStorage.getItem('userType');
+    const baseMenu: MatFabMenu[] = [
+      { id: 'messages', icon: 'notifications' },
+      { id: 'phones', icon: 'contact_phone' },
+      { id: 'asociaciones', icon: 'groups' }
+    ];
     if (userType === 'mañana') {
       this.menu = [
-        { id: 'messages', icon: 'notifications' },
-        { id: 'phones', icon: 'contact_phone' },
+        ...baseMenu.slice(0, 3),
         { id: 'carrozas', icon: 'local_shipping' },
-        { id: 'asociaciones', icon: 'groups', tooltip: 'Asociaciones', tooltipPosition: 'right' }
       ];
     } else if (userType === 'boss') {
       this.menu = [
-        { id: 'messages', icon: 'notifications' },
-        { id: 'phones', icon: 'contact_phone' },
+        ...baseMenu.slice(0, 3),
         { id: 'carrozas', icon: 'local_shipping' },
-        { id: 'asociaciones', icon: 'groups', tooltip: 'Asociaciones', tooltipPosition: 'right' },
         { id: 'admin', icon: 'manage_accounts' }
       ];
     } else {
-      this.menu = [
-        { id: 'messages', icon: 'notifications' },
-        { id: 'phones', icon: 'contact_phone' },
-        { id: 'asociaciones', icon: 'groups' }
-      ];
+      this.menu = baseMenu;
     }
   }
 
   onChangeMenu(event: string | number): void {
-    switch (event) {
-      case 'asociaciones':
-        this.router.navigate(['/asociaciones']);
-        break;
-      case 'carrozas':
-        this.router.navigate(['/carrozas']);
-        break;
-      case 'phones':
-        this.router.navigate(['/telefonos']);
-        break;
-      case 'admin':
-        this.router.navigate(['/admin']);
-        break;
-      case 'messages':
-        this.router.navigate(['/messages']);
-        break;
-      case 'logout':
-        localStorage.removeItem('userType');
-        localStorage.removeItem('zone');
-        this.router.navigate(['/login']);
-        break;
-      default:
-        console.warn('Unknown menu item:', event);
+    const routes: Record<string, string> = {
+      asociaciones: '/asociaciones',
+      carrozas: '/carrozas',
+      phones: '/telefonos',
+      admin: '/admin',
+      messages: '/messages'
+    };
+    if (event === 'logout') {
+      localStorage.removeItem('userType');
+      localStorage.removeItem('zone');
+      this.router.navigate(['/login']);
+    } else if (routes[event as string]) {
+      this.router.navigate([routes[event as string]]);
+    } else {
+      console.warn('Unknown menu item:', event);
     }
   }
 
-  activarNotificaciones() {
-    this._pushService.subscribeToNotifications()
-      .then(() => alert('¡Suscripción completada!'))
-      .catch(console.error);
+  activarNotificaciones(): void {
+    this.pushService.subscribeToNotifications()
+      .then(() => alert('Recibirás las notificaciones de la app.'))
+      .catch(error => this.handleError('Error subscribing to notifications:', error));
   }
 }

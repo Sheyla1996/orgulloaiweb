@@ -245,10 +245,15 @@ mat-fab-menu {
   overflow: hidden;
 }
 .buttons-list .mdc-button__label {
-  color: white;
+    color: black;
+
   display: flex;
     align-items: center;
     gap: 8px;
+    @media (prefers-color-scheme: dark) {
+        color: white;
+
+    }
  }
 mat-form-field {
   width: -webkit-fill-available;

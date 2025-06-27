@@ -1,29 +1,11 @@
 
 
 <main>
+<ngx-spinner type="ball-scale-ripple-multiple">Cargando...</ngx-spinner>
   <div *ngIf="!notificationsOn" class="alert" (click)="activarNotificaciones()">
     <mat-icon >notifications</mat-icon> Activa las notificaciones pulsando aquí para recibir avisos de la app
   </div>
   <router-outlet></router-outlet>
   <mat-fab-menu *ngIf="currentUrl !== '/login'" [color]="'warn'" [fabButtons]="menu" direction="top" (onFabMenuItemSelected)="onChangeMenu($event)" icon="menu"></mat-fab-menu>
 </main>
-
-<!--<footer>
-    <mat-toolbar class="toolbarNav">
-      <button matButton routerLink="asociaciones" routerLinkActive="active-link">
-        <mat-icon class="material-icons color_blue">
-          groups</mat-icon>
-        <span>Asociaciones</span>
-      </button>
-      <button matButton routerLink="/carrozas" routerLinkActive="active-link">
-        <mat-icon class="material-icons color_blue">local_shipping
-        </mat-icon>
-        <span>Carrozas</span>
-      </button>
-      <button matButton routerLink="/telefonos" routerLinkActive="active-link">
-        <mat-icon class="material-icons color_blue">contact_phone</mat-icon>
-        <span>Teléfonos</span>
-      </button>
-    </mat-toolbar>
-  </footer>-->
 

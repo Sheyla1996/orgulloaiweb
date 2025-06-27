@@ -66,10 +66,13 @@ input {
     border-radius: 20px;
     outline: none;
     border: none;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
     height: 50px;
+    @media (prefers-color-scheme: dark) {
+      color: white;
+      background-color: rgba(0, 0, 0, 0.8);
+    }
 }
 
 button {

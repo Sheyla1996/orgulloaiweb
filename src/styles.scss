@@ -18,10 +18,13 @@ $my-theme: mat.define-light-theme((
 
 @include mat.all-component-themes($my-theme);*/
 
+body {
+  font-family: var(--mat-tab-label-text-font, var(--mat-sys-title-small-font));
+}
+
 @media (prefers-color-scheme: dark) {
   body {
     background-color: #262626;
     color: white;
-    font-family: var(--mat-tab-label-text-font, var(--mat-sys-title-small-font));
   }
 }

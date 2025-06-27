@@ -75,8 +75,11 @@ a {
     max-width: 100%;
   }
  .mdc-button__label {
-  color: white;
+  
   display: flex;
     align-items: center;
+    @media (prefers-color-scheme: dark) {
+      color: white;
+    }
  }
 }

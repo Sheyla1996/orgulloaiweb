@@ -18,7 +18,7 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
   templateUrl: './modal.component.html',
 })
 export class ModalComponent implements OnInit {
-    
+
   installPromptEvent: any = null;
   showInstallButton = false;
   constructor(
@@ -28,7 +28,6 @@ export class ModalComponent implements OnInit {
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
-      // Check for install prompt event
       window.addEventListener('beforeinstallprompt', (event: any) => {
         event.preventDefault();
         this.installPromptEvent = event;
@@ -41,7 +40,6 @@ export class ModalComponent implements OnInit {
     if (this.installPromptEvent) {
       this.installPromptEvent.prompt();
       this.installPromptEvent.userChoice.then((choiceResult: any) => {
-        // Puedes ocultar el botón si el usuario acepta o rechaza
         this.showInstallButton = false;
         this.installPromptEvent = null;
       });
@@ -53,9 +51,6 @@ export class ModalComponent implements OnInit {
   }
 
   install(): void {
-    /*if (isPlatformBrowser(this.platformId)) {
-        window.open('https://www.ejemplo.com', '_blank');
-    }*/
    this.dialogRef.close('install');
   }
 }

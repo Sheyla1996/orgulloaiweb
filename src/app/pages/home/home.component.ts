@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
   imports: [
     CommonModule
   ],
-  template: `<p>Home Component</p>`,
+  template: `<p>Cargando...</p>`,
   schemas: [NO_ERRORS_SCHEMA]
 })
 export class HomeComponent implements OnInit {
@@ -16,17 +16,11 @@ export class HomeComponent implements OnInit {
     constructor(
         @Inject(PLATFORM_ID) private platformId: Object,
         private router: Router
-    ) {
-        
-    }
+    ) {}
 
     async ngOnInit(): Promise<void> {
-        console.log('HomeComponent initialized');
-        console.log('Platform ID:', this.platformId);
         if (isPlatformBrowser(this.platformId)) {
-            console.log('Running in browser context');
             const userType = localStorage.getItem('userType');
-            console.log('User Type:', userType);
             if (!userType) {
                 this.router.navigate(['/login']);
             } else {
