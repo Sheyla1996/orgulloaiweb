@@ -1,73 +1,8 @@
 @import 'ngx-toastr/toastr';
-.navbar {
-    position: fixed;
-    bottom: 0;
-  display: flex;
-  justify-content: space-around;
-  background: #e91e63;
-  padding: 0.75rem;
-  font-weight: bold;
 
-  a {
-    color: white;
-    text-decoration: none;
-    padding: 0.5rem 1rem;
-
-    &.active {
-      background: white;
-      color: #e91e63;
-      border-radius: 6px;
-    }
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 6px;
-    }
-  }
-}
-
-main {
-  padding: 12px;
-}
-.toolbarNav {
-  position: fixed;
-  bottom: 0;
-  z-index: 1000;
-  display: flex;
-  justify-content: space-around;
-  background-color: white;
-
-  -webkit-box-shadow: 3px 3px 5px 6px #ccc; /* Safari 3-4, iOS 4.0.2 - 4.2, Android 2.3+ */
-  -moz-box-shadow: 3px 3px 5px 6px #ccc; /* Firefox 3.5 - 3.6 */
-  box-shadow: 2px 2px 4px 5px #ccc; /* Opera 10.5, IE 9, Firefox 4+, Chrome 6+, iOS 5 */
-
-  button {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    span {
-      display: block;
-    }
-
-    & .mat-icon {
-      min-height: 1.125rem;
-    }
-  }
-}
-
-button:hover,
-.active-link {
-  color: blueviolet;
-}
-
-mat-fab-menu {
-  position: fixed;
-  bottom: 15px;
-  right: 15px;
-  z-index: 1000;
-}
-
+/*==========================
+  Variables y Root
+==========================*/
 :root {
   --color-text: #000000;
   --color-background: #ffffff;
@@ -96,8 +31,107 @@ mat-fab-menu {
   }
 }
 
+/*==========================
+  Navbar y Toolbar
+==========================*/
+.navbar {
+  position: fixed;
+  bottom: 0;
+  display: flex;
+  justify-content: space-around;
+  background: #e91e63;
+  padding: 0.75rem;
+  font-weight: bold;
+
+  a {
+    color: white;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+
+    &.active {
+      background: white;
+      color: #e91e63;
+      border-radius: 6px;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+    }
+  }
+}
+
+.toolbarNav {
+  position: fixed;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-around;
+  background-color: white;
+  -webkit-box-shadow: 3px 3px 5px 6px #ccc;
+  -moz-box-shadow: 3px 3px 5px 6px #ccc;
+  box-shadow: 2px 2px 4px 5px #ccc;
+
+  button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+
+    span {
+      display: block;
+    }
+
+    & .mat-icon {
+      min-height: 1.125rem;
+    }
+  }
+}
+
+button:hover,
+.active-link {
+  color: blueviolet;
+}
+
+a {
+  color: inherit !important;
+}
+
+/*==========================
+  Main y Page
+==========================*/
+main {
+  padding: 12px;
+}
+
+.head {
+  position: relative;
+}
+
+.page {
+  overflow: hidden;
+}
+
+/*==========================
+  Mat-Fab-Menu
+==========================*/
+mat-fab-menu {
+  position: fixed;
+  bottom: 15px;
+  right: 15px;
+  z-index: 1000;
+
+  .mdc-fab {
+    border-radius: 50%;
+  }
+}
+
+/*==========================
+  Mapas y Leaflet
+==========================*/
 .map-carrozas {
-  .leaflet-popup-content-wrapper, .leaflet-popup-tip{
+  .leaflet-popup-content-wrapper,
+  .leaflet-popup-tip {
     background: url('/assets/icons/bus.svg') no-repeat center center !important;
     background-size: cover !important;
     box-shadow: none !important;
@@ -110,9 +144,9 @@ mat-fab-menu {
   .leaflet-popup {
     margin-bottom: 5px !important;
   }
-
 }
-.leaflet-control-zoom{
+
+.leaflet-control-zoom {
   opacity: 0.7;
   border: none !important;
   border-radius: 10px !important;
@@ -127,8 +161,13 @@ mat-fab-menu {
   border-bottom-left-radius: 10px !important;
   border-bottom-right-radius: 10px !important;
 }
+
 .leaflet-control-attribution {
   display: none !important;
+}
+
+.leaflet-container a {
+  color: initial !important;
 }
 
 /* Map container */
@@ -141,7 +180,9 @@ mat-fab-menu {
   margin-bottom: 1rem;
 }
 
-/* Search input */
+/*==========================
+  Search
+==========================*/
 .search {
   position: absolute;
   width: -webkit-fill-available;
@@ -163,7 +204,6 @@ mat-fab-menu {
     color: var(--color-text, #aaa);
     opacity: 1;
   }
-
 }
 
 .search-content {
@@ -178,7 +218,9 @@ mat-fab-menu {
   }
 }
 
-/* List */
+/*==========================
+  Listas
+==========================*/
 .list {
   overflow-y: auto;
   overflow-x: hidden;
@@ -192,26 +234,34 @@ mat-fab-menu {
     &:last-child {
       padding-bottom: calc(100vh - 442px);
     }
+
     &__name {
       font-family: var(--mat-tab-label-text-font, var(--mat-sys-title-small-font));
       font-weight: normal;
     }
-  }
 
-  
+    &__buttom {
+      color: inherit !important;
+    }
+  }
 }
 
-/* Logo colores */
 .list-item__logo,
 .list .list-item__logo {
   border-radius: 25px;
   display: flex;
   align-items: center;
   justify-content: center;
-
-  
 }
 
+.list-item__name {
+  font-size: 1.2rem;
+  margin-left: 10px;
+}
+
+/*==========================
+  Colores de Logo y Fill
+==========================*/
 .roja    { background-color: var(--color-red); }
 .naranja { background-color: var(--color-orange); }
 .amarilla{ background-color: var(--color-yellow); }
@@ -221,7 +271,6 @@ mat-fab-menu {
 .rosa    { background-color: var(--color-rose); }
 .blanca  { background-color: var(--color-white); }
 
-
 .roja-fill    { fill: var(--color-red); }
 .naranja-fill { fill: var(--color-orange); }
 .amarilla-fill{ fill: var(--color-yellow); }
@@ -230,31 +279,21 @@ mat-fab-menu {
 .azul-fill    { fill: var(--color-blue); }
 .rosa-fill    { fill: var(--color-rose); }
 .blanca-fill  { fill: var(--color-white); }
-/* Nombre */
-.list-item__name {
-  font-size: 1.2rem;
-  margin-left: 10px;
-}
 
-/* Head y page */
-.head {
-  position: relative;
-}
-.page {
-  //max-height: 90vh;
-  overflow: hidden;
-}
+/*==========================
+  Botones y Formularios
+==========================*/
 .buttons-list .mdc-button__label {
-    color: black;
-
+  color: black;
   display: flex;
-    align-items: center;
-    gap: 8px;
-    @media (prefers-color-scheme: dark) {
-        color: white;
+  align-items: center;
+  gap: 8px;
 
-    }
- }
+  @media (prefers-color-scheme: dark) {
+    color: white;
+  }
+}
+
 mat-form-field {
   width: -webkit-fill-available;
 
@@ -267,23 +306,9 @@ mat-form-field {
   }
 }
 
-
-mat-fab-menu {
-  .mdc-fab {
-    border-radius: 50%;
-  }
-}
-
-a {
-    color: inherit !important;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .mdc-tab__text-label {
-        color: var(--color-text) !important;
-    }
-}
-
+/*==========================
+  Toastr y Alertas
+==========================*/
 .toast-success {
   background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAtOTYwIDk2MCA5NjAiIHdpZHRoPSIyNHB4IiBmaWxsPSIjZTNlM2UzIj48cGF0aCBkPSJNMTYwLTIwMHYtODBoODB2LTI4MHEwLTgzIDUwLTE0Ny41VDQyMC03OTJ2LTI4cTAtMjUgMTcuNS00Mi41VDQ4MC04ODBxMjUgMCA0Mi41IDE3LjVUNTQwLTgyMHYyOHE4MCAyMCAxMzAgODQuNVQ3MjAtNTYwdjI4MGg4MHY4MEgxNjBabTMyMC0zMDBabTAgNDIwcS0zMyAwLTU2LjUtMjMuNVQ0MDAtMTYwaDE2MHEwIDMzLTIzLjUgNTYuNVQ0ODAtODBaTTMyMC0yODBoMzIwdi0yODBxMC02Ni00Ny0xMTN0LTExMy00N3EtNjYgMC0xMTMgNDd0LTQ3IDExM3YyODBaIi8+PC9zdmc+');;
 }
@@ -342,6 +367,11 @@ a {
   }
 }
 
-.leaflet-container a {
-  color: initial !important;
+/*==========================
+  Otros
+==========================*/
+@media (prefers-color-scheme: dark) {
+  .mdc-tab__text-label {
+    color: var(--color-text) !important;
+  }
 }

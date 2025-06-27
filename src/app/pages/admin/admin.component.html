@@ -58,7 +58,7 @@
               loading="lazy"
             />
           </div>
-          <div class="list-item__details">
+          <div style="display: flex; justify-content: space-between; width: -webkit-fill-available;">
             <div>
               <div class="list-item__name list-carrozas-item__name">
                 {{carroza.position}}. {{ carroza.name }}
@@ -67,7 +67,7 @@
                 {{carroza.status | titlecase}}
               </div>
             </div>
-            <button mat-icon-button class="list-carrozas-item__button" (click)="openDialog(carroza)">
+            <button mat-icon-button class="list-item__buttom" (click)="openDialog(carroza)">
               <mat-icon>edit</mat-icon>
             </button>
           </div>
