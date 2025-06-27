@@ -2,9 +2,7 @@
 
 <main>
 <ngx-spinner type="ball-scale-ripple-multiple">Cargando...</ngx-spinner>
-  <div *ngIf="!notificationsOn" class="alert" (click)="activarNotificaciones()">
-    <mat-icon >notifications</mat-icon> Activa las notificaciones pulsando aquí para recibir avisos de la app
-  </div>
+ 
   <router-outlet></router-outlet>
   <mat-fab-menu *ngIf="currentUrl !== '/login'" [color]="'warn'" [fabButtons]="menu" direction="top" (onFabMenuItemSelected)="onChangeMenu($event)" icon="menu"></mat-fab-menu>
 </main>

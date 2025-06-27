@@ -13,6 +13,8 @@ import { PushService } from './services/push.service';
 import { NgxSpinnerModule } from "ngx-spinner";
 import { ErrorModalService } from './components/error-modal/error-modal.service';
 import { SwUpdate } from '@angular/service-worker';
+import { FcmService } from './services/fcm.service';
+import { getToken } from 'firebase/messaging';
 
 @Component({
   selector: 'app-root',
@@ -45,20 +47,10 @@ export class AppComponent implements OnInit {
     private toastr: ToastrService,
     private pushService: PushService,
     private errorModal: ErrorModalService,
-    private swUpdate: SwUpdate,
+    private fcm: FcmService,
     @Inject(PLATFORM_ID) private platformId: Object,
   ) {
-    if (this.swUpdate.isEnabled) {
-      this.swUpdate.versionUpdates
-        .pipe(filter((evt: any) => evt.type === 'VERSION_READY'))
-        .subscribe(() => {
-          if (confirm('Hay una nueva versión disponible. ¿Deseas actualizar?')) {
-            if (isPlatformBrowser(this.platformId)) {
-              window.location.reload();
-            }
-          }
-        });
-    }
+    
   }
 
   get currentUrl(): string {
@@ -66,10 +58,11 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.fcm.requestPermission();
+    this.fcm.listen();
     console.log('AppComponent initialized');
     this.wsService.connect();
     this.updateMenu();
-    this.subscribeToPushNotifications();
     this.subscribeToRouterEvents();
     this.subscribeToWebSocketMessages();
     if (isPlatformBrowser(this.platformId)) {
@@ -78,12 +71,6 @@ export class AppComponent implements OnInit {
     }
   }
 
-  private subscribeToPushNotifications(): void {
-    this.pushService.isSubscribed$.subscribe({
-      next: (isSubscribed) => this.notificationsOn = isSubscribed,
-      error: (err) => this.handleError('Error checking subscription status:', err)
-    });
-  }
 
   private subscribeToRouterEvents(): void {
     this.router.events
@@ -182,9 +169,4 @@ export class AppComponent implements OnInit {
     }
   }
 
-  activarNotificaciones(): void {
-    this.pushService.subscribeToNotifications()
-      .then(() => alert('Recibirás las notificaciones de la app.'))
-      .catch(error => this.handleError('Error subscribing to notifications:', error));
-  }
 }
