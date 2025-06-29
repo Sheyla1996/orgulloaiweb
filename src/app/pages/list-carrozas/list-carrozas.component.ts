@@ -207,7 +207,7 @@ export class ListCarrozasComponent implements OnInit {
     container.addEventListener('scroll', () => {
       const items = container.querySelectorAll('.list-item');
       let firstVisible: Element | null = null;
-
+      items.forEach(item => item.classList.remove('active'));
       for (let item of Array.from(items)) {
         const rect = item.getBoundingClientRect();
         const containerRect = container.getBoundingClientRect();
@@ -219,6 +219,7 @@ export class ListCarrozasComponent implements OnInit {
       }
 
       if (firstVisible) {
+        firstVisible.classList.add('active');
         const id = parseInt(firstVisible.id.replace('carr-', ''), 10);
         if (id === this.activeCarrozaId) return;
         this.marker?.remove();

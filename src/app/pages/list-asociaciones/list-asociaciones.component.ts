@@ -192,9 +192,8 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
     container.addEventListener('scroll', () => {
       const items = container.querySelectorAll('.list-item');
       let firstVisible: Element | null = null;
-
+      items.forEach(item => item.classList.remove('active'));
       for (const item of Array.from(items)) {
-        item.classList.remove('active');
         const rect = item.getBoundingClientRect();
         const containerRect = container.getBoundingClientRect();
         const visibleHeight = Math.min(rect.bottom, containerRect.bottom) - Math.max(rect.top, containerRect.top);

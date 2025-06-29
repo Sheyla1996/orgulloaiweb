@@ -243,6 +243,10 @@ mat-fab-menu {
     &__buttom {
       color: inherit !important;
     }
+    &.active {
+      background-color: rgba(0, 0, 0, 0.1);
+      border-radius: 25px;
+    }
   }
 }
 
