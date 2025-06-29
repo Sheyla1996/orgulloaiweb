@@ -194,6 +194,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
       let firstVisible: Element | null = null;
 
       for (const item of Array.from(items)) {
+        item.classList.remove('active');
         const rect = item.getBoundingClientRect();
         const containerRect = container.getBoundingClientRect();
         const visibleHeight = Math.min(rect.bottom, containerRect.bottom) - Math.max(rect.top, containerRect.top);
@@ -204,6 +205,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
       }
 
       if (firstVisible) {
+        firstVisible.classList.add('active');
         const id = parseInt(firstVisible.id.replace('asoc-', ''), 10);
         if (id !== this.activeAsociacionId) {
           this.marker?.remove();

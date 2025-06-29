@@ -8,6 +8,8 @@ import { VersionService } from '../../services/version.service';
 import { MatButtonModule } from '@angular/material/button';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ErrorModalService } from '../../components/error-modal/error-modal.service';
+import { WhatsappService } from '../../services/whatsapp.service';
+import { Whatsapp } from '../../models/whatsapp.model';
 
 
 @Component({
@@ -29,16 +31,9 @@ export class ListTelefonosComponent implements OnInit {
   version = '';
   userZone: string | null = null;
 
-  readonly listZonas = [
-    { name: "blanca", url: "" },
-    { name: "roja", url: "https://chat.whatsapp.com/E30mS9eMZMnD88unuBNr1p" },
-    { name: "naranja", url: "" },
-    { name: "amarilla", url: "" },
-    { name: "verde", url: "" },
-    { name: "azul", url: "" },
-    { name: "violeta", url: "" },
-    { name: "rosa", url: "" }
-  ];
+  linkComunidad = ""
+  linkGrupo = ""
+  listZonas: Whatsapp[] = [];
 
   get whatsappSvg(): string {
     return `<svg class="whatsapp" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -51,7 +46,8 @@ export class ListTelefonosComponent implements OnInit {
     @Inject(PLATFORM_ID) private platformId: Object,
     private spinner: NgxSpinnerService,
     private versionService: VersionService,
-    private errorModal: ErrorModalService
+    private errorModal: ErrorModalService,
+    private whatsappService: WhatsappService
   ) {}
 
   ngOnInit(): void {
@@ -94,6 +90,29 @@ export class ListTelefonosComponent implements OnInit {
       next: data => {
         this.setTelefonos(data);
         localStorage.setItem('telefonos', JSON.stringify(data));
+        this.spinner.hide();
+      },
+      error: error => {
+        this.errorModal.openDialog(error);
+        console.error('Error fetching telefonos:', error);
+        this.spinner.hide();
+      }
+    });
+  }
+
+  private getWhatsapp(): void {
+    this.spinner.show();
+    this.whatsappService.getWhatsapp().subscribe({
+      next: data => {
+        data.filter(item => !['comunidad', 'grupo'].includes(item.zona.toLocaleLowerCase())).forEach(item => {
+          this.listZonas.push({
+            zona: item.zona.toLocaleLowerCase(),
+            link: item.link,
+            sheet_row: item.sheet_row,
+            id: item.id
+          });
+        });
+        localStorage.setItem('whatsapp', JSON.stringify(data));
         this.spinner.hide();
       },
       error: error => {
