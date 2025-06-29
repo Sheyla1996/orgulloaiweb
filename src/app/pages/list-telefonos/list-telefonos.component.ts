@@ -61,8 +61,19 @@ export class ListTelefonosComponent implements OnInit {
 
     if (shouldUseCache && cached) {
       this.setTelefonos(JSON.parse(cached));
+      const whatsappRaw = localStorage.getItem('whatsapp');
+      const whatsapp = whatsappRaw ? JSON.parse(whatsappRaw) : null;
+      whatsapp?.filter((item: Whatsapp) => !['comunidad', 'grupo'].includes(item.zona.toLocaleLowerCase())).forEach((item: Whatsapp) => {
+        this.listZonas.push({
+            zona: item.zona.toLocaleLowerCase(),
+            link: item.link,
+            sheet_row: item.sheet_row,
+            id: item.id
+          });
+        });
     } else {
       this.fetchTelefonos();
+      this.getWhatsapp();
     }
   }
 
