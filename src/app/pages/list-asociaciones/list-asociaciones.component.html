@@ -24,7 +24,14 @@
       >
         <div class="list-item__logo" [ngClass]="asociacion.zona">
           <img
+            *ngIf="asociacion.logo || asociacion.isBatucada"
             [src]="asociacion.isBatucada ? '/assets/icons/batucada.svg' : 'https://laalisedadetormes.com/orgullo/' + asociacion.logo + '.webp'"
+            (error)="onImgError($event)"
+            [alt]="asociacion.name"
+          />
+          <img
+            *ngIf="!asociacion.logo && !asociacion.isBatucada"
+            [src]="'./../../../assets/icons/lgbt.png'"
             (error)="onImgError($event)"
             [alt]="asociacion.name"
           />

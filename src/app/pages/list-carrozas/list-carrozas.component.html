@@ -30,6 +30,12 @@
             (error)="onImgError($event)"
             [alt]="carroza.name"
           />
+          <img
+            *ngIf="!carroza.logo"
+            [src]="'./../../../assets/icons/lgbt.png'"
+            (error)="onImgError($event)"
+            [alt]="carroza.name"
+          />
         </div>
         <div style="display: flex; justify-content: space-between; width: -webkit-fill-available;">
           <div>
