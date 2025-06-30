@@ -1,4 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, ViewEncapsulation, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, ViewEncapsulation, OnInit, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterModule, RouterOutlet, NavigationEnd } from '@angular/router';
 import { CommonModule, isPlatformBrowser, TitleCasePipe } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -54,6 +54,7 @@ export class AppComponent implements OnInit {
     private pushService: PushService,
     private errorModal: ErrorModalService,
     private fcm: FcmService,
+    private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private platformId: Object,
   ) {
     
@@ -75,6 +76,7 @@ export class AppComponent implements OnInit {
       this.setViewportHeight();
       window.visualViewport?.addEventListener('resize', this.setViewportHeight);
     }
+    this.cdr.detectChanges();
   }
 
 
@@ -154,6 +156,7 @@ export class AppComponent implements OnInit {
     } else {
       this.menu = baseMenu;
     }
+    this.cdr.detectChanges();
   }
 
   onChangeMenu(event: string | number): void {
