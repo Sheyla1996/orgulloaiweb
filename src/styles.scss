@@ -22,7 +22,6 @@ html, body {
 }
 body {
   font-family: var(--mat-tab-label-text-font, var(--mat-sys-title-small-font));
-    overflow: hidden;
 }
 
 @media (prefers-color-scheme: dark) {

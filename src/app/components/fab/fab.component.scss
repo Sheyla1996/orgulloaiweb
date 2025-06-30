@@ -30,6 +30,11 @@
   }
 }
 
+.fab-secondary {
+  z-index: 1001 !important;
+  position: relative; // asegúrate que no sea static
+}
+
 .fab-toggler {
   float: right;
   z-index: 100;
