@@ -4,9 +4,9 @@
   <button mat-fab class="fab-toggler" (click)="toggle()">
     <i class="material-icons" [@fabToggler]="{value: fabTogglerState}">add</i>
   </button>
-<p>{{ _options | json }}</p>
-  <div >
-    @for(btn of _options; track btn) {
+
+  <div>
+    @for(btn of _options; track btn.id) {
     <button 
       class="fab-secondary"
       color="secondary"
@@ -14,7 +14,6 @@
       <i class="material-icons">{{btn.icon}}</i>
     </button>
     }
-    
   </div>
 </div>
 

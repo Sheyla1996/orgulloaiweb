@@ -141,21 +141,32 @@ export class AppComponent implements OnInit {
 
   private updateMenu(): void {
     setTimeout(() => {
-    const userType = localStorage.getItem('userType');
-    if (userType === 'mañana' || userType === 'test_coor') {
-      this.menu = [
-        ...this.menu,
-        { id: 'carrozas', icon: 'local_shipping' },
+      const userType = localStorage.getItem('userType');
+      const baseMenu = [
+        { id: 'messages', icon: 'notifications' },
+        { id: 'phones', icon: 'contact_phone' },
+        { id: 'asociaciones', icon: 'groups' }
       ];
-    } else if (userType === 'boss') {
-      this.menu = [
-        ...this.menu,
-        { id: 'carrozas', icon: 'local_shipping' },
-        { id: 'admin', icon: 'manage_accounts' }
-      ];
-    }
-    this.cdr.detectChanges();
-  }, 100);
+      
+      if (userType === 'mañana' || userType === 'test_coor') {
+        this.menu = [
+          ...baseMenu,
+          { id: 'carrozas', icon: 'local_shipping' },
+        ];
+      } else if (userType === 'boss') {
+        this.menu = [
+          ...baseMenu,
+          { id: 'carrozas', icon: 'local_shipping' },
+          { id: 'admin', icon: 'manage_accounts' }
+        ];
+      } else {
+        this.menu = [...baseMenu];
+      }
+      
+      // Force change detection in iOS
+      this.cdr.markForCheck();
+      this.cdr.detectChanges();
+    }, 100);
   }
 
   onChangeMenu(event: string | number): void {

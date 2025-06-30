@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { speedDialFabAnimations } from './fab.animations';
 import { CommonModule } from '@angular/common';
 
@@ -10,15 +10,21 @@ import { CommonModule } from '@angular/common';
   imports: [
     CommonModule
   ],
-  animations: speedDialFabAnimations
+  animations: speedDialFabAnimations,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FabComponent implements OnInit {
 
-    _options: any[] = [];
+  _options: any[] = [];
   @Input() set options(value: any[]) {
-    this._options = value;
+    this._options = [...(value || [])]; // Create a new array reference
+    this.cdr.markForCheck();
     this.cdr.detectChanges(); // fuerza actualización del DOM
-    }
+  }
+
+  get options(): any[] {
+    return this._options;
+  }
 
   @Output() onFabMenuItemSelected = new EventEmitter<any>();
 
@@ -48,5 +54,11 @@ export class FabComponent implements OnInit {
 
   onClickItem(item: string){
     this.onFabMenuItemSelected.emit(item);
+  }
+
+  // Method to force update - useful for iOS
+  public forceUpdate(): void {
+    this.cdr.markForCheck();
+    this.cdr.detectChanges();
   }
 }
