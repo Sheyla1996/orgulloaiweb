@@ -116,8 +116,8 @@ main {
   Mat-Fab-Menu
 ==========================*/
 mat-fab-menu {
-  position: fixed;
-  bottom: 15px;
+  position: absolute;
+  bottom: 35px;
   right: 15px;
   z-index: 1000;
 
@@ -385,4 +385,16 @@ mat-form-field {
   .mdc-tab__text-label {
     color: var(--color-text) !important;
   }
+}
+
+main {
+  height: calc((var(--vh, 1vh) * 100) - 24px);
+  max-height: calc((var(--vh, 1vh) * 100) - 24px);
+  overflow: hidden;
+}
+
+app-list-telefonos {
+  overflow-y: scroll;
+    display: block;
+    height: calc((var(--vh, 1vh) * 100) - 24px);
 }
