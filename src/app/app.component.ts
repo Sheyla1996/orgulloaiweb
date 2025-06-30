@@ -68,60 +68,47 @@ export class AppComponent implements OnInit {
     return this.router.url;
   }
   ngOnInit(): void {
-    console.log('ngOnInit started');
-    console.log('Platform ID:', this.platformId);
-    console.log('isPlatformBrowser check:', isPlatformBrowser(this.platformId));
     
     // Check for iOS Safari specific limitations
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
-    console.log('Is iOS:', isIOS, 'Is Safari:', isSafari);
     
     // Only initialize FCM if platform supports it
     if (isPlatformBrowser(this.platformId)) {
       try {
         this.fcm.requestPermission();
-        console.log('FCM requestPermission completed');
       } catch (error) {
         console.error('Error in FCM requestPermission:', error);
       }
       
       try {
         this.fcm.listen();
-        console.log('FCM listen completed');
       } catch (error) {
         console.error('Error in FCM listen:', error);
       }
-    } else {
-      console.log('Skipping FCM initialization - not browser platform');
-    }
+    } 
     
-    console.log('AppComponent initialized');
     
     try {
       this.wsService.connect();
-      console.log('WebSocket service connected');
     } catch (error) {
       console.error('Error in WebSocket connect:', error);
     }
     
     try {
       this.subscribeToRouterEvents();
-      console.log('Router events subscribed');
     } catch (error) {
       console.error('Error in subscribeToRouterEvents:', error);
     }
     
     try {
       this.subscribeToWebSocketMessages();
-      console.log('WebSocket messages subscribed');
     } catch (error) {
       console.error('Error in subscribeToWebSocketMessages:', error);
     }
     
     try {
       this.listenToStorageChanges();
-      console.log('Storage changes listener added');
     } catch (error) {
       console.error('Error in listenToStorageChanges:', error);
     }
@@ -130,23 +117,17 @@ export class AppComponent implements OnInit {
       try {
         this.setViewportHeight();
         window.visualViewport?.addEventListener('resize', this.setViewportHeight);
-        console.log('Viewport height set');
       } catch (error) {
         console.error('Error in viewport setup:', error);
       }
       
-      console.log('About to call updateMenu');
       // Update menu after platform browser check
       setTimeout(() => {
-        console.log('setTimeout for updateMenu executed');
         this.updateMenu();
       }, 200);
-    } else {
-      console.log('Not platform browser in ngOnInit');
-    }
+    } 
     
     // Also try calling updateMenu directly without platform check
-    console.log('Calling updateMenu directly');
     try {
       this.updateMenuDirect();
     } catch (error) {
@@ -155,9 +136,22 @@ export class AppComponent implements OnInit {
     
     try {
       this.cdr.detectChanges();
-      console.log('Change detection completed');
     } catch (error) {
       console.error('Error in detectChanges:', error);
+    }
+
+    const now = new Date();
+    const cutoff = new Date(now.getFullYear(), 6, 4, 13, 0, 0); // July is month 6 (0-based)
+    const userType = localStorage.getItem('userType');
+    if (
+      isPlatformBrowser(this.platformId) &&
+      userType &&
+      (userType === 'test' || userType === 'test_coor') &&
+      now > cutoff
+    ) {
+      localStorage.removeItem('userType');
+      localStorage.removeItem('zone');
+      this.router.navigate(['/login']);
     }
   }
 
@@ -166,7 +160,6 @@ export class AppComponent implements OnInit {
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(() => {
-        console.log('Router navigation end, calling updateMenu');
         this.updateMenu();
       });
   }
@@ -182,7 +175,6 @@ export class AppComponent implements OnInit {
     if (isPlatformBrowser(this.platformId)) {
       window.addEventListener('storage', (event) => {
         if (event.key === 'userType') {
-          console.log('UserType changed in localStorage:', event.newValue);
           this.updateMenu();
         }
       });
@@ -236,17 +228,12 @@ export class AppComponent implements OnInit {
   }
 
   public testMenu(): void {
-    console.log('testMenu called from console');
-    console.log('Current userType:', localStorage?.getItem('userType'));
-    console.log('Current menu:', this.menu);
     this.updateMenuDirect();
   }
 
   private updateMenuDirect(): void {
-    console.log('updateMenuDirect called - no platform check');
     try {
       const userType = localStorage?.getItem('userType');
-      console.log('UpdateMenuDirect - UserType:', userType);
       
       const baseMenu = [
         { id: 'messages', icon: 'notifications' },
@@ -259,17 +246,14 @@ export class AppComponent implements OnInit {
           ...baseMenu,
           { id: 'carrozas', icon: 'local_shipping' },
         ];
-        console.log('Menu updated for mañana/test_coor:', this.menu);
       } else if (userType === 'boss') {
         this.menu = [
           ...baseMenu,
           { id: 'carrozas', icon: 'local_shipping' },
           { id: 'admin', icon: 'manage_accounts' }
         ];
-        console.log('Menu updated for boss:', this.menu);
       } else {
         this.menu = [...baseMenu];
-        console.log('Menu updated for normal user:', this.menu);
       }
       
       this.cdr.markForCheck();
@@ -280,41 +264,34 @@ export class AppComponent implements OnInit {
   }
 
   private updateMenu(): void {
-    console.log('updateMenu called'); // Debug log
     setTimeout(() => {
-      console.log('updateMenu setTimeout executed'); // Debug log
-      console.log('isPlatformBrowser:', isPlatformBrowser(this.platformId)); // Debug log
       
       if (!isPlatformBrowser(this.platformId)) {
         console.log('Not platform browser, returning'); // Debug log
         return;
       }
-      
+
       const userType = localStorage.getItem('userType');
-      console.log('UpdateMenu - UserType:', userType); // Debug log
-      
+
       const baseMenu = [
         { id: 'messages', icon: 'notifications' },
         { id: 'phones', icon: 'contact_phone' },
         { id: 'asociaciones', icon: 'groups' }
       ];
-      
+
       if (userType === 'mañana' || userType === 'test_coor') {
         this.menu = [
           ...baseMenu,
           { id: 'carrozas', icon: 'local_shipping' },
         ];
-        console.log('Menu updated for mañana/test_coor:', this.menu); // Debug log
       } else if (userType === 'boss') {
         this.menu = [
           ...baseMenu,
           { id: 'carrozas', icon: 'local_shipping' },
           { id: 'admin', icon: 'manage_accounts' }
         ];
-        console.log('Menu updated for boss:', this.menu); // Debug log
       } else {
         this.menu = [...baseMenu];
-        console.log('Menu updated for normal user:', this.menu); // Debug log
       }
       
       // Force change detection in iOS
