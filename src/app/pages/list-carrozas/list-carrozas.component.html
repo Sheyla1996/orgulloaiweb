@@ -8,7 +8,8 @@
         (input)="onSearchChange()"
         class="search"
       />
-      <mat-icon fontIcon="search"></mat-icon>
+      <mat-icon class="search-icon" fontIcon="search"></mat-icon>
+      <mat-icon class="close-icon" fontIcon="close" (click)="clear()"></mat-icon>
     </div>
     <div class="head__info">
       <div class="tag-info pendiente">{{pending}}/{{total}}</div>
@@ -35,6 +36,7 @@
             [src]="'./../../../assets/icons/lgbt.png'"
             (error)="onImgError($event)"
             [alt]="carroza.name"
+            style="max-height: 30px;"
           />
         </div>
         <div style="display: flex; justify-content: space-between; width: -webkit-fill-available;">

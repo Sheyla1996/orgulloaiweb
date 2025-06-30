@@ -1,6 +1,6 @@
 <h2 mat-dialog-title>Cambiar estado</h2>
 <p style="color: initial;  padding: 12px 24px; padding-top: 0;
-    margin-top: 0;">Cambia el estado de la carroza <br><b>{{data.carroza.name}}</b>:</p>
+    margin-top: 0;">Cambia el estado de la carroza <br><b>{{data.carroza.position}} - {{data.carroza.name}}</b>:</p>
 <mat-button-toggle-group  (change)="onSelectChange($event)" [value]="selected" style="margin: 0 24px;">
   <mat-button-toggle value="pendiente">Pendiente</mat-button-toggle>
   <mat-button-toggle value="aparcando">Aparcando</mat-button-toggle>

@@ -314,7 +314,12 @@ export class ListCarrozasComponent implements OnInit {
   }
 
   onImgError(event: Event) {
-      const target = event.target as HTMLImageElement;
-      target.src = './../../../assets/icons/lgbt.png'; // Ruta a tu imagen por defecto
-    }
+    const target = event.target as HTMLImageElement;
+    target.src = './../../../assets/icons/lgbt.png'; // Ruta a tu imagen por defecto
+  }
+  
+  clear() {
+    this.searchText = '';
+    this.onSearchChange();
+  }
 }

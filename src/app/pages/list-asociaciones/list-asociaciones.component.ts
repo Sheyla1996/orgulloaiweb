@@ -276,4 +276,9 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
       });
     }
   }
+
+  clear() {
+    this.searchText = '';
+    this.onSearchChange();
+  }
 }

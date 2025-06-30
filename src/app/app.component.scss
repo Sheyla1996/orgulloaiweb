@@ -209,9 +209,16 @@ mat-fab-menu {
 .search-content {
   display: flex;
 
-  mat-icon {
+  .search-icon {
     position: absolute;
     left: 20px;
+    color: var(--color-text);
+    z-index: 1000;
+    bottom: 20px;
+  }
+  .close-icon {
+    position: absolute;
+    right: 20px;
     color: var(--color-text);
     z-index: 1000;
     bottom: 20px;
