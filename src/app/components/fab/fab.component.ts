@@ -29,21 +29,22 @@ export class FabComponent implements OnInit {
     const maxButtons = 6;
     if (this.options.length > maxButtons) {
       this.options.splice(5, this.options.buttons.length - maxButtons);
+      
     }
+    this.buttons = this.options;
   }
 
   public showItems() {
     this.fabTogglerState = 'active';
-    this.buttons = this.options;
+    
   }
 
   public hideItems() {
     this.fabTogglerState = 'inactive';
-    this.buttons = [];
   }
 
   public toggle() {
-    this.buttons.length 
+    this.fabTogglerState === 'active'
       ? this.hideItems() 
       : this.showItems();
   }

@@ -5,7 +5,7 @@
     <i class="material-icons" [@fabToggler]="{value: fabTogglerState}">add</i>
   </button>
 
-  <div [@speedDialStagger]="buttons.length">
+  <div *ngIf="fabTogglerState === 'active'" [@speedDialStagger]="buttons.length">
     <button 
       *ngFor="let btn of buttons"
       mat-mini-fab
