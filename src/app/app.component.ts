@@ -15,6 +15,9 @@ import { ErrorModalService } from './components/error-modal/error-modal.service'
 import { SwUpdate } from '@angular/service-worker';
 import { FcmService } from './services/fcm.service';
 import { getToken } from 'firebase/messaging';
+import { MdlFabMenuModule } from '@angular-mdl/fab-menu';
+import { MdlPopoverModule } from '@angular-mdl/popover';
+import { FabComponent } from './components/fab/fab.component';
 
 @Component({
   selector: 'app-root',
@@ -28,7 +31,10 @@ import { getToken } from 'firebase/messaging';
     MatButtonToggleModule,
     RouterModule,
     MatFabMenuModule,
-    NgxSpinnerModule
+    NgxSpinnerModule,
+    MdlFabMenuModule,
+    MdlPopoverModule,
+    FabComponent
   ],
   providers: [TitleCasePipe],
   templateUrl: './app.component.html',

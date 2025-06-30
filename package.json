@@ -16,6 +16,9 @@
   "private": true,
   "dependencies": {
     "@angular-material-extensions/fab-menu": "^6.1.0",
+    "@angular-mdl/core": "^15.0.0",
+    "@angular-mdl/fab-menu": "^15.0.0",
+    "@angular-mdl/popover": "^15.0.0",
     "@angular/animations": "^20.0.3",
     "@angular/cdk": "^20.0.3",
     "@angular/common": "^20.0.3",
