@@ -22,7 +22,6 @@ export class FabComponent implements OnInit {
 
   @Output() onFabMenuItemSelected = new EventEmitter<any>();
 
-  public buttons: any[] = [];
 
   public fabTogglerState = 'inactive';
 
@@ -30,12 +29,6 @@ export class FabComponent implements OnInit {
 
 
   public ngOnInit() {
-    const maxButtons = 6;
-    if (this.options.length > maxButtons) {
-      this.options.splice(5, this.options.length - maxButtons);
-      
-    }
-    this.buttons = this.options;
   }
 
   public showItems() {

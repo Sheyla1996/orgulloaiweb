@@ -44,7 +44,11 @@ import { FabComponent } from './components/fab/fab.component';
 })
 export class AppComponent implements OnInit {
   title = 'orgullo2022';
-  menu: MatFabMenu[] = [];
+  menu: MatFabMenu[] = [
+      { id: 'messages', icon: 'notifications' },
+      { id: 'phones', icon: 'contact_phone' },
+      { id: 'asociaciones', icon: 'groups' }
+    ];
   notificationsOn = false;
 
   constructor(
@@ -137,24 +141,17 @@ export class AppComponent implements OnInit {
 
   private updateMenu(): void {
     const userType = localStorage.getItem('userType');
-    const baseMenu: MatFabMenu[] = [
-      { id: 'messages', icon: 'notifications' },
-      { id: 'phones', icon: 'contact_phone' },
-      { id: 'asociaciones', icon: 'groups' }
-    ];
     if (userType === 'mañana' || userType === 'test_coor') {
       this.menu = [
-        ...baseMenu.slice(0, 3),
+        ...this.menu,
         { id: 'carrozas', icon: 'local_shipping' },
       ];
     } else if (userType === 'boss') {
       this.menu = [
-        ...baseMenu.slice(0, 3),
+        ...this.menu,
         { id: 'carrozas', icon: 'local_shipping' },
         { id: 'admin', icon: 'manage_accounts' }
       ];
-    } else {
-      this.menu = baseMenu;
     }
     this.cdr.detectChanges();
   }
