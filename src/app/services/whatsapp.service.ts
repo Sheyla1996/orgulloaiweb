@@ -5,7 +5,8 @@ import { Whatsapp } from "../models/whatsapp.model";
 
 @Injectable({ providedIn: 'root' })
 export class WhatsappService {
-  private apiUrl = 'https://apiorgullo.sheylamartinez.es/whatsapp';
+  userType = localStorage.getItem('userType') || 'normal';
+  private apiUrl = 'https://apiorgullo.sheylamartinez.es/' + (['test', 'test_coor'].includes(this.userType) ? 'test/' : '') + 'whatsapp';
 
   constructor(private http: HttpClient) {}
 

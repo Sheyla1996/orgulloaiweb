@@ -115,6 +115,13 @@ export class ListTelefonosComponent implements OnInit {
     this.spinner.show();
     this.whatsappService.getWhatsapp().subscribe({
       next: data => {
+        data.forEach(item => {
+          if (item.zona.toLocaleLowerCase() === 'comunidad') {
+            this.linkComunidad = item.link;
+          } else if (item.zona.toLocaleLowerCase() === 'grupo') {
+            this.linkGrupo = item.link;
+          }
+        });
         data.filter(item => !['comunidad', 'grupo'].includes(item.zona.toLocaleLowerCase())).forEach(item => {
           this.listZonas.push({
             zona: item.zona.toLocaleLowerCase(),
