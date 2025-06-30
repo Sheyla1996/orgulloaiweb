@@ -5,7 +5,8 @@ import { Telefono } from "../models/telefono.model";
 
 @Injectable({ providedIn: 'root' })
 export class TelefonosService {
-  private apiUrl = 'https://apiorgullo.sheylamartinez.es/telefono';
+  userType = localStorage.getItem('userType') || 'normal';
+  private apiUrl = 'https://apiorgullo.sheylamartinez.es/' + (['test', 'test_coor'].includes(this.userType) ? 'test/' : '') + 'telefono';
 
   constructor(private http: HttpClient) {}
 

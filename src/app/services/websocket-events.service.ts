@@ -24,7 +24,7 @@ export class WebSocketEventsService {
             closeButton: true,
             timeOut: 20000
           });
-        } else if (msg.type === 'actualizar_listado_carr' && [Roles.Manana, Roles.Boss].includes(userType)) {
+        } else if (msg.type === 'actualizar_listado_carr' && [Roles.Manana, Roles.Boss, 'test_coor'].includes(userType)) {
           const { carroza } = msg;
           const baseOptions = {
             closeButton: true,

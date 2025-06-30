@@ -4,7 +4,8 @@ import { Observable } from "rxjs";
 
 @Injectable({ providedIn: 'root' })
 export class MessagesService {
-  private apiUrl = 'https://apiorgullo.sheylamartinez.es/message';
+  userType = localStorage.getItem('userType') || 'normal';
+  private apiUrl = 'https://apiorgullo.sheylamartinez.es/' + (['test', 'test_coor'].includes(this.userType) ? 'test/' : '') + 'message';
 
   constructor(private http: HttpClient) {}
 

@@ -5,7 +5,8 @@ import { Asociacion } from "../models/asociacion.model";
 
 @Injectable({ providedIn: 'root' })
 export class AsociacionesService {
-  private apiUrl = 'https://apiorgullo.sheylamartinez.es/asociacion';
+  userType = localStorage.getItem('userType') || 'normal';
+  private apiUrl = 'https://apiorgullo.sheylamartinez.es/' + (['test', 'test_coor'].includes(this.userType) ? 'test/' : '') + 'asociacion';
 
   constructor(private http: HttpClient) {}
 

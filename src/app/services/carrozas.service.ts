@@ -5,7 +5,8 @@ import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class CarrozasService {
-  private apiUrl = 'https://apiorgullo.sheylamartinez.es/carroza';
+  userType = localStorage.getItem('userType') || 'normal';
+  private apiUrl = 'https://apiorgullo.sheylamartinez.es/' + (['test', 'test_coor'].includes(this.userType) ? 'test/' : '') + 'carroza';
 
   constructor(private http: HttpClient) {}
 

@@ -93,7 +93,7 @@ export class AppComponent implements OnInit {
         closeButton: true,
         timeOut: 20000
       });
-    } else if (msg.type === 'actualizar_listado_carr' && ['mañana', 'boss', 'willy'].includes(userType)) {
+    } else if (msg.type === 'actualizar_listado_carr' && ['mañana', 'boss', 'willy', 'test_coor'].includes(userType)) {
       this.showCarrozaNotification(msg.carroza);
     }
   }
@@ -134,7 +134,7 @@ export class AppComponent implements OnInit {
       { id: 'phones', icon: 'contact_phone' },
       { id: 'asociaciones', icon: 'groups' }
     ];
-    if (userType === 'mañana') {
+    if (userType === 'mañana' || userType === 'test_coor') {
       this.menu = [
         ...baseMenu.slice(0, 3),
         { id: 'carrozas', icon: 'local_shipping' },

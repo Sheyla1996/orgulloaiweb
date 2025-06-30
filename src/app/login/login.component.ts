@@ -63,9 +63,10 @@ export class LoginComponent implements OnInit {
         if (response.ok) {
           localStorage.setItem('userType', response.type || 'normal');
           localStorage.setItem('zone', response.zona || '');
-          this.router.navigate([['mañana', 'boss', 'willy'].includes(response.type) ? '/carrozas' : '/asociaciones'], {
-            queryParams: { pass: this.password, type: this.selectZone }
-          });
+            const deadline = new Date('2025-07-05T15:00:00');
+            this.router.navigate([['mañana', 'boss', 'willy', 'test_coor'].includes(response.type) && new Date() < deadline ? '/carrozas' : '/asociaciones'], {
+              queryParams: { pass: this.password, type: this.selectZone }
+            });
         } else {
           this.handleLoginError();
         }
