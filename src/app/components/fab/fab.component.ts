@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { speedDialFabAnimations } from './fab.animations';
 import { CommonModule } from '@angular/common';
 
@@ -14,8 +14,11 @@ import { CommonModule } from '@angular/common';
 })
 export class FabComponent implements OnInit {
 
-  @Input() 
-  public options: any;
+    _options: any[] = [];
+  @Input() set options(value: any[]) {
+    this._options = value;
+    this.cdr.detectChanges(); // fuerza actualización del DOM
+    }
 
   @Output() onFabMenuItemSelected = new EventEmitter<any>();
 
@@ -23,12 +26,13 @@ export class FabComponent implements OnInit {
 
   public fabTogglerState = 'inactive';
 
-  constructor() { }
+  constructor(private cdr: ChangeDetectorRef) {}
+
 
   public ngOnInit() {
     const maxButtons = 6;
     if (this.options.length > maxButtons) {
-      this.options.splice(5, this.options.buttons.length - maxButtons);
+      this.options.splice(5, this.options.length - maxButtons);
       
     }
     this.buttons = this.options;
