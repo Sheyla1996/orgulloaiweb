@@ -140,6 +140,7 @@ export class AppComponent implements OnInit {
   };
 
   private updateMenu(): void {
+    setTimeout(() => {
     const userType = localStorage.getItem('userType');
     if (userType === 'mañana' || userType === 'test_coor') {
       this.menu = [
@@ -154,6 +155,7 @@ export class AppComponent implements OnInit {
       ];
     }
     this.cdr.detectChanges();
+  }, 100);
   }
 
   onChangeMenu(event: string | number): void {
