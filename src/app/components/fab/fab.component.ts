@@ -55,6 +55,7 @@ export class FabComponent implements OnInit {
 
   onClickItem(item: string){
     this.onFabMenuItemSelected.emit(item);
+    this.hideItems();
   }
 
   // Method to force update - useful for iOS
