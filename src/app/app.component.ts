@@ -69,6 +69,10 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    console.log('ngOnInit started');
+    console.log('Platform ID:', this.platformId);
+    console.log('isPlatformBrowser check:', isPlatformBrowser(this.platformId));
+    
     this.fcm.requestPermission();
     this.fcm.listen();
     console.log('AppComponent initialized');
@@ -81,11 +85,19 @@ export class AppComponent implements OnInit {
       this.setViewportHeight();
       window.visualViewport?.addEventListener('resize', this.setViewportHeight);
       
+      console.log('About to call updateMenu');
       // Update menu after platform browser check
       setTimeout(() => {
+        console.log('setTimeout for updateMenu executed');
         this.updateMenu();
       }, 200);
+    } else {
+      console.log('Not platform browser in ngOnInit');
     }
+    
+    // Also try calling updateMenu directly without platform check
+    console.log('Calling updateMenu directly');
+    this.updateMenuDirect();
     
     this.cdr.detectChanges();
   }
@@ -94,7 +106,10 @@ export class AppComponent implements OnInit {
   private subscribeToRouterEvents(): void {
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe(() => this.updateMenu());
+      .subscribe(() => {
+        console.log('Router navigation end, calling updateMenu');
+        this.updateMenu();
+      });
   }
 
   private subscribeToWebSocketMessages(): void {
@@ -161,9 +176,60 @@ export class AppComponent implements OnInit {
     this.updateMenu();
   }
 
+  public testMenu(): void {
+    console.log('testMenu called from console');
+    console.log('Current userType:', localStorage?.getItem('userType'));
+    console.log('Current menu:', this.menu);
+    this.updateMenuDirect();
+  }
+
+  private updateMenuDirect(): void {
+    console.log('updateMenuDirect called - no platform check');
+    try {
+      const userType = localStorage?.getItem('userType');
+      console.log('UpdateMenuDirect - UserType:', userType);
+      
+      const baseMenu = [
+        { id: 'messages', icon: 'notifications' },
+        { id: 'phones', icon: 'contact_phone' },
+        { id: 'asociaciones', icon: 'groups' }
+      ];
+      
+      if (userType === 'mañana' || userType === 'test_coor') {
+        this.menu = [
+          ...baseMenu,
+          { id: 'carrozas', icon: 'local_shipping' },
+        ];
+        console.log('Menu updated for mañana/test_coor:', this.menu);
+      } else if (userType === 'boss') {
+        this.menu = [
+          ...baseMenu,
+          { id: 'carrozas', icon: 'local_shipping' },
+          { id: 'admin', icon: 'manage_accounts' }
+        ];
+        console.log('Menu updated for boss:', this.menu);
+      } else {
+        this.menu = [...baseMenu];
+        console.log('Menu updated for normal user:', this.menu);
+      }
+      
+      this.cdr.markForCheck();
+      this.cdr.detectChanges();
+    } catch (error) {
+      console.error('Error in updateMenuDirect:', error);
+    }
+  }
+
   private updateMenu(): void {
+    console.log('updateMenu called'); // Debug log
     setTimeout(() => {
-      if (!isPlatformBrowser(this.platformId)) return;
+      console.log('updateMenu setTimeout executed'); // Debug log
+      console.log('isPlatformBrowser:', isPlatformBrowser(this.platformId)); // Debug log
+      
+      if (!isPlatformBrowser(this.platformId)) {
+        console.log('Not platform browser, returning'); // Debug log
+        return;
+      }
       
       const userType = localStorage.getItem('userType');
       console.log('UpdateMenu - UserType:', userType); // Debug log
