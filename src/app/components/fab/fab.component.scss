@@ -6,7 +6,7 @@
   display: flex;
   flex-direction: column-reverse;
   align-items: center;
-  z-index: 1000;
+  z-index: 2000;
 
   > div {
     display: flex;
@@ -41,7 +41,7 @@
     width: 60px;
     justify-content: center;
     vertical-align: middle;
-    display: flow;
+    display: flex;
     i {
         font-size: 30px;
     }
@@ -58,4 +58,6 @@
   right: 0;
   bottom: 0;
   z-index: 99;
+  background: transparent; // ← importante para iOS
+  touch-action: none; // ← evita gestos extraños en Safari
 }
