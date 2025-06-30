@@ -1,5 +1,5 @@
 
-<p style="text-align: right; font-size: 8px;" (click)="onShortClick()" (longpress)="clearPwaCache()">V: {{version}}</p>
+<button *ngIf="['test', 'test_coor'].includes(userType || 'normal')" matButton="filled" (click)="onShortClick()">Cerrar sesión</button><p style="text-align: right; font-size: 8px;" (click)="onShortClick()" (longpress)="clearPwaCache()">V: {{version}}</p>
 <h2>Teléfonos</h2>
 <div class="phone-list">
   @for (t of filteredTelefonos; track t) {
