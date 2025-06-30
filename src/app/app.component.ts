@@ -73,13 +73,20 @@ export class AppComponent implements OnInit {
     this.fcm.listen();
     console.log('AppComponent initialized');
     this.wsService.connect();
-    this.updateMenu();
     this.subscribeToRouterEvents();
     this.subscribeToWebSocketMessages();
+    this.listenToStorageChanges();
+    
     if (isPlatformBrowser(this.platformId)) {
       this.setViewportHeight();
       window.visualViewport?.addEventListener('resize', this.setViewportHeight);
+      
+      // Update menu after platform browser check
+      setTimeout(() => {
+        this.updateMenu();
+      }, 200);
     }
+    
     this.cdr.detectChanges();
   }
 
@@ -95,6 +102,17 @@ export class AppComponent implements OnInit {
       next: (msg) => this.handleWebSocketMessage(msg),
       error: (err) => this.handleError('Error in WebSocket messages subscription:', err)
     });
+  }
+
+  private listenToStorageChanges(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      window.addEventListener('storage', (event) => {
+        if (event.key === 'userType') {
+          console.log('UserType changed in localStorage:', event.newValue);
+          this.updateMenu();
+        }
+      });
+    }
   }
 
   private handleWebSocketMessage(msg: any): void {
@@ -139,9 +157,17 @@ export class AppComponent implements OnInit {
     document.documentElement.style.setProperty('--vh', `${vh}px`);
   };
 
+  public refreshMenu(): void {
+    this.updateMenu();
+  }
+
   private updateMenu(): void {
     setTimeout(() => {
+      if (!isPlatformBrowser(this.platformId)) return;
+      
       const userType = localStorage.getItem('userType');
+      console.log('UpdateMenu - UserType:', userType); // Debug log
+      
       const baseMenu = [
         { id: 'messages', icon: 'notifications' },
         { id: 'phones', icon: 'contact_phone' },
@@ -153,14 +179,17 @@ export class AppComponent implements OnInit {
           ...baseMenu,
           { id: 'carrozas', icon: 'local_shipping' },
         ];
+        console.log('Menu updated for mañana/test_coor:', this.menu); // Debug log
       } else if (userType === 'boss') {
         this.menu = [
           ...baseMenu,
           { id: 'carrozas', icon: 'local_shipping' },
           { id: 'admin', icon: 'manage_accounts' }
         ];
+        console.log('Menu updated for boss:', this.menu); // Debug log
       } else {
         this.menu = [...baseMenu];
+        console.log('Menu updated for normal user:', this.menu); // Debug log
       }
       
       // Force change detection in iOS

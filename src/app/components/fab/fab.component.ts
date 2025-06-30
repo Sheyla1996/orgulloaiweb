@@ -17,6 +17,7 @@ export class FabComponent implements OnInit {
 
   _options: any[] = [];
   @Input() set options(value: any[]) {
+    console.log('FAB Component - Setting options:', value); // Debug log
     this._options = [...(value || [])]; // Create a new array reference
     this.cdr.markForCheck();
     this.cdr.detectChanges(); // fuerza actualización del DOM
