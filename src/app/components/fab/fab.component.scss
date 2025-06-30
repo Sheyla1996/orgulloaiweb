@@ -44,16 +44,11 @@
     border: none;
     height: 60px;
     width: 60px;
-    justify-content: center;
-    vertical-align: middle;
-    display: flex;
+        padding: 15px;
     i {
         font-size: 30px;
     }
-        display: flex;
-    justify-content: center;
-    align-content: center;
-    align-items: center;
+       
 }
 
 #fab-dismiss {
@@ -65,4 +60,12 @@
   z-index: 99;
   background: transparent; // ← importante para iOS
   touch-action: none; // ← evita gestos extraños en Safari
+}
+
+.icon-bar {
+  width: 22px;
+  height: 2px;
+  background: black;
+  margin: 3px;
+  position: relative;
 }

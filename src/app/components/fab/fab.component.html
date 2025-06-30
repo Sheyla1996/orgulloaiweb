@@ -5,7 +5,10 @@
 
 <div class="fab-container">
   <button mat-fab class="fab-toggler" (click)="toggle()">
-    <i class="material-icons" [@fabToggler]="{value: fabTogglerState}">add</i>
+    <div class="icon-bar" [@hamburguerX]="isHamburguer ? 'hamburguer' : 'topX'"></div>
+    <div class="icon-bar" [@hamburguerX]="isHamburguer ? 'hamburguer' : 'hide'"></div>
+    <div class="icon-bar" [@hamburguerX]="isHamburguer ? 'hamburguer' : 'bottomX'"></div>
+    
   </button>
 
   <div *ngIf="fabTogglerState === 'active'" [@speedDialStagger]="_options.length">

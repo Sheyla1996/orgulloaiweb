@@ -11,9 +11,11 @@ import { CommonModule } from '@angular/common';
     CommonModule
   ],
   animations: speedDialFabAnimations,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FabComponent implements OnInit {
+
+    isHamburguer = true;
 
   _options: any[] = [];
   @Input() set options(value: any[]) {
@@ -40,11 +42,12 @@ export class FabComponent implements OnInit {
 
   public showItems() {
     this.fabTogglerState = 'active';
-    
+    this.isHamburguer = false; // Change to X state
   }
 
   public hideItems() {
     this.fabTogglerState = 'inactive';
+    this.isHamburguer = true; // Reset to hamburguer state
   }
 
   public toggle() {
