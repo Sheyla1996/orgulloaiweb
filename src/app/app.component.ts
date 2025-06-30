@@ -67,23 +67,73 @@ export class AppComponent implements OnInit {
   get currentUrl(): string {
     return this.router.url;
   }
-
   ngOnInit(): void {
     console.log('ngOnInit started');
     console.log('Platform ID:', this.platformId);
     console.log('isPlatformBrowser check:', isPlatformBrowser(this.platformId));
     
-    this.fcm.requestPermission();
-    this.fcm.listen();
+    // Check for iOS Safari specific limitations
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+    console.log('Is iOS:', isIOS, 'Is Safari:', isSafari);
+    
+    // Only initialize FCM if platform supports it
+    if (isPlatformBrowser(this.platformId)) {
+      try {
+        this.fcm.requestPermission();
+        console.log('FCM requestPermission completed');
+      } catch (error) {
+        console.error('Error in FCM requestPermission:', error);
+      }
+      
+      try {
+        this.fcm.listen();
+        console.log('FCM listen completed');
+      } catch (error) {
+        console.error('Error in FCM listen:', error);
+      }
+    } else {
+      console.log('Skipping FCM initialization - not browser platform');
+    }
+    
     console.log('AppComponent initialized');
-    this.wsService.connect();
-    this.subscribeToRouterEvents();
-    this.subscribeToWebSocketMessages();
-    this.listenToStorageChanges();
+    
+    try {
+      this.wsService.connect();
+      console.log('WebSocket service connected');
+    } catch (error) {
+      console.error('Error in WebSocket connect:', error);
+    }
+    
+    try {
+      this.subscribeToRouterEvents();
+      console.log('Router events subscribed');
+    } catch (error) {
+      console.error('Error in subscribeToRouterEvents:', error);
+    }
+    
+    try {
+      this.subscribeToWebSocketMessages();
+      console.log('WebSocket messages subscribed');
+    } catch (error) {
+      console.error('Error in subscribeToWebSocketMessages:', error);
+    }
+    
+    try {
+      this.listenToStorageChanges();
+      console.log('Storage changes listener added');
+    } catch (error) {
+      console.error('Error in listenToStorageChanges:', error);
+    }
     
     if (isPlatformBrowser(this.platformId)) {
-      this.setViewportHeight();
-      window.visualViewport?.addEventListener('resize', this.setViewportHeight);
+      try {
+        this.setViewportHeight();
+        window.visualViewport?.addEventListener('resize', this.setViewportHeight);
+        console.log('Viewport height set');
+      } catch (error) {
+        console.error('Error in viewport setup:', error);
+      }
       
       console.log('About to call updateMenu');
       // Update menu after platform browser check
@@ -97,9 +147,18 @@ export class AppComponent implements OnInit {
     
     // Also try calling updateMenu directly without platform check
     console.log('Calling updateMenu directly');
-    this.updateMenuDirect();
+    try {
+      this.updateMenuDirect();
+    } catch (error) {
+      console.error('Error in updateMenuDirect:', error);
+    }
     
-    this.cdr.detectChanges();
+    try {
+      this.cdr.detectChanges();
+      console.log('Change detection completed');
+    } catch (error) {
+      console.error('Error in detectChanges:', error);
+    }
   }
 
 

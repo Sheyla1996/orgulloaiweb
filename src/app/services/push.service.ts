@@ -8,40 +8,74 @@ export class PushService {
   private isSubscribedSubject = new BehaviorSubject<boolean>(false);
   isSubscribed$ = this.isSubscribedSubject.asObservable();
   readonly publicKey = 'BEViErh-fOZsxN-2KakVHn4ZLGdQRrHBJ-FrhUnEPM0QGJGHaZLt6fkXGKeRvTYoj69bI6yXDmTPiy3b-1Fx-NE'; // Copiada del paso 1
+  private isSupported = false;
 
   constructor() {
-    this.checkSubscription();
+    this.checkSupport();
+    if (this.isSupported) {
+      this.checkSubscription();
+    }
+  }
+
+  private checkSupport(): boolean {
+    this.isSupported = 
+      typeof window !== 'undefined' &&
+      'Notification' in window &&
+      'serviceWorker' in navigator &&
+      !/iPad|iPhone|iPod/.test(navigator.userAgent);
+    
+    console.log('Push Service Support check:', this.isSupported);
+    return this.isSupported;
   }
 
   // Verifica al iniciar si ya está suscrito
   async checkSubscription() {
-    const registration = await navigator.serviceWorker.getRegistration();
-    const subscription = await registration?.pushManager.getSubscription();
-    this.isSubscribedSubject.next(!!subscription);
+    if (!this.isSupported) {
+      console.log('Push notifications not supported in this browser');
+      return;
+    }
+
+    try {
+      const registration = await navigator.serviceWorker.getRegistration();
+      const subscription = await registration?.pushManager.getSubscription();
+      this.isSubscribedSubject.next(!!subscription);
+    } catch (error) {
+      console.error('Error checking push subscription:', error);
+      this.isSubscribedSubject.next(false);
+    }
   }
 
   async subscribeToNotifications(): Promise<void> {
-    const registration = await navigator.serviceWorker.register('service-worker.js');
-
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') {
-      throw new Error('Permiso de notificación denegado');
+    if (!this.isSupported) {
+      throw new Error('Push notifications not supported in this browser');
     }
 
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: this.urlBase64ToUint8Array(this.publicKey)
-    });
+    try {
+      const registration = await navigator.serviceWorker.register('service-worker.js');
 
-    // Enviar la suscripción a tu backend
-    await fetch('https://apiorgullo.sheylamartinez.es/push/suscribir', {
-      method: 'POST',
-      body: JSON.stringify(subscription),
-      headers: { 'Content-Type': 'application/json' }
-    });
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        throw new Error('Permiso de notificación denegado');
+      }
 
-    console.log('Suscripción enviada:', subscription);
-    this.isSubscribedSubject.next(true); // ✅ Notifica a los observadores
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: this.urlBase64ToUint8Array(this.publicKey)
+      });
+
+      // Enviar la suscripción a tu backend
+      await fetch('https://apiorgullo.sheylamartinez.es/push/suscribir', {
+        method: 'POST',
+        body: JSON.stringify(subscription),
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      console.log('Suscripción enviada:', subscription);
+      this.isSubscribedSubject.next(true); // ✅ Notifica a los observadores
+    } catch (error) {
+      console.error('Error subscribing to push notifications:', error);
+      throw error;
+    }
   }
 
   private urlBase64ToUint8Array(base64String: string): Uint8Array {
@@ -52,10 +86,20 @@ export class PushService {
   }
 
   async isUserSubscribed(): Promise<boolean> {
-    const registration = await navigator.serviceWorker.getRegistration();
-    if (!registration) return false;
+    if (!this.isSupported) {
+      console.log('Push notifications not supported, returning false');
+      return false;
+    }
 
-    const subscription = await registration.pushManager.getSubscription();
-    return !!subscription;
+    try {
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (!registration) return false;
+
+      const subscription = await registration.pushManager.getSubscription();
+      return !!subscription;
+    } catch (error) {
+      console.error('Error checking user subscription:', error);
+      return false;
+    }
   }
 }
