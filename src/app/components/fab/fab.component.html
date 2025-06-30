@@ -5,7 +5,7 @@
     <i class="material-icons" [@fabToggler]="{value: fabTogglerState}">add</i>
   </button>
 
-  <div>
+  <div *ngIf="fabTogglerState === 'active'" [@speedDialStagger]="_options.length">
     @for(btn of _options; track btn.id) {
     <button 
       class="fab-secondary"
