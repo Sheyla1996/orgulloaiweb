@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { speedDialFabAnimations } from './fab.animations';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-fab',
@@ -29,12 +30,16 @@ export class FabComponent implements OnInit {
     return this._options;
   }
 
+  get activeRoute(): string {
+    return this.router.url.replace('/', ''); // Remove trailing slash for consistency
+  }
+
   @Output() onFabMenuItemSelected = new EventEmitter<any>();
 
 
   public fabTogglerState = 'inactive';
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor(private cdr: ChangeDetectorRef, private router: Router) {}
 
 
   public ngOnInit() {

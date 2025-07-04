@@ -47,6 +47,10 @@
 .fab-secondary {
   z-index: 1001 !important;
   position: relative; // asegúrate que no sea static
+
+  &.active {
+    color: var(--mat-sys-on-error-container);
+  }
 }
 
 .fab-toggler {

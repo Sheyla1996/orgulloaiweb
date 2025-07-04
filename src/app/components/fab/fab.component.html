@@ -17,6 +17,7 @@
         <div (click)="onClickItem(btn.id)" class="fab-label">{{btn.tooltip}}</div>
         <button
           class="fab-secondary"
+          [ngClass]="{'active': activeRoute === btn.id}"
           color="secondary"
           (click)="onClickItem(btn.id)">
           <i class="material-icons">{{btn.icon}}</i>

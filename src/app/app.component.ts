@@ -274,11 +274,11 @@ export class AppComponent implements OnInit {
 
       const baseMenu = [
         { id: 'messages', icon: 'notifications',tooltip: 'Avisos' },
-        { id: 'phones', icon: 'contact_phone', tooltip: 'Teléfonos' },
+        { id: 'telefonos', icon: 'contact_phone', tooltip: 'Teléfonos' },
         { id: 'asociaciones', icon: 'groups', tooltip: 'Asociaciones' }
       ];
 
-      if (userType === 'mañana' || userType === 'test_coor') {
+      if (userType === 'mañana' || userType === 'test_coor' || userType === 'willy') {
         this.menu = [
           ...baseMenu,
           { id: 'carrozas', icon: 'local_shipping', tooltip: 'Carrozas' },
@@ -303,7 +303,7 @@ export class AppComponent implements OnInit {
     const routes: Record<string, string> = {
       asociaciones: '/asociaciones',
       carrozas: '/carrozas',
-      phones: '/telefonos',
+      telefonos: '/telefonos',
       admin: '/admin',
       messages: '/messages'
     };
