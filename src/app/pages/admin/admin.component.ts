@@ -17,6 +17,7 @@ import { FormsModule } from "@angular/forms";
 import { MatIconModule } from "@angular/material/icon";
 import { NgxSpinnerService } from "ngx-spinner";
 import { ErrorModalService } from "../../components/error-modal/error-modal.service";
+import { WhatsappService } from "../../services/whatsapp.service";
 
 @Component({
     selector: 'app-admin',
@@ -55,6 +56,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
         private asociacionesService: AsociacionesService,
         private carrozasService: CarrozasService,
         private telefonosService: TelefonosService,
+        private _whatsappService: WhatsappService,
         private mapService: MapService,
         private dialog: MatDialog,
         private spinner: NgxSpinnerService,
@@ -451,6 +453,16 @@ export class AdminComponent implements OnInit, AfterViewInit {
                 this.telefonosService.getTelefonosFromSheet().subscribe({
                     next: telefonos => {
                         this.telefonos = telefonos;
+                        this.spinner.hide();
+                    },
+                    error: error => {
+                        this._errorModal.openDialog(error);
+                        console.error('Error obteniendo teléfonos desde la hoja de cálculo', error);
+                        this.spinner.hide();
+                    }
+                });
+                this._whatsappService.getWhatsappFromSheet().subscribe({
+                    next: whatsapp => {
                         this.spinner.hide();
                     },
                     error: error => {
