@@ -11,14 +11,17 @@
     
   </button>
 
-  <div *ngIf="fabTogglerState === 'active'" [@speedDialStagger]="_options.length">
+  <div *ngIf="fabTogglerState === 'active'" [@speedDialStagger]="_options.length" class="fab-items">
     @for(btn of _options; track btn.id) {
-    <button 
-      class="fab-secondary"
-      color="secondary"
-      (click)="onClickItem(btn.id)">
-      <i class="material-icons">{{btn.icon}}</i>
-    </button>
+      <div class="fab-item">
+        <div (click)="onClickItem(btn.id)" class="fab-label">{{btn.tooltip}}</div>
+        <button
+          class="fab-secondary"
+          color="secondary"
+          (click)="onClickItem(btn.id)">
+          <i class="material-icons">{{btn.icon}}</i>
+        </button>
+      </div>
     }
   </div>
 </div>

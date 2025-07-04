@@ -45,9 +45,9 @@ import { FabComponent } from './components/fab/fab.component';
 export class AppComponent implements OnInit {
   title = 'orgullo2022';
   menu: MatFabMenu[] = [
-      { id: 'messages', icon: 'notifications' },
-      { id: 'phones', icon: 'contact_phone' },
-      { id: 'asociaciones', icon: 'groups' }
+      { id: 'messages', icon: 'notifications',tooltip: 'Avisos' },
+      { id: 'phones', icon: 'contact_phone', tooltip: 'Teléfonos' },
+      { id: 'asociaciones', icon: 'groups', tooltip: 'Asociaciones' }
     ];
   notificationsOn = false;
 
@@ -274,21 +274,21 @@ export class AppComponent implements OnInit {
       const userType = localStorage.getItem('userType');
 
       const baseMenu = [
-        { id: 'messages', icon: 'notifications' },
-        { id: 'phones', icon: 'contact_phone' },
-        { id: 'asociaciones', icon: 'groups' }
+        { id: 'messages', icon: 'notifications',tooltip: 'Avisos' },
+        { id: 'phones', icon: 'contact_phone', tooltip: 'Teléfonos' },
+        { id: 'asociaciones', icon: 'groups', tooltip: 'Asociaciones' }
       ];
 
       if (userType === 'mañana' || userType === 'test_coor') {
         this.menu = [
           ...baseMenu,
-          { id: 'carrozas', icon: 'local_shipping' },
+          { id: 'carrozas', icon: 'local_shipping', tooltip: 'Carrozas' },
         ];
       } else if (userType === 'boss') {
         this.menu = [
           ...baseMenu,
-          { id: 'carrozas', icon: 'local_shipping' },
-          { id: 'admin', icon: 'manage_accounts' }
+          { id: 'carrozas', icon: 'local_shipping', tooltip: 'Carrozas' },
+          { id: 'admin', icon: 'manage_accounts', tooltip: 'Admin' }
         ];
       } else {
         this.menu = [...baseMenu];
