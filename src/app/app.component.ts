@@ -198,7 +198,6 @@ export class AppComponent implements OnInit {
     const baseOptions = {
       closeButton: true,
       timeOut: 20000,
-      disableTimeOut: true
     };
     switch (carroza.status) {
       case 'pendiente':
