@@ -63,6 +63,7 @@
               <div class="list-item__name list-carrozas-item__name">
                 {{carroza.position}}. {{ carroza.name }}
               </div>
+              <p>Tamaño: {{carroza.size | titlecase}}</p>
               <div class="tag" [ngClass]="carroza.status?.toLocaleLowerCase()">
                 {{carroza.status | titlecase}}
               </div>

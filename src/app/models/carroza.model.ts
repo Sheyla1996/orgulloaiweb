@@ -9,5 +9,6 @@ export interface Carroza {
   type?: string;
   sheet_row: number;
   status?: string;
+  size?: string;
 }
   
