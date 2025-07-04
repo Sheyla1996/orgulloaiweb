@@ -298,6 +298,7 @@ mat-fab-menu {
   color: black;
   display: flex;
   align-items: center;
+  text-align: center;
   gap: 8px;
 
   @media (prefers-color-scheme: dark) {
