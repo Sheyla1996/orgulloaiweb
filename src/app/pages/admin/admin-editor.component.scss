@@ -1,0 +1,48 @@
+.admin-editor {
+  min-height: 100%;
+  padding: 12px;
+  color: var(--app-text, #eaf0fb);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+
+    h1 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+  }
+
+  &__card {
+    display: grid;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid var(--app-border, #2f3b4e);
+    background: linear-gradient(180deg, #171d27, #111823);
+  }
+
+  &__actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  input,
+  select {
+    border: 1px solid var(--app-border, #2f3b4e);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    background: #0f141d;
+    color: var(--app-text, #eaf0fb);
+  }
+}
+
+.check-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}

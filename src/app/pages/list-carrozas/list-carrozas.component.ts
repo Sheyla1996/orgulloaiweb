@@ -1,6 +1,6 @@
 import { CarrozasService } from '../../services/carrozas.service';
 import { Carroza } from '../../models/carroza.model';
-import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, Inject, NO_ERRORS_SCHEMA, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,9 +9,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { WebSocketService } from '../../services/websocket.service';
 import { ModalStatusComponent } from '../admin/admin.component';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ErrorModalService } from '../../components/error-modal/error-modal.service';
+import { SearchComponent } from '../../components/search/search.component';
 
 @Component({
   selector: 'app-list-carrozas',
@@ -22,20 +23,27 @@ import { ErrorModalService } from '../../components/error-modal/error-modal.serv
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    MatDialogModule,
+    SearchComponent
   ],
   templateUrl: './list-carrozas.component.html',
-  styleUrls: ['./list-carrozas.component.scss']
+  styleUrls: ['./list-carrozas.component.scss'],
+  schemas: [NO_ERRORS_SCHEMA]
 })
-export class ListCarrozasComponent implements OnInit {
+export class ListCarrozasComponent implements OnInit, OnDestroy {
   carrozas: Carroza[] = [];
-  map!: any;
+  map: any = null;
   searchText = '';
   observer!: IntersectionObserver;
   markerMap: { [id: number]: any } = {};
   marker: any = null;
   activeCarrozaId: number | null = null;
   private leaflet: any;
+  showMap = true;
+  showKeyboard = true;
+  private scrollContainer: HTMLElement | null = null;
+  private scrollHandler?: () => void;
 
   get pending() {
     return this.carrozas.filter(a => a.status?.toLocaleLowerCase() === 'pendiente').length;
@@ -63,37 +71,28 @@ export class ListCarrozasComponent implements OnInit {
   ) {}
 
   async ngOnInit(): Promise<void> {
-    if (isPlatformBrowser(this.platformId)) {
-      this.leaflet = await import('leaflet');
-      const cached = localStorage.getItem('carrozas');
-      let shouldUseCache = false;
+    if (!isPlatformBrowser(this.platformId)) return;
 
-      // Detectar calidad de conexión
-      const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
-      if (connection) {
-        // Puedes ajustar los valores según tus necesidades
-        const slowTypes = ['slow-2g', '2g', '3g'];
-        if (connection.saveData || slowTypes.includes(connection.effectiveType)) {
-          shouldUseCache = true;
-        }
-      } else if (!navigator.onLine) {
-        shouldUseCache = true;
-      }
+    this.leaflet = await import('leaflet');
+    this.setupViewportListener();
+    const cached = localStorage.getItem('carrozas');
+    const shouldUseCache = this.shouldUseCache()
 
-      if (shouldUseCache && cached) {
-        this.carrozas = JSON.parse(cached);
-        await this.waitForMapDiv();
-        this.initMap();
-        this.initObserver();
-      } else {
+
+    if (shouldUseCache && cached) {
+      this.carrozas = JSON.parse(cached);
+      await this.waitForMapDiv();
+      this.initMap();
+      this.initScrollSync();
+    } else {
+      this.getCarrozas(cached);
+    }
+    this._wsService.messages$.subscribe((msg) => {
+      if (msg.type === 'actualizar_listado_carr') {
         this.getCarrozas(cached);
       }
-      this._wsService.messages$.subscribe((msg) => {
-        if (msg.type === 'actualizar_listado_carr') {
-          this.getCarrozas(cached);
-        }
-      });
-    }
+    });
+    
   }
 
   getCarrozas(cached: any): void {
@@ -107,23 +106,101 @@ export class ListCarrozasComponent implements OnInit {
         localStorage.setItem('carrozas', JSON.stringify(this.carrozas));
         await this.waitForMapDiv();
         this.initMap();
-        this.initObserver();
+        this.initScrollSync();
         this.spinner.hide();
       },
-      error: error => {
+      error: async error => {
         console.error('Error fetching carrozas:', error);
         this._errorModal.openDialog(error);
         // Optionally, you can handle the error by showing a message to the user
         if (cached) {
           this.carrozas = JSON.parse(cached);
-          this.waitForMapDiv().then(() => {
-            this.initMap();
-            this.initObserver();
-            this.spinner.hide();
-          });
+          await this.waitForMapDiv();
+          this.initMap();
+          this.initScrollSync();
         }
+        this.spinner.hide();
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.observer) this.observer.disconnect();
+    if (typeof window !== 'undefined' && (window as any).visualViewport) {
+      (window as any).visualViewport.removeEventListener('resize', this.handleViewportResize);
+    }
+    this.detachScrollSync();
+    this.destroyMap();
+  }
+
+  private handleViewportResize = () => {
+    if (!this.showMap || !this.map) return;
+    
+    if (this.activeCarrozaId && this.map) {
+      const activeCarroza = this.carrozas.find(a => a.id === this.activeCarrozaId);
+      if (activeCarroza) {
+        this.repositionMap(activeCarroza);
+      }
+    }
+  }
+
+  private setupViewportListener(): void {
+    if (typeof window !== 'undefined' && (window as any).visualViewport) {
+      (window as any).visualViewport.addEventListener('resize', this.handleViewportResize);
+    }
+  }
+
+  private shouldUseCache(): boolean {
+    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+    if (connection) {
+      const slowTypes = ['slow-2g', '2g', '3g'];
+      if (connection.saveData || slowTypes.includes(connection.effectiveType)) {
+        return true;
+      }
+    }
+    return !navigator.onLine;
+  }
+
+  private getZonaColor(zona: string): string {
+    const colors: Record<string, string> = {
+      blanca: 'white',
+      azul: 'blue',
+      verde: 'green',
+      roja: 'red',
+      naranja: 'orange',
+      amarilla: 'yellow',
+      violeta: 'purple',
+      rosa: 'hotpink'
+    };
+    return colors[zona] || 'purple';
+  }
+
+  private clearMapLayers(): void {
+    if (!this.map) return;
+    this.map.eachLayer((layer: any) => {
+      if (layer instanceof this.leaflet.Marker || layer instanceof this.leaflet.Polyline) {
+        this.map.removeLayer(layer);
+      }
+    });
+  }
+
+  private detachScrollSync(): void {
+    if (this.scrollContainer && this.scrollHandler) {
+      this.scrollContainer.removeEventListener('scroll', this.scrollHandler);
+    }
+
+    this.scrollContainer = null;
+    this.scrollHandler = undefined;
+  }
+
+  private destroyMap(): void {
+    this.marker?.remove();
+    this.marker = null;
+
+    if (this.map) {
+      this.map.remove();
+      this.map = null;
+    }
   }
 
   private async waitForMapDiv(): Promise<void> {
@@ -139,31 +216,8 @@ export class ListCarrozasComponent implements OnInit {
     });
   }
 
-  ngOnDestroy(): void {
-    if (this.observer) this.observer.disconnect();
-  }
-
-  private getZoneColor(zona: string): string {
-    switch (zona) {
-      case 'azul': return 'blue';
-      case 'verde': return 'green';
-      case 'roja': return 'red';
-      case 'naranja': return 'orange';
-      case 'amarilla': return 'yellow';
-      default: return 'purple';
-    }
-  }
-
-  private clearMapLayers(): void {
-    this.map.eachLayer((layer: any) => {
-      if (layer instanceof this.leaflet.Marker || layer instanceof this.leaflet.Polyline) {
-        this.map.removeLayer(layer);
-      }
-    });
-    this.markerMap = {};
-  }
-
   initMap(): void {
+    if (!this.showMap) return;
     if (!this.map) {
       this.map = this.leaflet.map('map-carrozas').setView([40.412, -3.692], 18);
       this.leaflet.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
@@ -181,10 +235,18 @@ export class ListCarrozasComponent implements OnInit {
       path.push([a.lat, a.lng]);
     });
 
+    this.drawPolylines();
+
+    if (this.carrozas.length > 0) {
+      this.setMapItem(this.carrozas[0]);
+    }
+  }
+
+  private drawPolylines(): void {
     for (let i = 1; i < this.carrozas.length; i++) {
       const prev = this.carrozas[i - 1];
       const curr = this.carrozas[i];
-      const color = this.getZoneColor(curr.zona);
+      const color = this.getZonaColor(curr.zona);
 
       this.leaflet.polyline(
         [
@@ -194,17 +256,17 @@ export class ListCarrozasComponent implements OnInit {
         { color, weight: 6 }
       ).addTo(this.map);
     }
-
-    if (this.carrozas.length > 0) {
-      this.setMapItem(this.carrozas[0]);
-    }
   }
 
-  initObserver(): void {
+
+  private initScrollSync(): void {
+    this.detachScrollSync();
     const container = document.getElementById('list-container');
     if (!container) return;
 
-    container.addEventListener('scroll', () => {
+    this.scrollContainer = container;
+    this.scrollHandler = () => {
+      if (!this.showMap || !this.map) return;
       const items = container.querySelectorAll('.list-item');
       let firstVisible: Element | null = null;
       items.forEach(item => item.classList.remove('active'));
@@ -227,11 +289,12 @@ export class ListCarrozasComponent implements OnInit {
         const a = this.carrozas.find(a => a.id === id);
         if (a) this.setMapItem(a);
       }
-    });
+    };
+    container.addEventListener('scroll', this.scrollHandler);
   }
 
-  onSearchChange(): void {
-    const term = this.searchText.toLowerCase();
+  onSearchChange(searchText: string): void {
+    const term = searchText.toLowerCase();
     const index = this.carrozas.findIndex(a =>
       a.name.toLowerCase().includes(term) ||
       a.position.toString().includes(term)
@@ -243,13 +306,7 @@ export class ListCarrozasComponent implements OnInit {
       const items = container.querySelectorAll('.list-item');
       if (items[index]) {
         const item = items[index] as HTMLElement;
-        const containerTop = container.scrollTop;
-        const itemOffsetTop = item.offsetTop - container.offsetTop;
-
-        container.scrollTo({
-          top: itemOffsetTop,
-          behavior: 'smooth'
-        });
+        container.scrollTo({ top: item.offsetTop, behavior: 'smooth' });
       }
       }, 10);
     }
@@ -268,19 +325,53 @@ export class ListCarrozasComponent implements OnInit {
         : `<b style="max-width:100px;max-height:100px;display:block;">${a.name}</b>`;
       this.marker = this.leaflet.marker([a.lat, a.lng], { icon: customIcon })
         .addTo(this.map)
-        .bindPopup(popupContent)
-        .openPopup();
+        /*.bindPopup(popupContent)
+        .openPopup();*/
+      this.repositionMap(a);
+    }
+  }
+
+  private repositionMap(a: Carroza): void {
+    if (!this.showMap || !this.map) return;
+
+    setTimeout(() => {
       const mapDiv = document.getElementById('map-carrozas');
-        if (mapDiv) {
-          const mapHeight = mapDiv.clientHeight;
-          // Desplaza el centro hacia arriba para que el popup no tape el marcador
-          const offsetY = mapHeight > 0 ? (mapHeight / 6) : 0;
-          const targetPoint = this.map.project([a.lat, a.lng], this.map.getZoom()).subtract([0, offsetY]);
-          const targetLatLng = this.map.unproject(targetPoint, this.map.getZoom());
-          this.map.setView(targetLatLng, 18, { animate: true });
-        } else {
-          this.map.setView([a.lat, a.lng], 18, { animate: true });
-        }
+      if (mapDiv) {
+        const mapHeight = mapDiv.clientHeight;
+        const offsetY = mapHeight > 0 ? -60 : 0;
+        const targetPoint = this.map.project([a.lat, a.lng], this.map.getZoom()).subtract([0, offsetY]);
+        const targetLatLng = this.map.unproject(targetPoint, this.map.getZoom());
+        this.map.setView(targetLatLng, 18, { animate: true });
+      } else {
+        this.map.setView([a.lat, a.lng], 18, { animate: true });
+      }
+    }, 100);
+  }
+
+  onImgError(event: Event): void {
+    const target = event.target as HTMLImageElement;
+    target.src = './../../../assets/icons/lgbt.png';
+  }
+
+  changeShowMap() {
+    this.showMap = !this.showMap;
+
+    if (!this.showMap) {
+      //this.detachScrollSync();
+      this.destroyMap();
+      const container = document.getElementById('list-container');
+      if (container) {
+        container.querySelectorAll('.list-item').forEach(item => item.classList.remove('active'));
+      }
+      return;
+    }
+
+    if (this.showMap) {
+      setTimeout(async () => {
+        await this.waitForMapDiv();
+        this.initMap();
+        this.initScrollSync();
+      }, 100);
     }
   }
 
@@ -313,13 +404,22 @@ export class ListCarrozasComponent implements OnInit {
       });
   }
 
-  onImgError(event: Event) {
-    const target = event.target as HTMLImageElement;
-    target.src = './../../../assets/icons/lgbt.png'; // Ruta a tu imagen por defecto
-  }
   
   clear() {
     this.searchText = '';
-    this.onSearchChange();
+    this.onSearchChange('');
+  }
+
+  changeShowKeyboard() {
+    this.clear();
+    this.showKeyboard = !this.showKeyboard;
+    if (this.showMap) {
+      this.destroyMap();
+      setTimeout(async () => {
+        await this.waitForMapDiv();
+        this.initMap();
+        this.initScrollSync();
+      }, 100);
+    }
   }
 }

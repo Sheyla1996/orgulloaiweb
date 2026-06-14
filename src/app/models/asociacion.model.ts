@@ -1,6 +1,7 @@
 export interface Asociacion {
   id: number;
   name: string;
+  shortName: string;
   lema: string;
   logo: string;
   isBatucada: boolean;

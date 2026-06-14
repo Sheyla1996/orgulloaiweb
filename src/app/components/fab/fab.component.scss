@@ -39,9 +39,10 @@
 
 .fab-label {
   border-radius: 25px;
-  background-color: var(--mat-fab-container-color, var(--mat-sys-primary-container));
+  background-color: var(--app-surface, #141a23);
   padding: 4px 12px;
-  color: black;
+  color: var(--app-text, #eaf0fb);
+  border: 1px solid var(--app-border, #2f3b4e);
 }
 
 .fab-secondary {
@@ -83,7 +84,7 @@
 .icon-bar {
   width: 22px;
   height: 2px;
-  background: black;
+  background: var(--app-text, #eaf0fb);
   margin: 3px;
   position: relative;
 }

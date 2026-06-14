@@ -1,23 +1,19 @@
 <div class="page">
-  <div class="head">
-    <div class="search-content">
-      <input
-        type="text"
-        placeholder="Buscar asociación"
-        [(ngModel)]="searchText"
-        (input)="onSearchChange()"
-        class="search"
-      />
-      <mat-icon class="search-icon" fontIcon="search"></mat-icon>
-      <mat-icon class="close-icon" fontIcon="cancel" (click)="clear()"></mat-icon>
-    </div>
-    @defer {
-    <!-- Mapa fijo debajo del buscador -->
-    <div id="map-asociaciones" class="map-container"></div>
+  <div class="head" [ngClass]="{ 'head--full': !showKeyboard }">
+    @if(showMap) {
+      @defer {
+        <!-- Mapa fijo debajo del buscador -->
+        <div id="map-asociaciones" class="map-container"></div>
+      }
     }
+  <div class="map-toggle" (click)="changeShowMap()">
+    <mat-icon fontSet="material-symbols-outlined">{{showMap ? 'list' : 'map' }}</mat-icon>
+  </div>
+  <div class="keyboard-toggle" (click)="changeShowKeyboard()">
+    <mat-icon fontSet="material-symbols-outlined">{{showKeyboard ? 'keyboard_off' : 'keyboard' }}</mat-icon>
   </div>
   <!-- Listado con scroll ocupa el resto -->
-  <div class="list" id="list-container">
+  <div class="list" [ngClass]="{ 'list--full': !showMap }" id="list-container">
     <ng-container *ngFor="let asociacion of asociaciones">
       <div
         class="list-item"
@@ -37,8 +33,21 @@
             [alt]="asociacion.name"
           />
         </div>
-        <div class="list-item__name">{{asociacion.position}}. {{ asociacion.name }}</div>
+        <div class="list-item__name">
+          @if(asociacion.shortName) {
+            <span>{{asociacion.position}}. {{asociacion.shortName}}</span><br>
+            <span class="list-item__desc"> {{ asociacion.name }}</span>
+          } @else {
+            <span>{{asociacion.position}}. {{ asociacion.name }}</span>
+          }
+        </div>
       </div>
     </ng-container>
   </div>
+
+  </div>
+  @if (showKeyboard) {
+    <app-search (searchTerm)="onSearchChange($event)"></app-search>
+  }
+
 </div>

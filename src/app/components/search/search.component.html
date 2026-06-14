@@ -1,0 +1,8 @@
+<div class="search-container">
+    <div class="search-content">
+        <mat-icon class="search-icon" fontSet="material-symbols-outlined">search</mat-icon>
+        <span>{{ value ? value : 'Buscar...' }}</span>
+        <mat-icon class="close-icon " fontSet="material-symbols-outlined"  (click)="clear()">cancel_outline</mat-icon>
+    </div>
+    <div #keyboardContainer class="simple-keyboard"></div>
+</div>

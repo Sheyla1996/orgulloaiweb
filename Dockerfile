@@ -6,26 +6,16 @@ RUN npm install --legacy-peer-deps
 
 COPY . .
 
-# ⚠️ Este es el build correcto para SSR
-RUN npm run build:ssr
+# Build cliente (sin SSR)
+RUN npm run build
 
 # Añade el archivo de versión (usa commit corto o fecha)
 ARG VERSION=dev
 RUN echo "$VERSION" > /app/dist/browser/assets/version.txt
 
+FROM nginx:alpine AS production
 
-FROM node:lts-slim AS production
-WORKDIR /app
+COPY --from=builder /app/dist/browser /usr/share/nginx/html
 
-# Solo necesitas las dependencias de producción
-COPY package.json package-lock.json ./
-RUN npm install --only=production --legacy-peer-deps
-
-# Copia el resultado del build SSR
-COPY --from=builder /app/dist /app/dist
-
-EXPOSE 4001
-
-# Sirve con Node.js (Angular Universal)
-CMD ["node", "dist/server/main.js"]
+EXPOSE 80
 

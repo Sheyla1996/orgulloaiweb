@@ -1,94 +1,187 @@
-<div class="head">
-  <div class="search-content">
-    <input
-      type="text"
-      placeholder="Buscar asociación"
-      [(ngModel)]="searchText"
-      (input)="onSearchChange()"
-      class="search"
-    />
-    <mat-icon class="search-icon" fontIcon="search"></mat-icon>
-  </div>
-  @defer {
-    <!-- Mapa fijo debajo del buscador -->
-    <div id="map" class="map-container map-admin" [ngClass]="mapType"></div>
-  }
-</div>
+<div class="admin-mobile">
 
-<div id="map-hide" style="height: 500px; display: none;"></div>
-
-<div class="section-buttons">
-  <button mat-stroked-button (click)="getListFromSheet()">Obtener Sheet</button>
-  <button *ngIf="tab !== 2" mat-stroked-button (click)="getPosition()">Posición</button>
-</div>
-
-<mat-tab-group (selectedTabChange)="onTabChange($event)">
-  <mat-tab label="Asociaciones">
-    <div class="list list-asociaciones" id="list-container-asoc">
-      @for (asociacion of asociaciones; track asociacion) {
-        <div
-          class="list-item list-asociaciones-item"
-          [attr.id]="'asoc-' + asociacion.id"
-        >
-          <div class="list-item__logo list-asociaciones-item__logo" [ngClass]="asociacion.zona">
-        <img
-          [src]="asociacion.isBatucada ? '/assets/icons/batucada.svg' : 'https://laalisedadetormes.com/orgullo/' + asociacion.logo + '.webp'"
-          (error)="onImgError($event)"
-          [alt]="asociacion.name"
-          loading="lazy"
-        />
-          </div>
-          <div class="list-item__name list-asociaciones-item__name">
-        {{asociacion.position}}. {{ asociacion.name }}
+  <mat-tab-group class="admin-mobile__tabs" [selectedIndex]="tab" (selectedTabChange)="onTabChange($event)">
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon fontSet="material-symbols-outlined">map_search</mat-icon>
+      </ng-template>
+      <section class="admin-section">
+        <div class="admin-section__top">
+          <input type="text" class="admin-mobile__search" [(ngModel)]="searchText" (input)="onSearchChange()"
+            placeholder="Buscar asociacion" />
+          <div class="admin-section__actions">
+            <button mat-stroked-button (click)="getListFromSheet()">Sheets</button>
+            <button mat-flat-button (click)="openCreateForm()">Añadir</button>
           </div>
         </div>
-      }
-    </div>
-  </mat-tab>
-  <mat-tab label="Carrozas">
-    <div class="list list-carrozas" id="list-container-carr">
-      <ng-container *ngFor="let carroza of carrozas">
-        <div class="list-item list-carrozas-item" [id]="'carr-' + carroza.id">
-          <div class="list-item__logo list-carrozas-item__logo">
-            <img
-              *ngIf="carroza.logo"
-              [src]="'https://laalisedadetormes.com/orgullo/' + carroza.logo + '.webp'"
-              (error)="onImgError($event)"
-              [alt]="carroza.name"
-              loading="lazy"
-            />
-          </div>
-          <div style="display: flex; justify-content: space-between; width: -webkit-fill-available;">
-            <div>
-              <div class="list-item__name list-carrozas-item__name">
-                {{carroza.position}}. {{ carroza.name }}
-              </div>
-              <p>Tamaño: {{carroza.size | titlecase}}</p>
-              <div class="tag" [ngClass]="carroza.status?.toLocaleLowerCase()">
-                {{carroza.status | titlecase}}
-              </div>
+
+        <div class="cards-list" id="admin-list-asoc">
+          <article class="item-card" *ngFor="let item of getAsociacionesView()"
+            [ngClass]="'item-card--' + item.zona.toLocaleLowerCase()">
+            <div class="item-card__content">
+              <strong>{{ item.position }}. {{ item.name }}</strong>
+              <span>{{ item.shortName }}</span>
+              <span>Zona: {{ item.zona | titlecase }}</span>
             </div>
-            <button mat-icon-button class="list-item__buttom" (click)="openDialog(carroza)">
-              <mat-icon>edit</mat-icon>
-            </button>
+            <div class="item-card__actions">
+              <button mat-icon-button (click)="moveAsociacion(item, -1)"><mat-icon
+                  fontSet="material-symbols-outlined">keyboard_arrow_up</mat-icon></button>
+              <button mat-icon-button (click)="moveAsociacion(item, 1)"><mat-icon
+                  fontSet="material-symbols-outlined">keyboard_arrow_down</mat-icon></button>
+              <button mat-icon-button (click)="goToEditor('asociacion', item.id)"><mat-icon
+                  fontSet="material-symbols-outlined">edit</mat-icon></button>
+              <button mat-icon-button color="warn" (click)="deleteAsociacion(item.id)"><mat-icon
+                  fontSet="material-symbols-outlined">delete</mat-icon></button>
+            </div>
+          </article>
+        </div>
+      </section>
+    </mat-tab>
+
+    <mat-tab >
+      <ng-template mat-tab-label>
+        <mat-icon fontSet="material-symbols-outlined">airport_shuttle</mat-icon>
+      </ng-template>
+      <section class="admin-section">
+        <div class="admin-section__top">
+          <input type="text" class="admin-mobile__search" [(ngModel)]="searchText" (input)="onSearchChange()"
+            placeholder="Buscar carroza" />
+          <div class="admin-section__actions">
+            <button mat-stroked-button (click)="getListFromSheet()">Sheets</button>
+            <button mat-flat-button (click)="openCreateForm()">Añadir</button>
           </div>
         </div>
-      </ng-container>
-    </div>
-  </mat-tab>
-  <mat-tab label="Teléfonos">
-    <div class="phone-list">
-      @for (t of telefonos; track t) {
-        <div class="telefono" [class.no-phone]="!t.telefono">
-          <div class="name">
-            <div class="dot" [ngClass]="t.zona"></div>
-            <h3>{{ t.name }}</h3>
-          </div>
-          @if (t.telefono) {
-            {{t.telefono}}
-          }
+
+        <div class="cards-list" id="admin-list-carr">
+          <article class="item-card" *ngFor="let item of getCarrozasView()"
+            [ngClass]="'item-card--' + item.zona.toLocaleLowerCase()">
+            <div class="item-card__content">
+              <strong>{{ item.position }}. {{ item.name }}</strong>
+              <span>Zona: {{ item.zona | titlecase }}</span>
+              <span>Estado: {{ item.status | titlecase }}</span>
+              <span *ngIf="item.size">Tamano: {{ item.size | titlecase }}</span>
+            </div>
+            <div class="item-card__actions">
+              <button mat-icon-button (click)="moveCarroza(item, -1)"><mat-icon
+                  fontSet="material-symbols-outlined">keyboard_arrow_up</mat-icon></button>
+              <button mat-icon-button (click)="moveCarroza(item, 1)"><mat-icon
+                  fontSet="material-symbols-outlined">keyboard_arrow_down</mat-icon></button>
+              <button mat-icon-button (click)="goToEditor('carroza', item.id)"><mat-icon
+                  fontSet="material-symbols-outlined">edit</mat-icon></button>
+              <button mat-icon-button color="warn" (click)="deleteCarroza(item.id)"><mat-icon
+                  fontSet="material-symbols-outlined">delete</mat-icon></button>
+            </div>
+          </article>
         </div>
-      }
-    </div>
-  </mat-tab>
-</mat-tab-group>
+      </section>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon fontSet="material-symbols-outlined">contact_phone</mat-icon>
+      </ng-template>
+      <section class="admin-section">
+        <div class="admin-section__top">
+          <input type="text" class="admin-mobile__search" [(ngModel)]="searchText" (input)="onSearchChange()"
+            placeholder="Buscar telefono" />
+          <div class="admin-section__actions">
+            <button mat-stroked-button (click)="getListFromSheet()">Sheets</button>
+            <button mat-flat-button (click)="openCreateForm()">Añadir</button>
+          </div>
+        </div>
+
+        <div class="cards-list" id="admin-list-tel">
+          <article class="item-card" *ngFor="let item of getTelefonosView(); let i = index"
+            [ngClass]="'item-card--' + item.zona.toLocaleLowerCase()">
+            <div class="item-card__content">
+              <strong>{{ item.name }}</strong>
+              <span *ngIf="item.telefono">{{ item.telefono }}</span>
+              <span>Zona: {{ item.zona | titlecase }}</span>
+            </div>
+            <div class="item-card__actions">
+              <button mat-icon-button (click)="moveTelefono(i, -1)"><mat-icon
+                  fontSet="material-symbols-outlined">keyboard_arrow_up</mat-icon></button>
+              <button mat-icon-button (click)="moveTelefono(i, 1)"><mat-icon
+                  fontSet="material-symbols-outlined">keyboard_arrow_down</mat-icon></button>
+              <button mat-icon-button (click)="goToEditor('telefono', item.id)"><mat-icon
+                  fontSet="material-symbols-outlined">edit</mat-icon></button>
+              <button mat-icon-button color="warn" (click)="deleteTelefono(item.id)"><mat-icon
+                  fontSet="material-symbols-outlined">delete</mat-icon></button>
+            </div>
+          </article>
+        </div>
+      </section>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon fontSet="material-symbols-outlined">maps_ugc</mat-icon>
+      </ng-template>
+      <section class="admin-section">
+        <div class="admin-section__top">
+          <input type="text" class="admin-mobile__search" [(ngModel)]="searchText" (input)="onSearchChange()"
+            placeholder="Buscar whatsapp" />
+          <div class="admin-section__actions">
+            <button mat-stroked-button (click)="getListFromSheet()">Sheets</button>
+            <button mat-flat-button (click)="openCreateForm()">Añadir</button>
+          </div>
+        </div>
+
+        <div class="cards-list" id="admin-list-wa">
+          <article class="item-card" *ngFor="let item of getWhatsappView()"
+            [ngClass]="'item-card--' + item.zona.toLocaleLowerCase()">
+            <div class="item-card__content">
+              <strong>{{ item.zona | titlecase }}</strong>
+              <span>{{ item.link }}</span>
+            </div>
+            <div class="item-card__actions">
+              <button mat-icon-button (click)="goToEditor('whatsapp', item.id)"><mat-icon
+                  fontSet="material-symbols-outlined">edit</mat-icon></button>
+              <button mat-icon-button color="warn" (click)="deleteWhatsapp(item.id)"><mat-icon
+                  fontSet="material-symbols-outlined">delete</mat-icon></button>
+            </div>
+          </article>
+        </div>
+      </section>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon fontSet="material-symbols-outlined">fitness_tracker</mat-icon>
+      </ng-template>
+      <section class="admin-section">
+        <div class="admin-section__top">
+          <input type="text" class="admin-mobile__search" [(ngModel)]="searchText" (input)="onSearchChange()"
+            placeholder="Buscar pulsera" />
+          <div class="admin-section__actions">
+            <button mat-flat-button (click)="openCreateForm()">Añadir</button>
+          </div>
+        </div>
+
+        <div class="cards-list" id="admin-list-puls">
+          <article class="item-card item-card--qr" *ngFor="let item of getPulserasView(); let i = index"
+            [ngClass]="'item-card--' + item.zona.toLocaleLowerCase()">
+            <div class="item-card__content">
+              <strong>{{ item.description ? item.description : item.uuid }}</strong>
+              @if (item.description) {
+              <span>Code: {{ item.uuid }}</span>
+              }
+              <span>Zona: {{ item.zona | titlecase }}</span>
+              <span>Tipo: {{ item.type }}</span>
+            </div>
+            <div class="item-card__actions ">
+              <button mat-icon-button (click)="openQr(item.uuid)"><mat-icon
+                  fontSet="material-symbols-outlined">qr_code</mat-icon></button>
+              <button mat-icon-button (click)="writeNfc(item.uuid)"><mat-icon
+                  fontSet="material-symbols-outlined">nfc</mat-icon></button>
+              <button mat-icon-button (click)="goToEditor('pulsera', item.uuid)"><mat-icon
+                  fontSet="material-symbols-outlined">edit</mat-icon></button>
+              <button mat-icon-button color="warn" (click)="deletePulsera(item.uuid)"><mat-icon
+                  fontSet="material-symbols-outlined">delete</mat-icon></button>
+            </div>
+          </article>
+        </div>
+      </section>
+    </mat-tab>
+  </mat-tab-group>
+</div>

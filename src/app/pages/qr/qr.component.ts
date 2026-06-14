@@ -1,0 +1,165 @@
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Whatsapp } from '../../models/whatsapp.model';
+import { QrService } from '../../services/qr.service';
+import { WhatsappService } from '../../services/whatsapp.service';
+
+@Component({
+  selector: 'app-qr',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './qr.component.html',
+  styleUrls: ['./qr.component.scss']
+})
+export class QrComponent implements OnInit {
+  uuid = '';
+  extraParam = '';
+
+  zona = '';
+  type = '';
+
+  isAndroid = false;
+  loading = true;
+  isValid = false;
+  errorMessage = '';
+
+  playStoreUrl = '';
+  generalWhatsappLink = '';
+  zoneWhatsappLink = '';
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private qrService: QrService,
+    private whatsappService: WhatsappService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
+
+  ngOnInit(): void {
+    const qp = this.route.snapshot.queryParamMap;
+
+    this.uuid = (qp.get('uuid') || '').trim();
+    this.extraParam = (qp.get('extra') || '').trim();
+
+    if (isPlatformBrowser(this.platformId)) {
+      this.isAndroid = /android/i.test(navigator.userAgent);
+      this.playStoreUrl = this.buildPlayStoreUrl(this.uuid);
+    }
+
+    if (!this.uuid) {
+      this.loading = false;
+      this.isValid = false;
+      this.errorMessage = 'No tienes permisos para acceder.';
+      return;
+    }
+
+    this.validateUuid();
+  }
+
+  goToWeb(): void {
+    if (!isPlatformBrowser(this.platformId) || !this.isValid) return;
+
+    localStorage.setItem('userType', this.type || 'normal');
+    localStorage.setItem('zone', this.zona || '');
+
+    const goToCarrozas = ['mañana', 'boss', 'willy', 'test_coor'].includes((this.type || '').toLowerCase());
+    this.router.navigate([goToCarrozas ? '/carrozas' : '/asociaciones']);
+  }
+
+  private validateUuid(): void {
+    this.qrService.validateUuid(this.uuid).subscribe({
+      next: response => {
+        const ok = response?.ok && response?.result === 'ok' && !!response?.zona && !!response?.type;
+
+        if (!ok) {
+          this.isValid = false;
+          this.loading = false;
+          this.errorMessage = 'No tienes permisos para acceder.';
+          return;
+        }
+
+        this.zona = this.normalizeZone(response.zona || '');
+        this.type = (response.type || '').toLowerCase();
+        this.isValid = true;
+
+        this.loadWhatsappLinks();
+      },
+      error: () => {
+        this.isValid = false;
+        this.loading = false;
+        this.errorMessage = 'No tienes permisos para acceder.';
+      }
+    });
+  }
+
+  private loadWhatsappLinks(): void {
+    this.whatsappService.getWhatsapp().subscribe({
+      next: data => {
+        this.generalWhatsappLink = this.getGeneralWhatsappLink(data);
+        this.zoneWhatsappLink = this.getZoneWhatsappLink(data, this.zona);
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      }
+    });
+  }
+
+  private getGeneralWhatsappLink(list: Whatsapp[]): string {
+    const preferredZones = ['grupo', 'general', 'comunidad'];
+
+    for (const zoneName of preferredZones) {
+      const item = list.find(w => this.normalizeZone(w.zona.toLocaleLowerCase()) === zoneName);
+      if (item?.link) return this.buildWhatsappUrl(item.link);
+    }
+
+    return '';
+  }
+
+  private getZoneWhatsappLink(list: Whatsapp[], zone: string): string {
+    const item = list.find(w => this.normalizeZone(w.zona.toLocaleLowerCase()) === this.normalizeZone(zone.toLocaleLowerCase()));
+    return item?.link ? this.buildWhatsappUrl(item.link) : '';
+  }
+
+  private buildWhatsappUrl(link: string): string {
+    const raw = (link || '').trim();
+    if (!raw) return '';
+
+    if (/^https?:\/\//i.test(raw)) {
+      try {
+        const url = new URL(raw);
+        if (url.hostname.toLowerCase().includes('chat.whatsapp.com') && !url.searchParams.has('mode')) {
+          url.searchParams.set('mode', 'ac_t');
+        }
+        return url.toString();
+      } catch {
+        return raw;
+      }
+    }
+
+    return `https://chat.whatsapp.com/${raw}?mode=ac_t`;
+  }
+
+  private normalizeZone(zone: string): string {
+    const normalized = zone
+      .toLowerCase()
+      .trim()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+
+    const aliasMap: Record<string, string> = {
+      rojo: 'roja',
+      amarillo: 'amarilla',
+      blanco: 'blanca'
+    };
+
+    return aliasMap[normalized] || normalized;
+  }
+
+  private buildPlayStoreUrl(uuid: string): string {
+    const packageId = 'com.orgullo2022';
+    const referrer = encodeURIComponent(`uuid=${uuid}`);
+    return `https://play.google.com/store/apps/details?id=${packageId}&referrer=${referrer}`;
+  }
+}

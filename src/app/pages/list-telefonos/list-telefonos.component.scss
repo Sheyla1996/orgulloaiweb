@@ -3,8 +3,10 @@
   padding: 0.5rem;
   margin-bottom: 1rem;
   font-size: 1rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--app-border);
   border-radius: 4px;
+  background: var(--app-surface);
+  color: var(--app-text);
 }
 
 .telefono {
@@ -14,6 +16,7 @@
   //border-bottom: 1px solid #eee;
   cursor: pointer;
   transition: background 0.2s;
+  color: var(--app-text);
 
   h3 {
     margin: 0 0 0.25rem;
@@ -75,11 +78,8 @@ a {
     max-width: 100%;
   }
  .mdc-button__label {
-  
+  color: var(--app-text);
   display: flex;
     align-items: center;
-    @media (prefers-color-scheme: dark) {
-      color: white;
-    }
  }
 }

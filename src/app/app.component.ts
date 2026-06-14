@@ -5,20 +5,14 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatFabMenu, MatFabMenuModule } from '@angular-material-extensions/fab-menu';
 import { filter } from 'rxjs/operators';
 import { WebSocketService } from './services/websocket.service';
 import { ToastrService } from 'ngx-toastr';
 import { PushService } from './services/push.service';
 import { NgxSpinnerModule } from "ngx-spinner";
 import { ErrorModalService } from './components/error-modal/error-modal.service';
-import { SwUpdate } from '@angular/service-worker';
 import { FcmService } from './services/fcm.service';
-import { getToken } from 'firebase/messaging';
-import { MdlFabMenuModule } from '@angular-mdl/fab-menu';
-import { MdlPopoverModule } from '@angular-mdl/popover';
-import { FabComponent } from './components/fab/fab.component';
-
+import { BottomNavigation } from './components/bottom-navigation/bottom-navigation';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -30,11 +24,8 @@ import { FabComponent } from './components/fab/fab.component';
     MatButtonModule,
     MatButtonToggleModule,
     RouterModule,
-    MatFabMenuModule,
     NgxSpinnerModule,
-    MdlFabMenuModule,
-    MdlPopoverModule,
-    FabComponent
+    BottomNavigation
   ],
   providers: [TitleCasePipe],
   templateUrl: './app.component.html',
@@ -44,11 +35,6 @@ import { FabComponent } from './components/fab/fab.component';
 })
 export class AppComponent implements OnInit {
   title = 'orgullo2022';
-  menu: MatFabMenu[] = [
-      { id: 'messages', icon: 'notifications',tooltip: 'Avisos' },
-      { id: 'phones', icon: 'contact_phone', tooltip: 'Teléfonos' },
-      { id: 'asociaciones', icon: 'groups', tooltip: 'Asociaciones' }
-    ];
   notificationsOn = false;
 
   constructor(
@@ -240,7 +226,7 @@ export class AppComponent implements OnInit {
         { id: 'asociaciones', icon: 'groups' }
       ];
       
-      if (userType === 'mañana' || userType === 'test_coor') {
+      /*if (userType === 'mañana' || userType === 'test_coor') {
         this.menu = [
           ...baseMenu,
           { id: 'carrozas', icon: 'local_shipping' },
@@ -253,7 +239,7 @@ export class AppComponent implements OnInit {
         ];
       } else {
         this.menu = [...baseMenu];
-      }
+      }*/
       
       this.cdr.markForCheck();
       this.cdr.detectChanges();
@@ -278,7 +264,7 @@ export class AppComponent implements OnInit {
         { id: 'asociaciones', icon: 'groups', tooltip: 'Asociaciones' }
       ];
 
-      if (userType === 'mañana' || userType === 'test_coor' || userType === 'willy') {
+      /*if (userType === 'mañana' || userType === 'test_coor' || userType === 'willy') {
         this.menu = [
           ...baseMenu,
           { id: 'carrozas', icon: 'local_shipping', tooltip: 'Carrozas' },
@@ -291,7 +277,7 @@ export class AppComponent implements OnInit {
         ];
       } else {
         this.menu = [...baseMenu];
-      }
+      }*/
       
       // Force change detection in iOS
       this.cdr.markForCheck();

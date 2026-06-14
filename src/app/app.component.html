@@ -4,6 +4,9 @@
 <ngx-spinner type="ball-scale-ripple-multiple">Cargando...</ngx-spinner>
  
   <router-outlet></router-outlet>
-  <app-fab *ngIf="currentUrl !== '/login'" [options]="menu" (onFabMenuItemSelected)="onChangeMenu($event)"></app-fab>
+  <app-bottom-navigation></app-bottom-navigation>
+
+
+ <!--<app-fab *ngIf="currentUrl !== '/login'" [options]="menu" (onFabMenuItemSelected)="onChangeMenu($event)"></app-fab>-->
 </main>
 

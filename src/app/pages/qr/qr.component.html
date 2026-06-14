@@ -1,0 +1,52 @@
+<main class="qr-mobile">
+  <section class="card" *ngIf="loading">
+    <h1>Validando acceso</h1>
+    <p>Estamos comprobando tu codigo QR...</p>
+  </section>
+
+  <section class="card card-error" *ngIf="!loading && !isValid">
+    <h1>Acceso no valido</h1>
+    <p>{{ errorMessage }}</p>
+  </section>
+
+  <section class="card" *ngIf="!loading && isValid">
+    <h1>Bienvenida al voluntariado</h1>
+    <p class="subtitle">Tu acceso se ha validado correctamente.</p>
+
+    <a
+      *ngIf="isAndroid"
+      class="action-btn action-btn-play"
+      [href]="playStoreUrl"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Descargar app Android en Google Play
+    </a>
+
+    <a
+      *ngIf="generalWhatsappLink"
+      class="action-btn action-btn-whatsapp"
+      [href]="generalWhatsappLink"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Ir al grupo general de WhatsApp
+    </a>
+
+    <a
+      *ngIf="zoneWhatsappLink"
+      class="action-btn action-btn-zone"
+      [href]="zoneWhatsappLink"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Ir al grupo de zona {{ zona | titlecase }}
+    </a>
+
+    <button class="action-btn action-btn-web" type="button" (click)="goToWeb()">
+      Acceder a la web
+    </button>
+
+    <p class="meta">UUID: {{ uuid }}</p>
+  </section>
+</main>

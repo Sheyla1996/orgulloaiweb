@@ -21,4 +21,20 @@ export class AsociacionesService {
   updatePosition(asociacion: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/posicion`, asociacion);
   }
+
+  createAsociacion(payload: Partial<Asociacion>): Observable<Asociacion> {
+    return this.http.post<Asociacion>(this.apiUrl, payload);
+  }
+
+  updateAsociacion(id: number, payload: Partial<Asociacion>): Observable<Asociacion> {
+    return this.http.put<Asociacion>(`${this.apiUrl}/${id}`, payload);
+  }
+
+  deleteAsociacion(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  changePosicion(id: number, nuevaPosicion: number): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}/posicion`, { nuevaPosicion });
+  }
 }

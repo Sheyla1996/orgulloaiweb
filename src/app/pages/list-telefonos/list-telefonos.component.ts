@@ -119,15 +119,15 @@ export class ListTelefonosComponent implements OnInit {
       next: data => {
         data.forEach(item => {
           if (item.zona.toLocaleLowerCase() === 'comunidad') {
-            this.linkComunidad = item.link;
+            this.linkComunidad = this.getUrlWhatsapp(item.link);
           } else if (item.zona.toLocaleLowerCase() === 'grupo') {
-            this.linkGrupo = item.link;
+            this.linkGrupo = this.getUrlWhatsapp(item.link);
           }
         });
         data.filter(item => !['comunidad', 'grupo'].includes(item.zona.toLocaleLowerCase())).forEach(item => {
           this.listZonas.push({
             zona: item.zona.toLocaleLowerCase(),
-            link: item.link,
+            link: this.getUrlWhatsapp(item.link),
             sheet_row: item.sheet_row,
             id: item.id
           });
@@ -141,6 +141,30 @@ export class ListTelefonosComponent implements OnInit {
         this.spinner.hide();
       }
     });
+  }
+
+  private extractWhatsappGroupId(rawLink: string): string {
+    const raw = (rawLink || '').trim();
+    if (!raw) return '';
+
+    try {
+      if (/^https?:\/\//i.test(raw)) {
+        const url = new URL(raw);
+        const segments = url.pathname.split('/').filter(Boolean);
+        return segments.length ? segments[segments.length - 1] : '';
+      }
+    } catch {
+      // Si URL falla, continuamos con parseo manual.
+    }
+
+    const noQuery = raw.split('?')[0];
+    const cleaned = noQuery.replace(/^\/+|\/+$/g, '');
+    const segments = cleaned.split('/').filter(Boolean);
+    return segments.length ? segments[segments.length - 1] : cleaned;
+  }
+
+  private getUrlWhatsapp(value: string) {
+    return `https://chat.whatsapp.com/${this.extractWhatsappGroupId(value)}?mode=ac_t`;
   }
 
   onSearchChange(): void {

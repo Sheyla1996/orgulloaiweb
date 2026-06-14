@@ -1,27 +1,24 @@
 <div class="page">
-  <div class="head">
-    <div class="search-content">
-      <input
-        type="text"
-        placeholder="Buscar carroza"
-        [(ngModel)]="searchText"
-        (input)="onSearchChange()"
-        class="search"
-      />
-      <mat-icon class="search-icon" fontIcon="search"></mat-icon>
-      <mat-icon class="close-icon" fontIcon="cancel" (click)="clear()"></mat-icon>
-    </div>
+  <div class="head" [ngClass]="{ 'head--full': !showKeyboard }">
     <div class="head__info">
       <div class="tag-info pendiente">{{pending}}/{{total}}</div>
       <div class="tag-info aparcando">{{aparcando}}/{{total - situadas}}</div>
       <div class="tag-info situado">{{situadas}}/{{total}}</div>
     </div>
-    @defer {
-    <div id="map-carrozas" class="map-container map-carrozas"></div>
+    @if(showMap) {
+      @defer {
+        <!-- Mapa fijo debajo del buscador -->
+        <div id="map-carrozas" class="map-container"></div>
+      }
     }
+  <div class="map-toggle" (click)="changeShowMap()">
+    <mat-icon fontSet="material-symbols-outlined">{{showMap ? 'list' : 'map' }}</mat-icon>
   </div>
-
-  <div class="list" id="list-container">
+  <div class="keyboard-toggle" (click)="changeShowKeyboard()">
+    <mat-icon fontSet="material-symbols-outlined">{{showKeyboard ? 'keyboard_off' : 'keyboard' }}</mat-icon>
+  </div>
+  <!-- Listado con scroll ocupa el resto -->
+  <div class="list" [ngClass]="{ 'list--full': !showMap }" id="list-container">
     <ng-container *ngFor="let carroza of carrozas">
       <div class="list-item" [id]="'carr-' + carroza.id">
         <div class="list-item__logo">
@@ -50,10 +47,18 @@
             </div>
           </div>
           <button matIconButton class="list-item__buttom" (click)="openDialog(carroza)" >
-            <mat-icon>edit</mat-icon>
+            <mat-icon fontSet="material-symbols-outlined">edit</mat-icon>
           </button>
         </div>
       </div>
     </ng-container>
   </div>
+
+  </div>
+  @if (showKeyboard) {
+    <app-search (searchTerm)="onSearchChange($event)"></app-search>
+  }
+
 </div>
+
+

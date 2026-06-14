@@ -1,4 +1,5 @@
 @import 'ngx-toastr/toastr';
+@import 'simple-keyboard/build/css/index.css';
 
 /*==========================
   Variables y Root
@@ -67,10 +68,11 @@
   z-index: 1000;
   display: flex;
   justify-content: space-around;
-  background-color: white;
+  background-color: var(--app-surface);
   -webkit-box-shadow: 3px 3px 5px 6px #ccc;
   -moz-box-shadow: 3px 3px 5px 6px #ccc;
-  box-shadow: 2px 2px 4px 5px #ccc;
+  box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.45);
+  border-top: 1px solid var(--app-border);
 
   button {
     display: flex;
@@ -90,7 +92,7 @@
 
 button:hover,
 .active-link {
-  color: blueviolet;
+  color: var(--app-accent);
 }
 
 a {
@@ -106,10 +108,27 @@ main {
 
 .head {
   position: relative;
+  height: calc(calc(var(--vh, 1vh) * 100) - 354px);
+
+  &.keyboard-open {
+    height: 100%;
+  }
+
+  &--full {
+    height: calc(calc(var(--vh, 1vh) * 100) - 90px);
+
+    & .list {
+      max-height: calc(var(--vh, 1vh) * 50);
+      &--full {
+        max-height: 100%;
+      }
+    }
+  }
 }
 
 .page {
   overflow: hidden;
+  height: 100%;
 }
 
 /*==========================
@@ -172,58 +191,32 @@ mat-fab-menu {
 
 /* Map container */
 .map-container {
-  height: calc(var(--vh, 1vh) * 40);
+  height: 100%;
   min-height: 200px;
   border-radius: 8px;
-  border: 1px solid #ccc;
   overflow: hidden;
-  margin-bottom: 1rem;
+}
+
+.marker-content{
+  display: flex;
+  flex-direction: column;
+  max-width: 150px;
+  margin: auto;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+
+.map-img {
+  width: 150px;
+  max-height: 50px;
+  object-fit: contain;
 }
 
 /*==========================
   Search
 ==========================*/
-.search {
-  position: absolute;
-  width: -webkit-fill-available;
-  padding: 0.5rem 1rem;
-  padding-left: 2.5rem;
-  margin: 10px;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 25px;
-  height: 30px;
-  z-index: 1000;
-  bottom: 0;
-  color: var(--color-text);
-  background-color: var(--color-background);
-  opacity: 0.8;
-  border: none;
 
-  &::placeholder {
-    color: var(--color-text, #aaa);
-    opacity: 1;
-  }
-}
-
-.search-content {
-  display: flex;
-
-  .search-icon {
-    position: absolute;
-    left: 20px;
-    color: var(--color-text);
-    z-index: 1000;
-    bottom: 20px;
-  }
-  .close-icon {
-    position: absolute;
-    right: 20px;
-    color: var(--color-text);
-    z-index: 1000;
-    bottom: 20px;
-  }
-}
 
 /*==========================
   Listas
@@ -231,15 +224,33 @@ mat-fab-menu {
 .list {
   overflow-y: auto;
   overflow-x: hidden;
-  max-height: calc(100vh - 340px);
+  max-height: calc(var(--vh, 1vh) * 25);
+  position: absolute;
+  bottom: 0;
+  z-index: 1000;
+  padding: 0 10px;
+  background: rgba(7, 10, 15, 0.86);
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  padding-top: 8px;
+
+  &--full {
+    max-height: 100%;
+    border-radius: 0;
+    background: none;
+  }
 
   &-item {
     display: flex;
     align-items: center;
-    padding: 15px 0;
+    padding: 10px 0;
 
     &:last-child {
-      padding-bottom: calc(100vh - 442px);
+      padding-bottom: calc(var(--vh, 1vh) - 442px);
+    }
+
+    &:first-child {
+      margin-top: 8px;
     }
 
     &__name {
@@ -251,8 +262,12 @@ mat-fab-menu {
       color: inherit !important;
     }
     &.active {
-      background-color: rgba(0, 0, 0, 0.2);
-      border-radius: 25px;
+      background-color: rgba(102, 182, 255, 0.08);
+      border-radius: 40px;
+      border: 1px solid rgba(102, 182, 255, 0.35);
+      box-shadow: 0 4px 12px rgba(58, 140, 216, 0.2), 0 2px 6px rgba(58, 140, 216, 0.15);
+      padding: 10px;
+
     }
   }
 }
@@ -295,15 +310,12 @@ mat-fab-menu {
   Botones y Formularios
 ==========================*/
 .buttons-list .mdc-button__label {
-  color: black;
+  color: var(--app-text);
   display: flex;
   align-items: center;
   text-align: center;
   gap: 8px;
 
-  @media (prefers-color-scheme: dark) {
-    color: white;
-  }
 }
 
 mat-form-field {
@@ -382,16 +394,20 @@ mat-form-field {
 /*==========================
   Otros
 ==========================*/
-@media (prefers-color-scheme: dark) {
-  .mdc-tab__text-label {
-    color: var(--color-text) !important;
-  }
+.mdc-tab__text-label {
+  color: var(--app-muted) !important;
+}
+
+.mdc-tab--active .mdc-tab__text-label {
+  color: var(--app-text) !important;
 }
 
 main {
   height: calc((var(--vh, 1vh) * 100) - 24px);
   max-height: calc((var(--vh, 1vh) * 100) - 24px);
   overflow: hidden;
+  background: transparent;
+  color: var(--app-text);
 }
 
 app-list-telefonos {
@@ -399,3 +415,5 @@ app-list-telefonos {
     display: block;
     height: calc((var(--vh, 1vh) * 100) - 24px);
 }
+
+

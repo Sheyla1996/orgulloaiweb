@@ -25,4 +25,20 @@ export class CarrozasService {
   updateState(id:number, carroza: any): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}/${id}/estado`, carroza);
   }
+
+  createCarroza(payload: any): Observable<Carroza> {
+    return this.http.post<Carroza>(this.apiUrl, payload);
+  }
+
+  updateCarroza(id: number, payload: any): Observable<Carroza> {
+    return this.http.put<Carroza>(`${this.apiUrl}/${id}`, payload);
+  }
+
+  deleteCarroza(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  changePosicion(id: number, nuevaPosicion: number): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}/posicion`, { nuevaPosicion });
+  }
 }

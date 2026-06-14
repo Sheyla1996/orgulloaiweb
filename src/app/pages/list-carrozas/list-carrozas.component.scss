@@ -1,23 +1,32 @@
 .list {
   &-item {
+    gap: 8px;
     img {
       max-width: 80px;
     }
     &__logo {
-      height: 70px;
-      width: 140px;
-      min-width: 140px;
-      background: url('/assets/icons/bus.svg') no-repeat center center;
-      background-size: cover;
+      width: 80px;
+      height: 40px;
+      //min-width: 100px;
+      //background: url('/assets/icons/bus.svg') no-repeat center center;
+      //background-size: cover;
+      background: white;
       padding-top: 5px;
     }
+
+    &__name {
+      font-size: 0.9rem;
+    }
+  }
+  &--full {
+    top: 50px;
   }
 }
 .tag {
   border-radius: 12px;
   padding: 4px 8px;
   width: fit-content;
-  color: black;
+  color: #0b1017;
   font-size: 0.8rem;
   font-family: var(--mat-tab-label-text-font, var(--mat-sys-title-small-font));
 }
@@ -36,13 +45,40 @@
   position: absolute;
   display: flex;
   gap: 8px;
-  top: 8px;
-  right: 8px;
+  top: 15px;
+  right: 60px;
   z-index: 1000;
 }
 
 .tag-info {
   border-radius: 24px;
   padding: 4px 12px;
-  color: black;
+  color: #0b1017;
+}
+.map-toggle {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  z-index: 1100;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+}
+.keyboard-toggle {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 1100;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+}
+:host {
+  color: var(--app-text);
 }

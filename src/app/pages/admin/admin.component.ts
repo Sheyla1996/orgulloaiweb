@@ -1,23 +1,23 @@
 import { CommonModule, isPlatformBrowser } from "@angular/common";
-import { AfterViewInit, ChangeDetectionStrategy, Component, Inject, NO_ERRORS_SCHEMA, OnInit, PLATFORM_ID } from "@angular/core";
-import {MatTabsModule} from '@angular/material/tabs';
+import { ChangeDetectionStrategy, Component, Inject, NO_ERRORS_SCHEMA, OnInit, PLATFORM_ID } from "@angular/core";
+import { MatTabsModule } from '@angular/material/tabs';
 import { AsociacionesService } from "../../services/asociaciones.service";
 import { CarrozasService } from "../../services/carrozas.service";
 import { TelefonosService } from "../../services/telefonos.service";
 import { Asociacion } from "../../models/asociacion.model";
 import { Carroza } from "../../models/carroza.model";
 import { Telefono } from "../../models/telefono.model";
-import { MapService } from "../../services/map.service";
 import { MatButtonModule } from "@angular/material/button";
-import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from "@angular/material/dialog";
-import { MatButtonToggleModule } from "@angular/material/button-toggle";
-import { MatInputModule } from "@angular/material/input";
-import { MatFormFieldModule } from "@angular/material/form-field";
 import { FormsModule } from "@angular/forms";
 import { MatIconModule } from "@angular/material/icon";
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from "@angular/material/dialog";
+import { MatButtonToggleModule } from "@angular/material/button-toggle";
 import { NgxSpinnerService } from "ngx-spinner";
 import { ErrorModalService } from "../../components/error-modal/error-modal.service";
 import { WhatsappService } from "../../services/whatsapp.service";
+import { Whatsapp } from "../../models/whatsapp.model";
+import { Pulsera, QrService } from "../../services/qr.service";
+import { ActivatedRoute, Router } from "@angular/router";
 
 @Component({
     selector: 'app-admin',
@@ -27,533 +27,588 @@ import { WhatsappService } from "../../services/whatsapp.service";
         MatTabsModule,
         MatButtonModule,
         FormsModule,
-        MatFormFieldModule,
-        MatInputModule,
         MatIconModule
     ],
     templateUrl: './admin.component.html',
     styleUrls: ['./admin.component.scss'],
     schemas: [NO_ERRORS_SCHEMA]
 })
-export class AdminComponent implements OnInit, AfterViewInit {
+export class AdminComponent implements OnInit {
     tab = 0;
+    searchText = '';
+
     asociaciones: Asociacion[] = [];
     carrozas: Carroza[] = [];
     telefonos: Telefono[] = [];
-    map!: any;
-    markerMap: Record<number, any> = {};
-    marker: any = null;
-    activeAsociacionId: number | null = null;
-    activeCarrozaId: number | null = null;
-    private _leaflet: any;
-    private _observerCleanup: (() => void) | null = null;
-    private _observerType: string | null = null;
-    mapType = 'map-asociaciones';
-    searchText = '';
-    showMap = true;
+    whatsapp: Whatsapp[] = [];
+    pulseras: Pulsera[] = [];
+
+    asociacionForm: Partial<Asociacion> = { name: '', shortName: '', logo: '', zona: '', isBatucada: false };
+    carrozaForm: Partial<Carroza> = { name: '', logo: '', zona: '', status: 'pendiente', size: '' };
+    telefonoForm: Partial<Telefono> = { name: '', telefono: '', zona: '' };
+    whatsappForm: Partial<Whatsapp> = { zona: '', link: '' };
+    pulseraForm: { uuid: string; zona: string; type: string } = { uuid: '', zona: '', type: '' };
+
+    editingAsociacionId: number | null = null;
+    editingCarrozaId: number | null = null;
+    editingTelefonoId: number | null = null;
+    editingWhatsappId: number | null = null;
+    editingPulseraUuid: string | null = null;
+
+    readonly zonas = ['blanca', 'azul', 'verde', 'roja', 'naranja', 'amarilla'];
+    readonly carrozaStatusOptions = ['pendiente', 'aparcando', 'situado'];
+    readonly carrozaSizeOptions = ['pequena', 'mediana', 'grande'];
 
     constructor(
+        private router: Router,
+        private route: ActivatedRoute,
         private asociacionesService: AsociacionesService,
         private carrozasService: CarrozasService,
         private telefonosService: TelefonosService,
-        private _whatsappService: WhatsappService,
-        private mapService: MapService,
-        private dialog: MatDialog,
+        private whatsappService: WhatsappService,
+        private qrService: QrService,
         private spinner: NgxSpinnerService,
-        private _errorModal: ErrorModalService,
+        private errorModal: ErrorModalService,
         @Inject(PLATFORM_ID) private platformId: Object,
     ) {}
 
-    async ngOnInit(): Promise<void> {
+    ngOnInit(): void {
+        const tabParam = this.route.snapshot.queryParamMap.get('tab');
+        const parsed = Number(tabParam);
+        this.tab = Number.isInteger(parsed) && parsed >= 0 && parsed <= 4 ? parsed : 0;
+        this.loadDataForCurrentTab();
     }
 
-    async ngAfterViewInit(): Promise<void> {
-        if (isPlatformBrowser(this.platformId)) {
-            await this.waitForMapDiv();
-            this._leaflet = await import('leaflet');
-            this.createMap();
-            this.createMapHide();
-            this.loadAsociaciones();
+    onTabChange(event: any): void {
+        this.tab = event.index;
+        this.searchText = '';
+        this.loadDataForCurrentTab();
+    }
+
+    openCreateForm(): void {
+        const type = this.tab === 0 ? 'asociacion' : this.tab === 1 ? 'carroza' : this.tab === 2 ? 'telefono' : this.tab === 3 ? 'whatsapp' : 'pulsera';
+        this.router.navigate(['/admin/editor'], { queryParams: { type, tab: this.tab } });
+    }
+
+    goToEditor(type: 'asociacion' | 'carroza' | 'telefono' | 'whatsapp' | 'pulsera', id: number | string): void {
+        this.router.navigate(['/admin/editor'], { queryParams: { type, id, tab: this.tab } });
+    }
+
+    private loadDataForCurrentTab(): void {
+        if (this.tab === 0) this.loadAsociaciones();
+        if (this.tab === 1) this.loadCarrozas();
+        if (this.tab === 2) this.loadTelefonos();
+        if (this.tab === 3) this.loadWhatsapp();
+        if (this.tab === 4) this.loadPulseras();
+    }
+
+    getSearchPlaceholder(): string {
+        if (this.tab === 1) return 'Buscar carroza';
+        if (this.tab === 2) return 'Buscar telefono';
+        if (this.tab === 3) return 'Buscar whatsapp';
+        if (this.tab === 4) return 'Buscar pulsera';
+        return 'Buscar asociacion';
+    }
+
+    getAsociacionesView(): Asociacion[] {
+        return [...this.asociaciones].sort((a, b) => (a.sheet_row ?? 0) - (b.sheet_row ?? 0));
+    }
+
+    getCarrozasView(): Carroza[] {
+        return [...this.carrozas].sort((a, b) => (a.sheet_row ?? 0) - (b.sheet_row ?? 0));
+    }
+
+    getTelefonosView(): Telefono[] {
+        return this.telefonos;
+    }
+
+    getPulserasView(): Pulsera[] {
+        return [...this.pulseras];
+    }
+
+    getWhatsappView(): Whatsapp[] {
+        return this.whatsapp;
+    }
+
+    onSearchChange(): void {
+        const term = this.searchText.trim().toLowerCase();
+        if (!term) return;
+
+        const configs: { listId: string; matches: (i: number) => boolean }[] = [
+            {
+                listId: 'admin-list-asoc',
+                matches: i => {
+                    const a = this.getAsociacionesView()[i];
+                    return `${a.position}`.includes(term) ||
+                        (a.name || '').toLowerCase().includes(term) ||
+                        (a.shortName || '').toLowerCase().includes(term) ||
+                        (a.zona || '').toLowerCase().includes(term);
+                }
+            },
+            {
+                listId: 'admin-list-carr',
+                matches: i => {
+                    const c = this.getCarrozasView()[i];
+                    return `${c.position}`.includes(term) ||
+                        (c.name || '').toLowerCase().includes(term) ||
+                        (c.zona || '').toLowerCase().includes(term) ||
+                        (c.status || '').toLowerCase().includes(term);
+                }
+            },
+            {
+                listId: 'admin-list-tel',
+                matches: i => {
+                    const t = this.telefonos[i];
+                    return (t.name || '').toLowerCase().includes(term) ||
+                        (t.telefono || '').toLowerCase().includes(term) ||
+                        (t.zona || '').toLowerCase().includes(term);
+                }
+            },
+            {
+                listId: 'admin-list-wa',
+                matches: i => {
+                    const w = this.getWhatsappView()[i];
+                    return (w.zona || '').toLowerCase().includes(term) ||
+                        (w.link || '').toLowerCase().includes(term);
+                }
+            },
+            {
+                listId: 'admin-list-puls',
+                matches: i => {
+                    const p = this.getPulserasView()[i];
+                    return (p.uuid || '').toLowerCase().includes(term) ||
+                        (p.zona || '').toLowerCase().includes(term) ||
+                        (p.type || '').toLowerCase().includes(term);
+                }
+            },
+        ];
+
+        const cfg = configs[this.tab];
+        if (!cfg) return;
+
+        const container = document.getElementById(cfg.listId);
+        if (!container) return;
+
+        const items = Array.from(container.querySelectorAll<HTMLElement>('.item-card'));
+        const lists = [this.getAsociacionesView(), this.getCarrozasView(), this.telefonos, this.getWhatsappView(), this.getPulserasView()];
+        const currentList = lists[this.tab];
+
+        const idx = currentList.findIndex((_, i) => cfg.matches(i));
+        if (idx !== -1 && items[idx]) {
+            items[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
     }
 
     private loadAsociaciones(): void {
         this.spinner.show();
         this.asociacionesService.getAsociaciones().subscribe({
-            next: asociaciones => {
-                this.asociaciones = [...asociaciones]
-                    .map(a => ({ ...a, type: 'asociación' }))
-                    .sort((a, b) => a.sheet_row - b.sheet_row);
-                console.log(this.asociaciones);
-                    this.setMapAsociaciones();
-                this.initObserver('asociaciones');
-                this.mapType = 'map-asociaciones';
+            next: list => {
+                this.asociaciones = (list ?? []).map(a => ({ ...a, type: 'asociacion' }));
                 this.spinner.hide();
             },
-            error: error => {
-                this._errorModal.openDialog(error);
-                console.error('Error al obtener asociaciones:', error);
-                this.spinner.hide();
-            }
+            error: error => this.handleError('Error al cargar asociaciones', error)
         });
     }
 
     private loadCarrozas(): void {
         this.spinner.show();
         this.carrozasService.getCarrozas().subscribe({
-            next: carrozas => {
-                this.carrozas = (carrozas ?? [])
-                    .map(a => ({ ...a, type: 'carroza' }))
-                    .sort((a, b) => a.sheet_row - b.sheet_row);
-                this.setMapCarrozas();
-                this.initObserver('carrozas');
-                this.mapType = 'map-carrozas';
+            next: list => {
+                this.carrozas = (list ?? []).map(c => ({ ...c, type: 'carroza' }));
                 this.spinner.hide();
             },
-            error: error => {
-                this._errorModal.openDialog(error);
-                console.error('Error al obtener carrozas:', error);
-                this.spinner.hide();
-            }
+            error: error => this.handleError('Error al cargar carrozas', error)
         });
     }
 
     private loadTelefonos(): void {
         this.spinner.show();
         this.telefonosService.getTelefonos().subscribe({
-            next: telefonos => {
-                this.telefonos = telefonos ?? [];
+            next: list => {
+                this.telefonos = (list ?? []).sort((a, b) => (a.sheet_row ?? 0) - (b.sheet_row ?? 0));
                 this.spinner.hide();
             },
-            error: error => {
-                this._errorModal.openDialog(error);
-                console.error('Error al obtener teléfonos:', error);
-                this.spinner.hide();
-            }
+            error: error => this.handleError('Error al cargar telefonos', error)
         });
     }
 
-    onTabChange(event: any): void {
-        this.tab = event.index;
-        this.searchText = '';
-        switch (event.index) {
-            case 0:
-                this.showMap = true;
-                this.loadAsociaciones();
-                break;
-            case 1:
-                this.showMap = true;
-                this.loadCarrozas();
-                break;
-            case 2:
-                this.showMap = false;
-                this.loadTelefonos();
-                break;
-        }
-    }
-
-    // Mapa
-
-    private clearMapLayers(): void {
-        this.map.eachLayer((layer: any) => {
-            if (layer instanceof this._leaflet.Marker || layer instanceof this._leaflet.Polyline) {
-                this.map.removeLayer(layer);
-            }
-        });
-        this.markerMap = {};
-    }
-
-    private createMap(): void {
-        if (!this.map) {
-            this.map = this._leaflet.map('map').setView([40.412, -3.692], 18);
-            this._leaflet.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
-                attribution: '© OpenStreetMap',
-                maxZoom: 18,
-                minZoom: 15,
-            }).addTo(this.map);
-        } else {
-            this.clearMapLayers();
-        }
-    }
-
-    setMapItem(item: any): void {
-        if (!item || !this.map) return;
-        const customIcon = this._leaflet.icon({
-            iconUrl: '/assets/icons/marker.svg',
-            iconSize: [60, 60],
-            iconAnchor: [30, 60],
-            popupAnchor: [0, -60],
-        });
-        let popupContent = `<b>${item.name}</b>`;
-        if (item.type === 'carroza') {
-            popupContent = item.logo
-                ? `<img src="https://laalisedadetormes.com/orgullo/${item.logo}.webp" alt="${item.name}" style="max-width:100px;max-height:100px;display:block;padding-top:8px;">`
-                : `<b style="max-width:100px;max-height:100px;display:block;">${item.name}</b>`;
-        }
-        this.marker = this._leaflet.marker([item.lat, item.lng], { icon: customIcon })
-            .addTo(this.map)
-            .bindPopup(popupContent)
-            .openPopup();
-
-        const mapDiv = document.getElementById('map');
-        if (mapDiv) {
-            const mapHeight = mapDiv.clientHeight;
-            const offsetY = mapHeight > 0 ? (mapHeight / 6) : 0;
-            const targetPoint = this.map.project([item.lat, item.lng], this.map.getZoom()).subtract([0, offsetY]);
-            const targetLatLng = this.map.unproject(targetPoint, this.map.getZoom());
-            this.map.setView(targetLatLng, 18, { animate: true });
-        } else {
-            this.map.setView([item.lat, item.lng], 18, { animate: true });
-        }
-    }
-
-    private async waitForMapDiv(): Promise<void> {
-        return new Promise(resolve => {
-            const check = () => {
-                if (document.getElementById('map')) {
-                    resolve();
-                } else {
-                    setTimeout(check, 50);
-                }
-            };
-            check();
-        });
-    }
-
-    initObserver(type: string): void {
-        if (this._observerCleanup) {
-            this._observerCleanup();
-            this._observerCleanup = null;
-        }
-        const container = document.getElementById(type === 'asociaciones' ? 'list-container-asoc' : 'list-container-carr');
-        if (!container) return;
-
-        let lastActiveId: number | null = null;
-        this._observerType = type;
-
-        const onScroll = () => {
-            const items = container.querySelectorAll('.list-item');
-            let firstVisible: Element | null = null;
-            for (let item of Array.from(items)) {
-                const rect = item.getBoundingClientRect();
-                const containerRect = container.getBoundingClientRect();
-                const visibleHeight = Math.min(rect.bottom, containerRect.bottom) - Math.max(rect.top, containerRect.top);
-                if (visibleHeight > 0 && visibleHeight >= rect.height * 0.25) {
-                    firstVisible = item;
-                    break;
-                }
-            }
-            if (firstVisible) {
-                let id: number | null = null;
-                let item: any = null;
-                if (type === 'carrozas') {
-                    id = parseInt(firstVisible.id.replace('carr-', ''), 10);
-                    if (id === lastActiveId) return;
-                    this.marker?.remove();
-                    this.activeCarrozaId = id;
-                    lastActiveId = id;
-                    item = this.carrozas.find(a => a.id === id);
-                } else if (type === 'asociaciones') {
-                    id = parseInt(firstVisible.id.replace('asoc-', ''), 10);
-                    if (id === lastActiveId) return;
-                    this.marker?.remove();
-                    this.activeAsociacionId = id;
-                    lastActiveId = id;
-                    item = this.asociaciones.find(a => a.id === id);
-                }
-                if (item) this.setMapItem(item);
-            }
-        };
-
-        container.addEventListener('scroll', onScroll);
-        this._observerCleanup = () => container.removeEventListener('scroll', onScroll);
-        setTimeout(onScroll, 0);
-    }
-
-    private setMapAsociaciones(): void {
-        this.clearMapLayers();
-        this.asociaciones.forEach((a, i) => {
-            if (i > 0) {
-                const prev = this.asociaciones[i - 1];
-                const color = this.getZonaColor(a.zona);
-                this._leaflet.polyline(
-                    [
-                        [prev.lat, prev.lng],
-                        [a.lat, a.lng]
-                    ],
-                    { color, weight: 6 }
-                ).addTo(this.map);
-            }
-        });
-        if (this.asociaciones.length > 0) {
-            this.setMapItem(this.asociaciones[0]);
-        }
-    }
-
-    private setMapCarrozas(): void {
-        this.clearMapLayers();
-        this.carrozas.forEach((a, i) => {
-            if (i > 0) {
-                const prev = this.carrozas[i - 1];
-                const color = this.getZonaColor(a.zona);
-                this._leaflet.polyline(
-                    [
-                        [prev.lat, prev.lng],
-                        [a.lat, a.lng]
-                    ],
-                    { color, weight: 6 }
-                ).addTo(this.map);
-            }
-        });
-        if (this.carrozas.length > 0) {
-            this.setMapItem(this.carrozas[0]);
-        }
-    }
-
-    // Utils
-
-    private getZonaColor(zona: string): string {
-        switch (zona) {
-            case 'blanca': return 'white';
-            case 'azul': return 'blue';
-            case 'verde': return 'green';
-            case 'roja': return 'red';
-            case 'naranja': return 'orange';
-            case 'amarilla': return 'yellow';
-            default: return 'purple';
-        }
-    }
-
-    createMapHide(): void {
-        this.mapService.initializeMap('map-hide', {
-            center: [40.412, -3.692],
-            zoom: 18
-        });
-        setTimeout(() => {
-            this._leaflet.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
-                attribution: '© OpenStreetMap',
-                maxZoom: 18,
-                minZoom: 15,
-            }).addTo(this.mapService['map']);
-        }, 100);
-    }
-
-    async getListPosition(type: string): Promise<any[]> {
-        this.mapService.clearMapLayers();
-        if (type === 'asociaciones') {
-            const recorrido = [
-                this._leaflet.latLng(40.412416, -3.692842),
-                this._leaflet.latLng(40.409798, -3.692232),
-                this._leaflet.latLng(40.409486, -3.692095),
-                this._leaflet.latLng(40.408929, -3.691708),
-                this._leaflet.latLng(40.408795, -3.691358)
-            ];
-            return this.mapService.getAsocMarkers(this.mapService.map, recorrido, this.asociaciones.length, true);
-        } else if (type === 'carrozas') {
-            const lines = [
-                [new this._leaflet.LatLng(40.407099, -3.692758), new this._leaflet.LatLng(40.406359, -3.691967)],
-                [new this._leaflet.LatLng(40.405928, -3.691514), new this._leaflet.LatLng(40.405662, -3.691192)],
-                [new this._leaflet.LatLng(40.405567, -3.691090), new this._leaflet.LatLng(40.404914, -3.690375)],
-                [new this._leaflet.LatLng(40.404832, -3.690295), new this._leaflet.LatLng(40.403159, -3.688455)],
-                [new this._leaflet.LatLng(40.402966, -3.688234), new this._leaflet.LatLng(40.401832, -3.686979)],
-                [new this._leaflet.LatLng(40.401751, -3.686896), new this._leaflet.LatLng(40.401666, -3.686790)],
-                [new this._leaflet.LatLng(40.401390, -3.686665), new this._leaflet.LatLng(40.400735, -3.685780)],
-                [new this._leaflet.LatLng(40.400656, -3.685687), new this._leaflet.LatLng(40.400068, -3.685120)],
-                [new this._leaflet.LatLng(40.399837, -3.684794), new this._leaflet.LatLng(40.399596, -3.684513)]
-            ];
-            return this.mapService.getCarrMarkers(this.mapService.map, lines, this.carrozas.length, true);
-        }
-        return [];
-    }
-
-    async updateAsociacionesPosition(): Promise<void> {
+    private loadPulseras(): void {
         this.spinner.show();
-        const markers = await this.getListPosition('asociaciones');
-        const asocs = this.asociaciones.map((asoc, index) => {
-            const marker = markers[index];
-            if (marker) {
-                return { ...asoc, lat: marker.getLatLng().lat, lng: marker.getLatLng().lng };
-            }
-            return asoc;
-        });
-        this.asociacionesService.updatePosition(asocs).subscribe({
-            next: () => {
-                this.asociaciones = [...asocs];
-                this.setMapAsociaciones();
-                this.initObserver('asociaciones');
-                this.mapType = 'map-asociaciones';
+        this.qrService.getPulseras().subscribe({
+            next: list => {
+                this.pulseras = list ?? [];
                 this.spinner.hide();
             },
-            error: error => {
-                this._errorModal.openDialog(error);
-                console.error('Error updating Asociaciónes', error);
-                this.spinner.hide();
-            }
+            error: error => this.handleError('Error al cargar pulseras', error)
         });
     }
 
-    async updateCarrozasPosition(): Promise<void> {
+    private loadWhatsapp(): void {
         this.spinner.show();
-        const markers = await this.getListPosition('carrozas');
-        const carrs = this.carrozas.map((carr, index) => {
-            const marker = markers[index];
-            if (marker) {
-                return { ...carr, lat: marker.getLatLng().lat, lng: marker.getLatLng().lng };
-            }
-            return carr;
-        });
-        this.carrozasService.updatePosition(carrs).subscribe({
-            next: () => {
-                this.carrozas = carrs
-                    .map(a => ({ ...a, type: 'carroza' }))
-                    .sort((a, b) => a.sheet_row - b.sheet_row);
-                this.setMapCarrozas();
-                this.initObserver('carrozas');
-                this.mapType = 'map-carrozas';
+        this.whatsappService.getWhatsapp().subscribe({
+            next: list => {
+                this.whatsapp = (list ?? []).sort((a, b) => (a.sheet_row ?? 0) - (b.sheet_row ?? 0));
                 this.spinner.hide();
             },
-            error: error => {
-                this._errorModal.openDialog(error);
-                console.error('Error updating Carrozas', error);
-                this.spinner.hide();
-            }
+            error: error => this.handleError('Error al cargar whatsapp', error)
         });
     }
 
     getListFromSheet(): void {
         this.spinner.show();
-        switch (this.tab) {
-            case 0:
-                this.asociacionesService.getAsociacionesFromSheet().subscribe({
-                    next: async asociaciones => {
-                        this.asociaciones = asociaciones;
-                        await this.updateAsociacionesPosition();
-                    },
-                    error: error => {
-                        this._errorModal.openDialog(error);
-                        console.error('Error obteniendo asociaciones desde la hoja de cálculo', error);
-                        this.spinner.hide();
-                    }
-                });
-                break;
-            case 1:
-                this.carrozasService.getCarrozasFromSheet().subscribe({
-                    next: async carrozas => {
-                        this.carrozas = carrozas;
-                        await this.updateCarrozasPosition();
-                    },
-                    error: error => {
-                        this._errorModal.openDialog(error);
-                        console.error('Error obteniendo carrozas desde la hoja de cálculo', error);
-                        this.spinner.hide();
-                    }
-                });
-                break;
-            case 2:
-                this.telefonosService.getTelefonosFromSheet().subscribe({
-                    next: telefonos => {
-                        this.telefonos = telefonos;
-                        this.spinner.hide();
-                    },
-                    error: error => {
-                        this._errorModal.openDialog(error);
-                        console.error('Error obteniendo teléfonos desde la hoja de cálculo', error);
-                        this.spinner.hide();
-                    }
-                });
-                this._whatsappService.getWhatsappFromSheet().subscribe({
-                    next: whatsapp => {
-                        this.spinner.hide();
-                    },
-                    error: error => {
-                        this._errorModal.openDialog(error);
-                        console.error('Error obteniendo teléfonos desde la hoja de cálculo', error);
-                        this.spinner.hide();
-                    }
-                });
-                break;
-            default:
-                console.log('Tab no reconocida');
-                break;
-        }
-    }
-
-    getPosition(): void {
-        switch (this.tab) {
-            case 0:
-                this.updateAsociacionesPosition();
-                break;
-            case 1:
-                this.updateCarrozasPosition();
-                break;
-            default:
-                console.log('Tab no reconocida');
-                break;
-        }
-    }
-
-    updateStatus(id: number, status: string, sheet_row: number): void {
-        this.spinner.show();
-        this.carrozasService.updateState(id, { status, sheet_row }).subscribe({
-            next: () => this.loadCarrozas(),
-            error: error => {
-                this._errorModal.openDialog(error);
-                console.error(`Error updating Carroza ${id}`, error);
-                this.spinner.hide();
-            }
-        });
-    }
-
-    openDialog(carroza: Carroza): void {
-        const dialogRef = this.dialog.open(ModalStatusComponent, {
-            data: { carroza }
-        });
-        dialogRef.afterClosed().subscribe(result => {
-            if (result && result !== carroza.status) {
-                this.updateStatus(carroza.id, result, carroza.sheet_row);
-            }
-        });
-    }
-
-    onSearchChange(): void {
-        const term = this.searchText.toLowerCase();
-        let index = -1;
-        let containerName = '';
-        let itemName = '';
         if (this.tab === 0) {
-            index = this.asociaciones.findIndex(a =>
-                a.name.toLowerCase().includes(term) ||
-                a.position?.toString().includes(term)
-            );
-            containerName = 'list-container-asoc';
-            itemName = '.list-asociaciones-item';
-        } else if (this.tab === 1) {
-            index = this.carrozas.findIndex(a =>
-                a.name.toLowerCase().includes(term) ||
-                a.position?.toString().includes(term)
-            );
-            containerName = 'list-container-carr';
-            itemName = '.list-carrozas-item';
+            this.asociacionesService.getAsociacionesFromSheet().subscribe({
+                next: list => {
+                    this.asociaciones = list ?? [];
+                    this.spinner.hide();
+                },
+                error: error => this.handleError('Error al obtener asociaciones desde Sheet', error)
+            });
+            return;
         }
-        if (index !== -1) {
-            setTimeout(() => {
-                const container = document.getElementById(containerName);
-                if (!container) return;
-                const items = container.querySelectorAll(itemName);
-                if (items[index]) {
-                    const item = items[index] as HTMLElement;
-                    container.scrollTo({
-                        top: item.offsetTop - container.offsetTop,
-                        behavior: 'smooth'
-                    });
-                }
-            }, 10);
+
+        if (this.tab === 1) {
+            this.carrozasService.getCarrozasFromSheet().subscribe({
+                next: list => {
+                    this.carrozas = list ?? [];
+                    this.spinner.hide();
+                },
+                error: error => this.handleError('Error al obtener carrozas desde Sheet', error)
+            });
+            return;
+        }
+
+        if (this.tab === 2) {
+            this.telefonosService.getTelefonosFromSheet().subscribe({
+                next: list => {
+                    this.telefonos = list ?? [];
+                    this.spinner.hide();
+                },
+                error: error => this.handleError('Error al obtener telefonos desde Sheet', error)
+            });
+            return;
+        }
+
+        if (this.tab === 3) {
+            this.whatsappService.getWhatsappFromSheet().subscribe({
+                next: list => {
+                    this.whatsapp = list ?? [];
+                    this.spinner.hide();
+                },
+                error: error => this.handleError('Error al obtener whatsapp desde Sheet', error)
+            });
         }
     }
 
-    onImgError(event: Event): void {
-        const target = event.target as HTMLImageElement;
-        target.src = './../../../assets/icons/lgbt.png';
+    startEditAsociacion(a: Asociacion): void {
+        this.editingAsociacionId = a.id;
+        this.asociacionForm = { ...a };
+    }
+
+    cancelEditAsociacion(): void {
+        this.editingAsociacionId = null;
+        this.asociacionForm = { name: '', shortName: '', logo: '', zona: '', isBatucada: false };
+    }
+
+    saveAsociacion(): void {
+        const payload = {
+            name: (this.asociacionForm.name || '').trim(),
+            shortName: (this.asociacionForm.shortName || '').trim(),
+            logo: (this.asociacionForm.logo || '').trim(),
+            zona: (this.asociacionForm.zona || '').trim().toLowerCase(),
+            isBatucada: !!this.asociacionForm.isBatucada,
+            sheet_row: this.asociacionForm.sheet_row
+        };
+
+        if (!payload.name || !payload.zona) {
+            this.errorModal.openDialog('Nombre y zona son obligatorios');
+            return;
+        }
+
+        this.spinner.show();
+        if (this.editingAsociacionId) {
+            this.asociacionesService.updateAsociacion(this.editingAsociacionId, payload).subscribe({
+                next: () => {
+                    this.cancelEditAsociacion();
+                    this.loadAsociaciones();
+                },
+                error: error => this.handleError('Error al editar asociacion', error)
+            });
+            return;
+        }
+
+        this.asociacionesService.createAsociacion(payload).subscribe({
+            next: () => {
+                this.cancelEditAsociacion();
+                this.loadAsociaciones();
+            },
+            error: error => this.handleError('Error al crear asociacion', error)
+        });
+    }
+
+    deleteAsociacion(id: number): void {
+        if (!confirm('¿Seguro que quieres borrar esta asociacion?')) return;
+        this.spinner.show();
+        this.asociacionesService.deleteAsociacion(id).subscribe({
+            next: () => this.loadAsociaciones(),
+            error: error => this.handleError('Error al borrar asociacion', error)
+        });
+    }
+
+    moveAsociacion(item: Asociacion, direction: -1 | 1): void {
+        const sorted = this.getAsociacionesView();
+        const idx = sorted.findIndex(a => a.id === item.id);
+        const neighbour = sorted[idx + direction];
+        if (!neighbour) return;
+        this.spinner.show();
+        this.asociacionesService.changePosicion(item.id, neighbour.position).subscribe({
+            next: () => this.loadAsociaciones(),
+            error: error => this.handleError('Error al reordenar asociacion', error)
+        });
+    }
+
+    startEditCarroza(c: Carroza): void {
+        this.editingCarrozaId = c.id;
+        this.carrozaForm = { ...c };
+    }
+
+    cancelEditCarroza(): void {
+        this.editingCarrozaId = null;
+        this.carrozaForm = { name: '', logo: '', zona: '', status: 'pendiente', size: '' };
+    }
+
+    saveCarroza(): void {
+        const name = (this.carrozaForm.name || '').trim();
+        const zona = (this.carrozaForm.zona || '').trim().toLowerCase();
+        const status = (this.carrozaForm.status || 'pendiente').trim().toLowerCase();
+        const size = (this.carrozaForm.size || '').trim().toLowerCase();
+        const logo = (this.carrozaForm.logo || '').trim();
+
+        if (!name || !zona) {
+            this.errorModal.openDialog('Nombre y zona son obligatorios');
+            return;
+        }
+
+        this.spinner.show();
+
+        if (this.editingCarrozaId) {
+            this.carrozasService.updateCarroza(this.editingCarrozaId, {
+                nombre: name,
+                zona,
+                status,
+                size,
+                logo
+            }).subscribe({
+                next: () => {
+                    this.cancelEditCarroza();
+                    this.loadCarrozas();
+                },
+                error: error => this.handleError('Error al editar carroza', error)
+            });
+            return;
+        }
+
+        this.carrozasService.createCarroza({
+            nombre: name,
+            zona,
+            status,
+            size,
+            logo
+        }).subscribe({
+            next: () => {
+                this.cancelEditCarroza();
+                this.loadCarrozas();
+            },
+            error: error => this.handleError('Error al crear carroza', error)
+        });
+    }
+
+    deleteCarroza(id: number): void {
+        if (!confirm('¿Seguro que quieres borrar esta carroza?')) return;
+        this.spinner.show();
+        this.carrozasService.deleteCarroza(id).subscribe({
+            next: () => this.loadCarrozas(),
+            error: error => this.handleError('Error al borrar carroza', error)
+        });
+    }
+
+    moveCarroza(item: Carroza, direction: -1 | 1): void {
+        const sorted = this.getCarrozasView();
+        const idx = sorted.findIndex(c => c.id === item.id);
+        const neighbour = sorted[idx + direction];
+        if (!neighbour) return;
+        this.spinner.show();
+        this.carrozasService.changePosicion(item.id, neighbour.position).subscribe({
+            next: () => this.loadCarrozas(),
+            error: error => this.handleError('Error al reordenar carroza', error)
+        });
+    }
+
+    startEditTelefono(t: Telefono): void {
+        this.editingTelefonoId = t.id;
+        this.telefonoForm = { ...t };
+    }
+
+    cancelEditTelefono(): void {
+        this.editingTelefonoId = null;
+        this.telefonoForm = { name: '', telefono: '', zona: '' };
+    }
+
+    saveTelefono(): void {
+        const payload = {
+            name: (this.telefonoForm.name || '').trim(),
+            telefono: (this.telefonoForm.telefono || '').trim(),
+            zona: (this.telefonoForm.zona || '').trim().toLowerCase(),
+        };
+
+        if (!payload.name || !payload.zona) {
+            this.errorModal.openDialog('Nombre y zona son obligatorios');
+            return;
+        }
+
+        this.spinner.show();
+        if (this.editingTelefonoId) {
+            this.telefonosService.updateTelefono(this.editingTelefonoId, payload).subscribe({
+                next: () => {
+                    this.cancelEditTelefono();
+                    this.loadTelefonos();
+                },
+                error: error => this.handleError('Error al editar telefono', error)
+            });
+            return;
+        }
+
+        const nextSheetRow = this.telefonos.length + 2;
+        this.telefonosService.createTelefono({ ...payload, sheet_row: nextSheetRow }).subscribe({
+            next: () => {
+                this.cancelEditTelefono();
+                this.loadTelefonos();
+            },
+            error: error => this.handleError('Error al crear telefono', error)
+        });
+    }
+
+    deleteTelefono(id: number): void {
+        if (!confirm('¿Seguro que quieres borrar este telefono?')) return;
+        this.spinner.show();
+        this.telefonosService.deleteTelefono(id).subscribe({
+            next: () => this.loadTelefonos(),
+            error: error => this.handleError('Error al borrar telefono', error)
+        });
+    }
+
+    moveTelefono(index: number, direction: -1 | 1): void {
+        const target = index + direction;
+        if (target < 0 || target >= this.telefonos.length) return;
+        const copy = [...this.telefonos];
+        [copy[index], copy[target]] = [copy[target], copy[index]];
+        copy.forEach((t, i) => { t.sheet_row = i + 2; });
+        this.telefonos = copy;
+    }
+
+    deleteWhatsapp(id: number): void {
+        if (!confirm('¿Seguro que quieres borrar este enlace de whatsapp?')) return;
+        this.spinner.show();
+        this.whatsappService.deleteWhatsapp(id).subscribe({
+            next: () => this.loadWhatsapp(),
+            error: error => this.handleError('Error al borrar whatsapp', error)
+        });
+    }
+
+    startEditPulsera(p: Pulsera): void {
+        this.editingPulseraUuid = p.uuid;
+        this.pulseraForm = { uuid: p.uuid, zona: p.zona, type: p.type };
+    }
+
+    cancelEditPulsera(): void {
+        this.editingPulseraUuid = null;
+        this.pulseraForm = { uuid: '', zona: '', type: '' };
+    }
+
+    savePulsera(): void {
+        const zona = this.pulseraForm.zona.trim().toLowerCase();
+        const type = this.pulseraForm.type.trim().toLowerCase();
+        const uuid = this.pulseraForm.uuid.trim();
+        if (!zona || !type) {
+            this.errorModal.openDialog('Zona y tipo son obligatorios');
+            return;
+        }
+
+        this.spinner.show();
+        if (this.editingPulseraUuid) {
+            this.qrService.updatePulsera(this.editingPulseraUuid, { zona, type }).subscribe({
+                next: () => {
+                    this.cancelEditPulsera();
+                    this.loadPulseras();
+                },
+                error: error => this.handleError('Error al editar pulsera', error)
+            });
+            return;
+        }
+
+        this.qrService.createPulsera(uuid ? { uuid, zona, type } : { zona, type }).subscribe({
+            next: () => {
+                this.cancelEditPulsera();
+                this.loadPulseras();
+            },
+            error: error => this.handleError('Error al crear pulsera', error)
+        });
+    }
+
+    deletePulsera(uuid: string): void {
+        if (!confirm('¿Seguro que quieres borrar esta pulsera?')) return;
+        this.spinner.show();
+        this.qrService.deletePulsera(uuid).subscribe({
+            next: () => {
+                if (this.editingPulseraUuid === uuid) this.cancelEditPulsera();
+                this.loadPulseras();
+            },
+            error: error => this.handleError('Error al borrar pulsera', error)
+        });
+    }
+
+    movePulsera(index: number, direction: -1 | 1): void {
+        const target = index + direction;
+        if (target < 0 || target >= this.pulseras.length) return;
+        const copy = [...this.pulseras];
+        [copy[index], copy[target]] = [copy[target], copy[index]];
+        this.pulseras = copy;
+    }
+
+    getQrImageUrl(uuid: string): string {
+        return `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(this.buildAccessUrl(uuid))}`;
+    }
+
+    openQr(uuid: string): void {
+        if (!isPlatformBrowser(this.platformId)) return;
+        window.open(this.getQrImageUrl(uuid), '_blank');
+    }
+
+    async writeNfc(uuid: string): Promise<void> {
+        if (!isPlatformBrowser(this.platformId)) return;
+        const NDEF = (window as any).NDEFReader;
+        if (!NDEF) {
+            this.errorModal.openDialog('NFC no soportado en este dispositivo/navegador. Usa Android + Chrome.');
+            return;
+        }
+
+        try {
+            const ndef = new NDEF();
+            await ndef.write({ records: [{ recordType: 'url', data: this.buildAccessUrl(uuid) }] });
+            alert('Etiqueta NFC escrita correctamente');
+        } catch (error) {
+            this.handleError('No se pudo escribir la etiqueta NFC', error);
+        }
+    }
+
+    private buildAccessUrl(uuid: string): string {
+        return `https://voluntariadolgtbapp.es/qr?uuid=${encodeURIComponent(uuid)}`;
+    }
+
+    private handleError(message: string, error: any): void {
+        console.error(message, error);
+        this.errorModal.openDialog(typeof error === 'string' ? error : (error?.error?.message || message));
+        this.spinner.hide();
     }
 }
 

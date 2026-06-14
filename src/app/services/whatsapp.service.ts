@@ -17,4 +17,16 @@ export class WhatsappService {
   getWhatsappFromSheet(): Observable<Whatsapp[]> {
     return this.http.get<Whatsapp[]>(`${this.apiUrl}/from-sheet`);
   }
+
+  createWhatsapp(payload: Partial<Whatsapp> & { sheet_row?: number }): Observable<Whatsapp> {
+    return this.http.post<Whatsapp>(this.apiUrl, payload);
+  }
+
+  updateWhatsapp(id: number, payload: Partial<Whatsapp>): Observable<Whatsapp> {
+    return this.http.put<Whatsapp>(`${this.apiUrl}/${id}`, payload);
+  }
+
+  deleteWhatsapp(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
 }

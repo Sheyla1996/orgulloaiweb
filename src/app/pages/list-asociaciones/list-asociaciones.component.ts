@@ -11,6 +11,9 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ModalComponent } from '../../components/modal.component';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ErrorModalService } from '../../components/error-modal/error-modal.service';
+import { SearchComponent } from '../../components/search/search.component';
+
+
 
 @Component({
   selector: 'app-list-asociaciones',
@@ -22,7 +25,8 @@ import { ErrorModalService } from '../../components/error-modal/error-modal.serv
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatDialogModule
+    MatDialogModule,
+    SearchComponent
   ],
   templateUrl: './list-asociaciones.component.html',
   styleUrls: ['./list-asociaciones.component.scss'],
@@ -30,12 +34,17 @@ import { ErrorModalService } from '../../components/error-modal/error-modal.serv
 })
 export class ListAsociacionesComponent implements OnInit, OnDestroy {
   asociaciones: Asociacion[] = [];
-  map!: any;
+  map: any = null;
   searchText = '';
   marker: any = null;
   activeAsociacionId: number | null = null;
   private leaflet: any;
   private installPromptEvent: any = null;
+  showMap = true;
+  showKeyboard = true;
+  private scrollContainer: HTMLElement | null = null;
+  private scrollHandler?: () => void;
+  
 
   constructor(
     private asociacionesService: AsociacionesService,
@@ -50,6 +59,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
 
     this.leaflet = await import('leaflet');
     this.handlePwaPrompt();
+    this.setupViewportListener();
     const cached = localStorage.getItem('asociaciones');
     const shouldUseCache = this.shouldUseCache();
 
@@ -86,7 +96,32 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {}
+  
+
+  ngOnDestroy(): void {
+    if (typeof window !== 'undefined' && (window as any).visualViewport) {
+      (window as any).visualViewport.removeEventListener('resize', this.handleViewportResize);
+    }
+    this.detachScrollSync();
+    this.destroyMap();
+  }
+
+  private handleViewportResize = () => {
+    if (!this.showMap || !this.map) return;
+    
+    if (this.activeAsociacionId && this.map) {
+      const activeAsoc = this.asociaciones.find(a => a.id === this.activeAsociacionId);
+      if (activeAsoc) {
+        this.repositionMap(activeAsoc);
+      }
+    }
+  }
+
+  private setupViewportListener(): void {
+    if (typeof window !== 'undefined' && (window as any).visualViewport) {
+      (window as any).visualViewport.addEventListener('resize', this.handleViewportResize);
+    }
+  }
 
   private handlePwaPrompt(): void {
     const hideModal = localStorage.getItem('hideModal');
@@ -131,11 +166,32 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
   }
 
   private clearMapLayers(): void {
+    if (!this.map) return;
+
     this.map.eachLayer((layer: any) => {
       if (layer instanceof this.leaflet.Marker || layer instanceof this.leaflet.Polyline) {
         this.map.removeLayer(layer);
       }
     });
+  }
+
+  private detachScrollSync(): void {
+    if (this.scrollContainer && this.scrollHandler) {
+      this.scrollContainer.removeEventListener('scroll', this.scrollHandler);
+    }
+
+    this.scrollContainer = null;
+    this.scrollHandler = undefined;
+  }
+
+  private destroyMap(): void {
+    this.marker?.remove();
+    this.marker = null;
+
+    if (this.map) {
+      this.map.remove();
+      this.map = null;
+    }
   }
 
   private async waitForMapDiv(): Promise<void> {
@@ -152,6 +208,8 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
   }
 
   private initMap(): void {
+    if (!this.showMap) return;
+
     if (!this.map) {
       this.map = this.leaflet.map('map-asociaciones').setView([40.412, -3.692], 18);
       this.leaflet.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
@@ -186,10 +244,15 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
   }
 
   private initScrollSync(): void {
+    this.detachScrollSync();
+
     const container = document.getElementById('list-container');
     if (!container) return;
 
-    container.addEventListener('scroll', () => {
+    this.scrollContainer = container;
+    this.scrollHandler = () => {
+      if (!this.showMap || !this.map) return;
+
       const items = container.querySelectorAll('.list-item');
       let firstVisible: Element | null = null;
       items.forEach(item => item.classList.remove('active'));
@@ -197,7 +260,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
         const rect = item.getBoundingClientRect();
         const containerRect = container.getBoundingClientRect();
         const visibleHeight = Math.min(rect.bottom, containerRect.bottom) - Math.max(rect.top, containerRect.top);
-        if (visibleHeight > 0 && visibleHeight >= rect.height * 0.25) {
+        if (visibleHeight > 0 && visibleHeight >= rect.height * 0.65) {
           firstVisible = item;
           break;
         }
@@ -213,13 +276,16 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
           if (a) this.setMapItem(a);
         }
       }
-    });
+    };
+
+    container.addEventListener('scroll', this.scrollHandler);
   }
 
-  onSearchChange(): void {
-    const term = this.searchText.toLowerCase();
+  onSearchChange(searchText: string): void {
+    const term = searchText.toLowerCase();
     const index = this.asociaciones.findIndex(a =>
       a.name.toLowerCase().includes(term) ||
+      //a.shortName.toLowerCase().includes(term) ||
       a.position.toString().includes(term)
     );
     if (index !== -1) {
@@ -229,15 +295,14 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
         const items = container.querySelectorAll('.list-item');
         if (items[index]) {
           const item = items[index] as HTMLElement;
-          const itemOffsetTop = item.offsetTop - container.offsetTop;
-          container.scrollTo({ top: itemOffsetTop, behavior: 'smooth' });
+          container.scrollTo({ top: item.offsetTop, behavior: 'smooth' });
         }
       }, 10);
     }
   }
 
   setMapItem(a: Asociacion): void {
-    if (!a || !this.map) return;
+    if (!a || !this.map || !this.showMap) return;
     const customIcon = this.leaflet.icon({
       iconUrl: '/assets/icons/marker.svg',
       iconSize: [60, 60],
@@ -246,14 +311,22 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
     });
     this.marker = this.leaflet.marker([a.lat, a.lng], { icon: customIcon })
       .addTo(this.map)
-      .bindPopup(`<b>${a.name}</b>`)
-      .openPopup();
+      /*.bindPopup(`<div class="marker-content">
+        <img class="map-img" src="${a.isBatucada ? '/assets/icons/batucada.svg' : 'https://laalisedadetormes.com/orgullo/' + a.logo + '.webp'}" alt="${a.name}" onerror="this.src='./../../../assets/icons/lgbt.png'">
+        <b>${a.name}</b></div>`)*/
+      //.openPopup();
+
+    this.repositionMap(a);
+  }
+
+  private repositionMap(a: Asociacion): void {
+    if (!this.showMap || !this.map) return;
 
     setTimeout(() => {
       const mapDiv = document.getElementById('map-asociaciones');
       if (mapDiv) {
         const mapHeight = mapDiv.clientHeight;
-        const offsetY = mapHeight > 0 ? (mapHeight / 6) : 0;
+        const offsetY = mapHeight > 0 ? -60 : 0;
         const targetPoint = this.map.project([a.lat, a.lng], this.map.getZoom()).subtract([0, offsetY]);
         const targetLatLng = this.map.unproject(targetPoint, this.map.getZoom());
         this.map.setView(targetLatLng, 18, { animate: true });
@@ -279,6 +352,40 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
 
   clear() {
     this.searchText = '';
-    this.onSearchChange();
+    this.onSearchChange('');
+  }
+
+  changeShowMap() {
+    this.showMap = !this.showMap;
+
+    if (!this.showMap) {
+      //this.detachScrollSync();
+      this.destroyMap();
+      const container = document.getElementById('list-container');
+      if (container) {
+        container.querySelectorAll('.list-item').forEach(item => item.classList.remove('active'));
+      }
+      return;
+    }
+
+    if (this.showMap) {
+      setTimeout(async () => {
+        await this.waitForMapDiv();
+        this.initMap();
+        this.initScrollSync();
+      }, 100);
+    }
+  }
+
+  changeShowKeyboard() {
+    this.showKeyboard = !this.showKeyboard;
+    if (this.showMap) {
+      this.destroyMap();
+      setTimeout(async () => {
+        await this.waitForMapDiv();
+        this.initMap();
+        this.initScrollSync();
+      }, 100);
+    }
   }
 }

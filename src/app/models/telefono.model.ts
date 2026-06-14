@@ -3,4 +3,5 @@ export interface Telefono {
   name: string;
   telefono: string;
   zona: string;
+  sheet_row?: number;
 }
