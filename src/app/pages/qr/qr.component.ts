@@ -70,8 +70,10 @@ export class QrComponent implements OnInit {
     localStorage.setItem('zone', this.zona || '');
     localStorage.setItem('year', this.year.toString() || '0');
 
-    const goToCarrozas = ['mañana', 'boss', 'willy', 'test_coor'].includes((this.type || '').toLowerCase());
-    this.router.navigate([goToCarrozas ? '/carrozas' : '/asociaciones']);
+    const isMorning = new Date().getHours() < 12;
+    const navigate = ['coor', 'boss', 'willy', 'test_coor'].includes(this.type) && isMorning ? '/carrozas' : '/asociaciones';
+
+    this.router.navigate([navigate]);
   }
 
   private validateUuid(): void {
