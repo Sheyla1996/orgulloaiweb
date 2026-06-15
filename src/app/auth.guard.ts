@@ -14,6 +14,11 @@ export class AuthGuard implements CanActivate {
     if (isPlatformBrowser(this.platformId)) {
       const userType = localStorage.getItem('userType');
       const allowed = route.data['allowed'] as string[] | undefined;
+      const year = localStorage.getItem('year');
+      const actualYear = new Date().getFullYear();
+      if (year !== actualYear.toString()) {
+        return this.router.parseUrl('/login');
+      }
 
       if (!allowed || allowed.includes(userType || '')) {
         return true;

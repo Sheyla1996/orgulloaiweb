@@ -1,24 +1,38 @@
-<!-- login.component.html -->
-<form class="form" (ngSubmit)="login()">
-  <mat-form-field>
-    <mat-label>Selecciona la zona</mat-label>
-    <select matNativeControl [(ngModel)]="selectZone" name="zona">
-      <option value="blanca">Zona Blanca</option>
-      <option value="roja">Zona Roja</option>
-      <option value="naranja">Zona Naranja</option>
-      <option value="amarilla">Zona Amarilla</option>
-      <option value="verde">Zona Verde</option>
-      <option value="azul">Zona Azul</option>
-      <option value="violeta">Zona Violeta</option>
-      <option value="rosa">Zona Rosa</option>
-    </select>
-  </mat-form-field>
-  <input class="input" type="password" [(ngModel)]="password" name="password" placeholder="Contraseña" required>
-  <button matButton="filled" type="submit">Acceder</button>
-  <a style="margin-top: 24px;" matButton="filled" (click)="openDialogQr()"> <mat-icon>qr_code_scanner</mat-icon> Escanear QR</a>
-</form>
-<p *ngIf="error" style="color:red;">No tienes permisos para acceder</p>
+<main class="login-mobile">
+  <section class="card">
+    <img class="logo" src="assets/logo.png" alt="Logo Orgullo 2026" />
 
-<button style="margin: 0 auto;display: block;" matButton="filled" *ngIf="showInstallButton" (click)="onInstallPwa()">
-  Instalar aplicación
-</button>
+    <h1>Acceso voluntariado</h1>
+    <p>Selecciona tu zona y valida tu pulsera para entrar.</p>
+
+    <form class="form" (ngSubmit)="login()">
+      <label for="zona">Zona:</label>
+        <select [(ngModel)]="selectZone" name="zona" id="zona">
+          <option value="blanca">Zona Blanca</option>
+          <option value="roja">Zona Roja</option>
+          <option value="naranja">Zona Naranja</option>
+          <option value="amarilla">Zona Amarilla</option>
+          <option value="verde">Zona Verde</option>
+          <option value="azul">Zona Azul</option>
+          <option value="violeta">Zona Violeta</option>
+          <option value="rosa">Zona Rosa</option>
+        </select>
+
+      <label for="password">Contraseña:</label>
+      <input class="input" type="password" [(ngModel)]="password" name="password" id="password" required>
+
+      <button class="action-btn action-btn-primary" matButton="filled" type="submit">Acceder</button>
+
+      <button class="action-btn action-btn-secondary" matButton="filled" type="button" (click)="openDialogQr()">
+        <mat-icon fontSet="material-symbols-outlined">qr_code_scanner</mat-icon>
+        Escanear QR
+      </button>
+    </form>
+
+    <p *ngIf="error" class="error">No tienes permisos para acceder</p>
+
+    <button class="action-btn action-btn-webapp" matButton="filled" *ngIf="showInstallButton" (click)="onInstallPwa()">
+      Instalar aplicacion
+    </button>
+  </section>
+</main>

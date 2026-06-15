@@ -8,6 +8,7 @@ export interface QrValidationResponse {
   zona?: string;
   type?: string;
   description?: string;
+  year?: number;
   mensaje?: string;
 }
 
@@ -16,13 +17,15 @@ export interface Pulsera {
   zona: string;
   type: string;
   description?: string;
+  year?: number;
 }
 
 export interface PulseraPayload {
   zona: string;
   type: string;
   uuid?: string;
-    description?: string;
+  description?: string;
+  year?: number;
 }
 
 @Injectable({ providedIn: 'root' })

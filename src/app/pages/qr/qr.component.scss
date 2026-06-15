@@ -1,7 +1,6 @@
 :host {
   display: block;
   min-height: 100dvh;
-  background: #0c1016;
 }
 
 .qr-mobile {
@@ -34,6 +33,10 @@
     margin: 0;
     color: #b8c0d1;
   }
+
+  .logo {
+    margin-bottom: 12px;
+  }
 }
 
 .card-error {
@@ -56,6 +59,11 @@
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   box-sizing: border-box;
+  justify-content: center;
+    /* vertical-align: middle; */
+    align-items: center;
+    display: flex;
+    gap: 8px;
 
   &:active {
     transform: scale(0.98);
@@ -63,9 +71,15 @@
 }
 
 .action-btn-play {
-  background: linear-gradient(135deg, #0f9d58, #34a853);
+  background: linear-gradient(135deg, #810f9d, #9134a8);
   color: #fff;
-  box-shadow: 0 10px 24px rgba(15, 157, 88, 0.35);
+  box-shadow: 0 10px 24px rgba(129, 15, 157, 0.35);
+}
+
+.action-btn-webapp {
+  background: linear-gradient(135deg, #9d4f0f, #a85934);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(157, 79, 15,  0.35);
 }
 
 .action-btn-whatsapp {

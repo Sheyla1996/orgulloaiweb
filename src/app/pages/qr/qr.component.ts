@@ -4,6 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Whatsapp } from '../../models/whatsapp.model';
 import { QrService } from '../../services/qr.service';
 import { WhatsappService } from '../../services/whatsapp.service';
+import { ModalComponent } from '../../components/modal.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-qr',
@@ -18,6 +20,7 @@ export class QrComponent implements OnInit {
 
   zona = '';
   type = '';
+  year = 0;
 
   isAndroid = false;
   loading = true;
@@ -27,12 +30,14 @@ export class QrComponent implements OnInit {
   playStoreUrl = '';
   generalWhatsappLink = '';
   zoneWhatsappLink = '';
+  installPromptEvent: any = null;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private qrService: QrService,
     private whatsappService: WhatsappService,
+    private dialog: MatDialog,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -48,6 +53,7 @@ export class QrComponent implements OnInit {
     }
 
     if (!this.uuid) {
+      this.router.navigate(['/login']);
       this.loading = false;
       this.isValid = false;
       this.errorMessage = 'No tienes permisos para acceder.';
@@ -62,6 +68,7 @@ export class QrComponent implements OnInit {
 
     localStorage.setItem('userType', this.type || 'normal');
     localStorage.setItem('zone', this.zona || '');
+    localStorage.setItem('year', this.year.toString() || '0');
 
     const goToCarrozas = ['mañana', 'boss', 'willy', 'test_coor'].includes((this.type || '').toLowerCase());
     this.router.navigate([goToCarrozas ? '/carrozas' : '/asociaciones']);
@@ -71,21 +78,29 @@ export class QrComponent implements OnInit {
     this.qrService.validateUuid(this.uuid).subscribe({
       next: response => {
         const ok = response?.ok && response?.result === 'ok' && !!response?.zona && !!response?.type;
+        const actualYear = new Date().getFullYear();
 
-        if (!ok) {
+        if (!ok || response.year !== actualYear) {
           this.isValid = false;
           this.loading = false;
+          localStorage.removeItem('userType');
+          localStorage.removeItem('zone');
+          localStorage.removeItem('year');
           this.errorMessage = 'No tienes permisos para acceder.';
           return;
         }
 
         this.zona = this.normalizeZone(response.zona || '');
         this.type = (response.type || '').toLowerCase();
+        this.year = response.year || 0;
         this.isValid = true;
 
         this.loadWhatsappLinks();
       },
       error: () => {
+        localStorage.removeItem('userType');
+        localStorage.removeItem('zone');
+        localStorage.removeItem('year');
         this.isValid = false;
         this.loading = false;
         this.errorMessage = 'No tienes permisos para acceder.';
@@ -158,8 +173,28 @@ export class QrComponent implements OnInit {
   }
 
   private buildPlayStoreUrl(uuid: string): string {
-    const packageId = 'com.orgullo2022';
-    const referrer = encodeURIComponent(`uuid=${uuid}`);
-    return `https://play.google.com/store/apps/details?id=${packageId}&referrer=${referrer}`;
+    return `https://voluntariadolgtbapp.es/app.apk`;
+  }
+
+  onInstallPwa(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    window.addEventListener('beforeinstallprompt', (event: any) => {
+      event.preventDefault();
+      this.installPromptEvent = event;
+      const dialogRef = this.dialog.open(ModalComponent);
+
+      dialogRef.afterClosed().subscribe((result: any) => {
+        if (result === 'install') {
+          if (!this.installPromptEvent) return;
+          this.installPromptEvent.prompt();
+          this.installPromptEvent.userChoice.then(() => {
+            this.installPromptEvent = null;
+          });
+        } else {
+          localStorage.setItem('hideModal', 'hide');
+        }
+      });
+    });
+    
   }
 }

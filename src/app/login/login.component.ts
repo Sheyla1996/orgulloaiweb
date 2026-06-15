@@ -6,13 +6,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { Router } from '@angular/router';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
-import { LoginService } from '../services/login.service';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { BarcodeFormat } from '@zxing/library';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { ModalStatusComponent } from '../pages/admin/admin.component';
 import { MatIconModule } from '@angular/material/icon';
+import { QrService } from '../services/qr.service';
 
 @Component({
   selector: 'app-login',
@@ -32,7 +32,7 @@ import { MatIconModule } from '@angular/material/icon';
 export class LoginComponent implements OnInit {
   password = '';
   error = false;
-  selectZone = '';
+  selectZone?: string;
   installPromptEvent: any = null;
   showInstallButton = false;
 
@@ -40,7 +40,7 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private dialog: MatDialog,
     @Inject(PLATFORM_ID) private platformId: Object,
-    private loginService: LoginService
+    private qrService: QrService
   ) {}
 
   ngOnInit(): void {
@@ -57,19 +57,31 @@ export class LoginComponent implements OnInit {
 
   login(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-
-    this.loginService.login(this.password, this.selectZone).subscribe({
+    if (!this.password) {
+      this.handleLoginError();
+      return;
+    }
+    this.qrService.validateUuid(this.password).subscribe({
       next: (response: any) => {
-        if (response.ok) {
-          localStorage.setItem('userType', response.type || 'normal');
-          localStorage.setItem('zone', response.zona || '');
-            const deadline = new Date('2025-07-05T15:00:00');
-            this.router.navigate([['mañana', 'boss', 'willy', 'test_coor'].includes(response.type) && new Date() < deadline ? '/carrozas' : '/asociaciones'], {
-              queryParams: { pass: this.password, type: this.selectZone }
-            });
-        } else {
+        const ok = response?.ok && response?.result === 'ok' && !!response?.zona && !!response?.type;
+        const actualYear = new Date().getFullYear();
+        const zona = this.normalizeZone(response.zona || '');
+        const isSelectedZoneValid = this.selectZone ? this.normalizeZone(this.selectZone) !== zona : true;
+
+        if (!ok || response.year !== actualYear || !isSelectedZoneValid) {
           this.handleLoginError();
+          return;
         }
+
+        localStorage.setItem('userType', response.type || 'normal');
+        localStorage.setItem('zone', zona);
+        localStorage.setItem('year', response.year?.toString() || '0');
+
+        const isMorning = new Date().getHours() < 12;
+        const navigate = ['coor', 'boss', 'willy', 'test_coor'].includes(response.type) && isMorning ? '/carrozas' : '/asociaciones';
+
+        this.router.navigate([navigate]);
+
       },
       error: () => this.handleLoginError()
     });
@@ -77,6 +89,8 @@ export class LoginComponent implements OnInit {
 
   private handleLoginError(): void {
     localStorage.removeItem('userType');
+    localStorage.removeItem('zone');
+    localStorage.removeItem('year');
     this.error = true;
   }
 
@@ -96,15 +110,31 @@ export class LoginComponent implements OnInit {
     });
   }
 
+  private normalizeZone(zone: string): string {
+    const normalized = zone
+      .toLowerCase()
+      .trim()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+
+    const aliasMap: Record<string, string> = {
+      rojo: 'roja',
+      amarillo: 'amarilla',
+      blanco: 'blanca'
+    };
+
+    return aliasMap[normalized] || normalized;
+  }
+
   onScan(event: any): void {
     if (typeof event !== 'string' || !event.includes('voluntariadolgtbapp.es')) return;
     try {
       const url = new URL(event);
-      const pass = url.searchParams.get('pass');
+      const pass = url.searchParams.get('uuid');
       const type = url.searchParams.get('type');
-      if (pass && type) {
+      if (pass) {
         this.password = pass;
-        this.selectZone = type;
+        this.selectZone = type || undefined;
         this.login();
       }
     } catch {
