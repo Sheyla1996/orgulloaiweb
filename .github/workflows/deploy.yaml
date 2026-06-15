@@ -57,4 +57,4 @@ jobs:
             docker pull ghcr.io/sheyla1996/orgulloaiweb/orgulloaiweb:latest
             docker stop orgulloaiweb || true
             docker system prune -f
-            docker run --name orgulloaiweb -dit -p 4001:4001 ghcr.io/sheyla1996/orgulloaiweb/orgulloaiweb:latest
+            docker run --name orgulloaiweb -dit -p 4001:4001  -v /home/shey/public_html/voluntariadolgtbapp.es/app.apk:/usr/share/nginx/html/app.apk:ro ghcr.io/sheyla1996/orgulloaiweb/orgulloaiweb:latest
