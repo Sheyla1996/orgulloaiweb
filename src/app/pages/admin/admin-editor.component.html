@@ -64,6 +64,7 @@
       <option value="">Tipo</option>
       <option *ngFor="let t of typeOptions" [value]="t">{{ t | titlecase }}</option>
     </select>
+    <input type="number" placeholder="Año" [(ngModel)]="pulseraForm.year"/>
   </section>
 
   <div class="admin-editor__actions">

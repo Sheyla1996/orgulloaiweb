@@ -32,7 +32,7 @@ export class AdminEditorComponent implements OnInit {
   carrozaForm: Partial<Carroza> = { name: '', logo: '', zona: '', status: 'pendiente', size: '' };
   telefonoForm: Partial<Telefono> = { name: '', telefono: '', zona: '' };
   whatsappForm: Partial<Whatsapp> = { zona: '', link: '' };
-  pulseraForm: { uuid: string; zona: string; type: string; description?: string } = { uuid: '', zona: '', type: '' };
+  pulseraForm: { uuid: string; zona: string; type: string; description?: string; year?: number } = { uuid: '', zona: '', type: '' };
 
   readonly zonas = ['blanca', 'roja', 'naranja', 'amarilla', 'verde', 'azul', 'violeta', 'rosa', 'coor'];
   readonly carrozaStatusOptions = ['pendiente', 'aparcando', 'situado'];
@@ -153,7 +153,7 @@ export class AdminEditorComponent implements OnInit {
     this.qrService.getPulseras().subscribe({
       next: list => {
         const item = (list || []).find((p: Pulsera) => p.uuid === this.idParam);
-        if (item) this.pulseraForm = { uuid: item.uuid, zona: item.zona, type: item.type, description: item.description };
+        if (item) this.pulseraForm = { uuid: item.uuid, zona: item.zona, type: item.type, description: item.description, year: item.year };
         this.spinner.hide();
       },
       error: error => this.handleError('No se pudo cargar la pulsera', error)
@@ -256,6 +256,7 @@ export class AdminEditorComponent implements OnInit {
     const zona = this.pulseraForm.zona.trim().toLowerCase();
     const type = this.pulseraForm.type.trim().toLowerCase();
     const uuid = this.pulseraForm.uuid.trim();
+    const year = this.pulseraForm.year;
 
     if (!zona || !type) {
       this.errorModal.openDialog('Zona y tipo son obligatorios');
@@ -264,7 +265,7 @@ export class AdminEditorComponent implements OnInit {
 
     this.spinner.show();
     if (this.idParam) {
-      this.qrService.updatePulsera(this.idParam, { zona, type, description }).subscribe({
+      this.qrService.updatePulsera(this.idParam, { zona, type, description, year }).subscribe({
         next: () => this.goBack(),
         error: error => this.handleError('Error al guardar pulsera', error)
       });
@@ -280,7 +281,7 @@ export class AdminEditorComponent implements OnInit {
             newUuid = this.generateRandomId(10);
             exists = pulseras.some(p => p.uuid === newUuid);
           }
-          this.qrService.createPulsera({ uuid: newUuid, zona, type, description }).subscribe({
+          this.qrService.createPulsera({ uuid: newUuid, zona, type, description, year }).subscribe({
             next: () => this.goBack(),
             error: error => this.handleError('Error al crear pulsera', error)
           });
@@ -290,7 +291,7 @@ export class AdminEditorComponent implements OnInit {
       return;
     }
 
-    this.qrService.createPulsera({ uuid, zona, type, description }).subscribe({
+    this.qrService.createPulsera({ uuid, zona, type, description, year }).subscribe({
       next: () => this.goBack(),
       error: error => this.handleError('Error al crear pulsera', error)
     });
