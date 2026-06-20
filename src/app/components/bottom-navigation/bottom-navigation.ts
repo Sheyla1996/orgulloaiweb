@@ -18,12 +18,7 @@ interface NavigationItem {
 })
 export class BottomNavigation implements OnInit {
   showNavigation = true;
-  navigationItems: NavigationItem[] = [
-    { label: 'Asociaciones', icon: 'map_search', route: '/asociaciones' },
-    { label: 'Carrozas', icon: 'airport_shuttle', route: '/carrozas' },
-    { label: 'Teléfonos', icon: 'contact_phone', route: '/telefonos' }/*,
-    { label: 'Notificaciones', icon: 'notifications', route: '/notificaciones' }*/
-  ];
+  navigationItems: NavigationItem[] = [];
 
   constructor(private router: Router) {}
 
@@ -44,7 +39,6 @@ export class BottomNavigation implements OnInit {
   }
 
   private checkUserType(): void {
-    const isAdmin = this.navigationItems.some(item => item.route === '/admin');
     const userType = localStorage.getItem('userType');
     const year = localStorage.getItem('year');
     const zone = localStorage.getItem('zone');
@@ -55,12 +49,7 @@ export class BottomNavigation implements OnInit {
     }
 
     this.showNavigation = true;
-    
-    if (userType === 'boss' && !isAdmin) {
-      this.navigationItems.push({ label: 'Admin', icon: 'shield_person', route: '/admin' });
-    } else if (userType !== 'boss' && isAdmin) {
-      this.navigationItems = this.navigationItems.filter(item => item.route !== '/admin');
-    }
+    this.modifyNavigation();
   }
 
   isActive(route: string): boolean {
@@ -69,5 +58,19 @@ export class BottomNavigation implements OnInit {
 
   navigateTo(route: string): void {
     this.router.navigate([route]);
+  }
+
+  modifyNavigation(): void {
+    const userType = localStorage.getItem('userType');
+    const zona = localStorage.getItem('zone');
+    this.navigationItems = [];
+    this.navigationItems.push({ label: 'Asociaciones', icon: 'map_search', route: '/asociaciones' });
+    if (['boss', 'coor_manana'].includes(userType || '') || ['rosa'].includes(zona || '')) {
+      this.navigationItems.push({ label: 'Carrozas', icon: 'airport_shuttle', route: '/carrozas' });
+    }
+    this.navigationItems.push({ label: 'Teléfonos', icon: 'contact_phone', route: '/telefonos' });
+    if (userType === 'boss') {
+      this.navigationItems.push({ label: 'Admin', icon: 'shield_person', route: '/admin' });
+    }
   }
 }

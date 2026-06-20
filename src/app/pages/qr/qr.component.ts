@@ -6,11 +6,13 @@ import { QrService } from '../../services/qr.service';
 import { WhatsappService } from '../../services/whatsapp.service';
 import { ModalComponent } from '../../components/modal.component';
 import { MatDialog } from '@angular/material/dialog';
+import { MatButtonToggle } from "@angular/material/button-toggle";
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-qr',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatButtonToggle, MatIconModule],
   templateUrl: './qr.component.html',
   styleUrls: ['./qr.component.scss']
 })
@@ -42,6 +44,9 @@ export class QrComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    localStorage.removeItem('userType');
+    localStorage.removeItem('zone');
+    localStorage.removeItem('year');
     const qp = this.route.snapshot.queryParamMap;
 
     this.uuid = (qp.get('uuid') || '').trim();
@@ -50,6 +55,7 @@ export class QrComponent implements OnInit {
     if (isPlatformBrowser(this.platformId)) {
       this.isAndroid = /android/i.test(navigator.userAgent);
       this.playStoreUrl = this.buildPlayStoreUrl(this.uuid);
+      this.setupPwaPrompt();
     }
 
     if (!this.uuid) {
@@ -178,25 +184,24 @@ export class QrComponent implements OnInit {
     return `https://voluntariadolgtbapp.es/app.apk`;
   }
 
-  onInstallPwa(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
+  private setupPwaPrompt(): void {
     window.addEventListener('beforeinstallprompt', (event: any) => {
       event.preventDefault();
       this.installPromptEvent = event;
-      const dialogRef = this.dialog.open(ModalComponent);
-
-      dialogRef.afterClosed().subscribe((result: any) => {
-        if (result === 'install') {
-          if (!this.installPromptEvent) return;
-          this.installPromptEvent.prompt();
-          this.installPromptEvent.userChoice.then(() => {
-            this.installPromptEvent = null;
-          });
-        } else {
-          localStorage.setItem('hideModal', 'hide');
-        }
-      });
     });
-    
+  }
+
+  onInstallPwa(): void {
+    if (!isPlatformBrowser(this.platformId) || !this.installPromptEvent) return;
+
+    const dialogRef = this.dialog.open(ModalComponent);
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result === 'install') {
+        this.installPromptEvent.prompt();
+        this.installPromptEvent.userChoice.then(() => {
+          this.installPromptEvent = null;
+        });
+      } 
+    });
   }
 }

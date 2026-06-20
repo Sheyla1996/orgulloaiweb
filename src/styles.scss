@@ -17,7 +17,7 @@ $my-theme: mat.define-light-theme((
 ));
 
 @include mat.all-component-themes($my-theme);*/
-@import 'material-symbols';
+@use 'material-symbols';
 
 html, body {
   -webkit-overflow-scrolling: touch;

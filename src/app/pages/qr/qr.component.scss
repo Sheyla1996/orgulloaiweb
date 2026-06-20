@@ -60,10 +60,9 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   box-sizing: border-box;
   justify-content: center;
-    /* vertical-align: middle; */
-    align-items: center;
-    display: flex;
-    gap: 8px;
+  align-items: center;
+  display: flex;
+  gap: 8px;
 
   &:active {
     transform: scale(0.98);
@@ -88,8 +87,38 @@
 }
 
 .action-btn-zone {
-  background: #ff8b3e;
-  color: #fff;
+  &__blanca {
+    background: #fff;
+    color: #000 !important;
+  }
+  &__roja {
+    background: #f44336;
+    color: #fff;
+  }
+  &__naranja {
+    background: #f08103;
+    color: #fff !important;
+  }
+  &__amarilla {
+    background: #ffeb3b;
+    color: #000 !important;
+  }
+  &__verde {
+    background: #4caf50;
+    color: #fff;
+  }
+  &__azul {
+    background: #2196f3;
+    color: #fff;
+  }
+  &__violeta {
+    background: #9c27b0;
+    color: #fff;
+  }
+  &__rosa {
+    background: #e91e63;
+    color: #fff;
+  }
 }
 
 .action-btn-web {

@@ -24,7 +24,7 @@ export const routes: Routes = [
         path: 'carrozas',
         component: ListCarrozasComponent,
         canActivate: [AuthGuard],
-        data: { allowed: ['mañana', 'boss', 'willy', 'test_coor'] }
+        data: { allowed: ['boss', 'coor_manana', 'rosa'] }
     },
     {
         path: 'telefonos',

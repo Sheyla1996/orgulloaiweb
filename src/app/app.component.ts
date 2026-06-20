@@ -41,24 +41,17 @@ export class AppComponent implements OnInit {
     private router: Router,
     private wsService: WebSocketService,
     private toastr: ToastrService,
-    private pushService: PushService,
     private errorModal: ErrorModalService,
     private fcm: FcmService,
     private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private platformId: Object,
-  ) {
-    
-  }
+  ) {}
 
   get currentUrl(): string {
     return this.router.url;
   }
   ngOnInit(): void {
-    
-    // Check for iOS Safari specific limitations
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
-    
+
     // Only initialize FCM if platform supports it
     if (isPlatformBrowser(this.platformId)) {
       try {
@@ -66,39 +59,26 @@ export class AppComponent implements OnInit {
       } catch (error) {
         console.error('Error in FCM requestPermission:', error);
       }
-      
+
       try {
         this.fcm.listen();
       } catch (error) {
         console.error('Error in FCM listen:', error);
       }
-    } 
-    
-    
+    }
+
     try {
       this.wsService.connect();
     } catch (error) {
       console.error('Error in WebSocket connect:', error);
     }
-    
-    try {
-      this.subscribeToRouterEvents();
-    } catch (error) {
-      console.error('Error in subscribeToRouterEvents:', error);
-    }
-    
+
     try {
       this.subscribeToWebSocketMessages();
     } catch (error) {
       console.error('Error in subscribeToWebSocketMessages:', error);
     }
-    
-    try {
-      this.listenToStorageChanges();
-    } catch (error) {
-      console.error('Error in listenToStorageChanges:', error);
-    }
-    
+
     if (isPlatformBrowser(this.platformId)) {
       try {
         this.setViewportHeight();
@@ -106,48 +86,14 @@ export class AppComponent implements OnInit {
       } catch (error) {
         console.error('Error in viewport setup:', error);
       }
-      
-      // Update menu after platform browser check
-      setTimeout(() => {
-        this.updateMenu();
-      }, 200);
-    } 
-    
-    // Also try calling updateMenu directly without platform check
-    try {
-      this.updateMenuDirect();
-    } catch (error) {
-      console.error('Error in updateMenuDirect:', error);
     }
-    
+
     try {
       this.cdr.detectChanges();
     } catch (error) {
       console.error('Error in detectChanges:', error);
     }
 
-    const now = new Date();
-    const cutoff = new Date(now.getFullYear(), 6, 4, 13, 0, 0); // July is month 6 (0-based)
-    const userType = localStorage.getItem('userType');
-    if (
-      isPlatformBrowser(this.platformId) &&
-      userType &&
-      (userType === 'test' || userType === 'test_coor') &&
-      now > cutoff
-    ) {
-      localStorage.removeItem('userType');
-      localStorage.removeItem('zone');
-      this.router.navigate(['/login']);
-    }
-  }
-
-
-  private subscribeToRouterEvents(): void {
-    this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe(() => {
-        this.updateMenu();
-      });
   }
 
   private subscribeToWebSocketMessages(): void {
@@ -155,16 +101,6 @@ export class AppComponent implements OnInit {
       next: (msg) => this.handleWebSocketMessage(msg),
       error: (err) => this.handleError('Error in WebSocket messages subscription:', err)
     });
-  }
-
-  private listenToStorageChanges(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      window.addEventListener('storage', (event) => {
-        if (event.key === 'userType') {
-          this.updateMenu();
-        }
-      });
-    }
   }
 
   private handleWebSocketMessage(msg: any): void {
@@ -207,101 +143,5 @@ export class AppComponent implements OnInit {
     const vh = (window.visualViewport?.height || window.innerHeight) * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
   };
-
-  public refreshMenu(): void {
-    this.updateMenu();
-  }
-
-  public testMenu(): void {
-    this.updateMenuDirect();
-  }
-
-  private updateMenuDirect(): void {
-    try {
-      const userType = localStorage?.getItem('userType');
-      
-      const baseMenu = [
-        { id: 'messages', icon: 'notifications' },
-        { id: 'phones', icon: 'contact_phone' },
-        { id: 'asociaciones', icon: 'groups' }
-      ];
-      
-      /*if (userType === 'mañana' || userType === 'test_coor') {
-        this.menu = [
-          ...baseMenu,
-          { id: 'carrozas', icon: 'local_shipping' },
-        ];
-      } else if (userType === 'boss') {
-        this.menu = [
-          ...baseMenu,
-          { id: 'carrozas', icon: 'local_shipping' },
-          { id: 'admin', icon: 'manage_accounts' }
-        ];
-      } else {
-        this.menu = [...baseMenu];
-      }*/
-      
-      this.cdr.markForCheck();
-      this.cdr.detectChanges();
-    } catch (error) {
-      console.error('Error in updateMenuDirect:', error);
-    }
-  }
-
-  private updateMenu(): void {
-    setTimeout(() => {
-      
-      if (!isPlatformBrowser(this.platformId)) {
-        console.log('Not platform browser, returning'); // Debug log
-        return;
-      }
-
-      const userType = localStorage.getItem('userType');
-
-      const baseMenu = [
-        { id: 'messages', icon: 'notifications',tooltip: 'Avisos' },
-        { id: 'telefonos', icon: 'contact_phone', tooltip: 'Teléfonos' },
-        { id: 'asociaciones', icon: 'groups', tooltip: 'Asociaciones' }
-      ];
-
-      /*if (userType === 'mañana' || userType === 'test_coor' || userType === 'willy') {
-        this.menu = [
-          ...baseMenu,
-          { id: 'carrozas', icon: 'local_shipping', tooltip: 'Carrozas' },
-        ];
-      } else if (userType === 'boss') {
-        this.menu = [
-          ...baseMenu,
-          { id: 'carrozas', icon: 'local_shipping', tooltip: 'Carrozas' },
-          { id: 'admin', icon: 'manage_accounts', tooltip: 'Admin' }
-        ];
-      } else {
-        this.menu = [...baseMenu];
-      }*/
-      
-      // Force change detection in iOS
-      this.cdr.markForCheck();
-      this.cdr.detectChanges();
-    }, 100);
-  }
-
-  onChangeMenu(event: string | number): void {
-    const routes: Record<string, string> = {
-      asociaciones: '/asociaciones',
-      carrozas: '/carrozas',
-      telefonos: '/telefonos',
-      admin: '/admin',
-      messages: '/messages'
-    };
-    if (event === 'logout') {
-      localStorage.removeItem('userType');
-      localStorage.removeItem('zone');
-      this.router.navigate(['/login']);
-    } else if (routes[event as string]) {
-      this.router.navigate([routes[event as string]]);
-    } else {
-      console.warn('Unknown menu item:', event);
-    }
-  }
 
 }

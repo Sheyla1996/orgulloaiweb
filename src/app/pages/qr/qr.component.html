@@ -26,6 +26,7 @@
       rel="noopener noreferrer"
     >
       Descargar app Android
+      <mat-icon fontSet="material-symbols-outlined">apk_install</mat-icon>
     </a>
 
     <button
@@ -33,6 +34,7 @@
       (click)="onInstallPwa()"
     >
       Instalar Web App
+      <mat-icon fontSet="material-symbols-outlined">install_mobile</mat-icon>
     </button>
 
     <a
@@ -51,6 +53,7 @@
     <a
       *ngIf="zoneWhatsappLink"
       class="action-btn action-btn-zone"
+      [ngClass]="'action-btn-zone__' + zona.toLowerCase()"
       [href]="zoneWhatsappLink"
       target="_blank"
       rel="noopener noreferrer"
@@ -63,6 +66,7 @@
 
     <button class="action-btn action-btn-web" type="button" (click)="goToWeb()">
       Acceder a la web
+      <mat-icon fontSet="material-symbols-outlined">keyboard_arrow_right</mat-icon>
     </button>
 
   </section>
