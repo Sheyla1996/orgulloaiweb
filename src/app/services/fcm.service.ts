@@ -36,9 +36,10 @@ export class FcmService {
           vapidKey: environment.firebaseConfig.vapidKey
         }).then(async token => {
           console.log('Token:', token);
+          const topic = localStorage.getItem('topic');
           await fetch('https://apiorgullo.sheylamartinez.es/push/suscribir', {
             method: 'POST',
-            body: JSON.stringify({ token }),
+            body: JSON.stringify({ token, topic }),
             headers: { 'Content-Type': 'application/json' }
           });
           // 👉 Manda el token a tu backend para enviar notificaciones

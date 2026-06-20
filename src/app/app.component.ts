@@ -13,6 +13,7 @@ import { NgxSpinnerModule } from "ngx-spinner";
 import { ErrorModalService } from './components/error-modal/error-modal.service';
 import { FcmService } from './services/fcm.service';
 import { BottomNavigation } from './components/bottom-navigation/bottom-navigation';
+import { SettingsService } from './services/settings.service';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -44,6 +45,7 @@ export class AppComponent implements OnInit {
     private errorModal: ErrorModalService,
     private fcm: FcmService,
     private cdr: ChangeDetectorRef,
+    private settingsService: SettingsService,
     @Inject(PLATFORM_ID) private platformId: Object,
   ) {}
 
@@ -51,7 +53,9 @@ export class AppComponent implements OnInit {
     return this.router.url;
   }
   ngOnInit(): void {
-
+    const actualYear = new Date().getFullYear();
+    localStorage.setItem('topic', `${actualYear}`);
+    this.loadSettings();
     // Only initialize FCM if platform supports it
     if (isPlatformBrowser(this.platformId)) {
       try {
@@ -144,4 +148,13 @@ export class AppComponent implements OnInit {
     document.documentElement.style.setProperty('--vh', `${vh}px`);
   };
 
+  loadSettings(): void {
+    this.settingsService.getSettings().subscribe({
+      next: (settings) => {
+        const testSettings = settings.find(s => s.key === 'test');
+        localStorage.setItem('test', testSettings ? testSettings.value : 'false');
+      },
+      error: (err) => this.handleError('Error loading settings:', err)
+    });
+  }
 }

@@ -71,7 +71,7 @@ export class ChatComponent {
     if (!message) return;
 
     this.spinner.show();
-    this.messagesService.sendMessage({ message }).subscribe({
+    this.messagesService.sendMessage({ message, topic: localStorage.getItem('topic') || `global` }).subscribe({
       next: () => {
         this.newMessage = '';
         this.loadMessages();
