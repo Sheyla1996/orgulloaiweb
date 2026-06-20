@@ -6,13 +6,13 @@ import { QrService } from '../../services/qr.service';
 import { WhatsappService } from '../../services/whatsapp.service';
 import { ModalComponent } from '../../components/modal.component';
 import { MatDialog } from '@angular/material/dialog';
-import { MatButtonToggle } from "@angular/material/button-toggle";
 import { MatIconModule } from '@angular/material/icon';
+import { FcmService } from '../../services/fcm.service';
 
 @Component({
   selector: 'app-qr',
   standalone: true,
-  imports: [CommonModule, MatButtonToggle, MatIconModule],
+  imports: [CommonModule, MatIconModule],
   templateUrl: './qr.component.html',
   styleUrls: ['./qr.component.scss']
 })
@@ -33,6 +33,10 @@ export class QrComponent implements OnInit {
   generalWhatsappLink = '';
   zoneWhatsappLink = '';
   installPromptEvent: any = null;
+  currentStep = 1;
+  readonly totalSteps = 5;
+  notificationPermission: NotificationPermission | 'unsupported' = 'default';
+  notificationStatusMessage = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -40,6 +44,7 @@ export class QrComponent implements OnInit {
     private qrService: QrService,
     private whatsappService: WhatsappService,
     private dialog: MatDialog,
+    private fcmService: FcmService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -56,6 +61,7 @@ export class QrComponent implements OnInit {
       this.isAndroid = /android/i.test(navigator.userAgent);
       this.playStoreUrl = this.buildPlayStoreUrl(this.uuid);
       this.setupPwaPrompt();
+      this.syncNotificationPermission();
     }
 
     if (!this.uuid) {
@@ -80,6 +86,41 @@ export class QrComponent implements OnInit {
     const navigate = ['coor', 'boss', 'willy', 'test_coor'].includes(this.type) && isMorning ? '/carrozas' : '/asociaciones';
 
     this.router.navigate([navigate]);
+  }
+
+  nextStep(): void {
+    if (!this.isValid || this.currentStep >= this.totalSteps) return;
+    this.currentStep += 1;
+  }
+
+  prevStep(): void {
+    if (!this.isValid || this.currentStep <= 1) return;
+    this.currentStep -= 1;
+  }
+
+  goToStep(step: number): void {
+    if (!this.isValid) return;
+    this.currentStep = Math.min(this.totalSteps, Math.max(1, step));
+  }
+
+  async requestNotifications(): Promise<void> {
+    if (!isPlatformBrowser(this.platformId) || !('Notification' in window)) {
+      this.notificationPermission = 'unsupported';
+      this.notificationStatusMessage = 'Tu navegador no permite activar notificaciones aqui.';
+      return;
+    }
+
+    if (Notification.permission === 'granted') {
+      this.notificationPermission = 'granted';
+      this.notificationStatusMessage = 'Las notificaciones ya estaban activadas.';
+      return;
+    }
+
+    try {
+      this.fcmService.requestPermission();
+    } catch (error) {
+      console.error('Error in FCM requestPermission:', error);
+    }
   }
 
   private validateUuid(): void {
@@ -203,5 +244,14 @@ export class QrComponent implements OnInit {
         });
       } 
     });
+  }
+
+  private syncNotificationPermission(): void {
+    if (!isPlatformBrowser(this.platformId) || !('Notification' in window)) {
+      this.notificationPermission = 'unsupported';
+      return;
+    }
+
+    this.notificationPermission = Notification.permission;
   }
 }
