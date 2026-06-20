@@ -12,6 +12,7 @@ import { ModalComponent } from '../../components/modal.component';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ErrorModalService } from '../../components/error-modal/error-modal.service';
 import { SearchComponent } from '../../components/search/search.component';
+import { UbicacionCompartida } from '../../services/asociaciones.service';
 
 
 
@@ -37,11 +38,15 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
   map: any = null;
   searchText = '';
   marker: any = null;
+  liveLocationsLayer: any = null;
+  ubicacionesVivas: UbicacionCompartida[] = [];
   activeAsociacionId: number | null = null;
   private leaflet: any;
   private installPromptEvent: any = null;
   showMap = true;
   showKeyboard = true;
+  private liveLocationsTimer: ReturnType<typeof setInterval> | null = null;
+  private readonly liveLocationsTtlMinutes = 10;
   private scrollContainer: HTMLElement | null = null;
   private scrollHandler?: () => void;
   
@@ -60,6 +65,8 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
     this.leaflet = await import('leaflet');
     this.handlePwaPrompt();
     this.setupViewportListener();
+    this.loadLiveLocations();
+    this.liveLocationsTimer = setInterval(() => this.loadLiveLocations(false), 60000);
     const cached = localStorage.getItem('asociaciones');
     const shouldUseCache = this.shouldUseCache();
 
@@ -103,6 +110,10 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
       (window as any).visualViewport.removeEventListener('resize', this.handleViewportResize);
     }
     this.detachScrollSync();
+    if (this.liveLocationsTimer) {
+      clearInterval(this.liveLocationsTimer);
+      this.liveLocationsTimer = null;
+    }
     this.destroyMap();
   }
 
@@ -160,19 +171,40 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
       verde: 'green',
       roja: 'red',
       naranja: 'orange',
-      amarilla: 'yellow'
+      amarilla: 'yellow',
+      violeta: 'purple',
+      rosa: 'hotpink',
+      coor: 'black'
     };
     return colors[zona] || 'purple';
+  }
+
+  private getCircleBorderColor(zona: string): string {
+    const colors: Record<string, string> = {
+      blanca: '#a0a0a0',
+      azul: '#0d6efd',
+      verde: '#16a34a',
+      roja: '#dc2626',
+      naranja: '#ea580c',
+      amarilla: '#ca8a04',
+      violeta: '#7c3aed',
+      rosa: '#db2777',
+      coor: '#111827'
+    };
+
+    return colors[zona] || '#6d28d9';
   }
 
   private clearMapLayers(): void {
     if (!this.map) return;
 
     this.map.eachLayer((layer: any) => {
-      if (layer instanceof this.leaflet.Marker || layer instanceof this.leaflet.Polyline) {
+      if (layer instanceof this.leaflet.Marker || layer instanceof this.leaflet.Polyline || layer instanceof this.leaflet.Circle || layer instanceof this.leaflet.CircleMarker) {
         this.map.removeLayer(layer);
       }
     });
+
+    this.liveLocationsLayer?.clearLayers();
   }
 
   private detachScrollSync(): void {
@@ -187,6 +219,9 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
   private destroyMap(): void {
     this.marker?.remove();
     this.marker = null;
+
+    this.liveLocationsLayer?.remove();
+    this.liveLocationsLayer = null;
 
     if (this.map) {
       this.map.remove();
@@ -217,14 +252,63 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
         maxZoom: 18,
         minZoom: 15,
       }).addTo(this.map);
+      this.liveLocationsLayer = this.leaflet.layerGroup().addTo(this.map);
     } else {
       this.clearMapLayers();
     }
 
     this.drawPolylines();
+    this.drawLiveLocations();
     if (this.asociaciones.length > 0) {
       this.setMapItem(this.asociaciones[0]);
     }
+  }
+
+  private loadLiveLocations(refreshMap = true): void {
+    this.asociacionesService.getUbicacionesCompartidas(this.liveLocationsTtlMinutes).subscribe({
+      next: ubicaciones => {
+        this.ubicacionesVivas = ubicaciones ?? [];
+        if (refreshMap) {
+          this.drawLiveLocations();
+        }
+      },
+      error: error => {
+        console.error('Error fetching live locations:', error);
+      }
+    });
+  }
+
+  private drawLiveLocations(): void {
+    if (!this.map || !this.liveLocationsLayer) return;
+
+    this.liveLocationsLayer.clearLayers();
+
+    this.ubicacionesVivas.forEach(location => {
+      const color = this.getZonaColor(location.zona);
+      const circle = this.leaflet.circleMarker([location.lat, location.lng], {
+        radius: 12,
+        color: this.getCircleBorderColor(location.zona),
+        weight: 2,
+        fillColor: color,
+        fillOpacity: 0.42,
+      });
+
+      const label = location.displayName || `UUID ${location.uuid.slice(0, 6)}`;
+      const updatedAt = location.updatedAt ? new Date(location.updatedAt).toLocaleTimeString('es-ES', {
+        hour: '2-digit',
+        minute: '2-digit'
+      }) : 'reciente';
+
+      circle.bindPopup(`
+        <div class="live-location-popup">
+          <strong>${label}</strong><br>
+          Zona: ${location.zona}<br>
+          Última actualización: ${updatedAt}
+        </div>
+      `);
+
+      circle.addTo(this.liveLocationsLayer);
+    });
   }
 
   private drawPolylines(): void {

@@ -70,7 +70,34 @@
       }
     }
 
-    @if (currentStep === 4) {
+    @if (currentStep === 4 && shouldShowLocationSharingStep) {
+      <h1>Comparte tu ubicación</h1>
+
+      <p>Activa el compartido para enviar tu posición al mapa de asociaciones cada pocos minutos.</p>
+
+      <label class="location-share-field" for="sharing-interval">
+        <span>Intervalo en minutos</span>
+        <input
+          id="sharing-interval"
+          type="number"
+          min="1"
+          max="30"
+          step="1"
+          [(ngModel)]="sharingIntervalMinutes"
+        />
+      </label>
+
+      <button class="action-btn action-btn-location" type="button" (click)="toggleLocationSharing()">
+        {{ sharingLocation ? 'Detener ubicación' : 'Empezar ubicación' }}
+        <mat-icon fontSet="material-symbols-outlined">my_location</mat-icon>
+      </button>
+
+      @if (sharingStatusMessage) {
+        <p class="step-hint">{{ sharingStatusMessage }}</p>
+      }
+    }
+
+    @if (currentStep === (shouldShowLocationSharingStep ? 5 : 4)) {
       <h1>Grupos de WhatsApp</h1>
       <p>Unete a los grupos para estar coordinad{{'@'}} en tiempo real.</p>
 
@@ -106,7 +133,7 @@
       <p class="step-hint" *ngIf="!generalWhatsappLink && !zoneWhatsappLink">No hay enlaces de WhatsApp disponibles para tu perfil.</p>
     }
 
-    @if (currentStep === 5) {
+    @if (currentStep === (shouldShowLocationSharingStep ? 6 : 5)) {
       <h1>Todo listo</h1>
 
       <button class="action-btn action-btn-web" type="button" (click)="goToWeb()">
@@ -115,7 +142,7 @@
       </button>
     }
 
-    <div class="wizard-nav" *ngIf="currentStep < 5">
+    <div class="wizard-nav" *ngIf="currentStep < totalSteps">
       <button class="ghost-btn" type="button" (click)="prevStep()" [disabled]="currentStep === 1">Atras</button>
       <button class="action-btn action-btn-next" type="button" (click)="nextStep()">
         {{ currentStep === 1 ? 'Empezar' : 'Siguiente' }}
@@ -123,7 +150,7 @@
       </button>
     </div>
 
-    <button class="ghost-btn ghost-btn-full" type="button" *ngIf="currentStep === 5" (click)="goToStep(1)">
+    <button class="ghost-btn ghost-btn-full" type="button" *ngIf="currentStep === totalSteps" (click)="goToStep(1)">
       Volver al inicio
     </button>
 

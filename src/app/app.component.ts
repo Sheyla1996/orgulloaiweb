@@ -14,6 +14,7 @@ import { ErrorModalService } from './components/error-modal/error-modal.service'
 import { FcmService } from './services/fcm.service';
 import { BottomNavigation } from './components/bottom-navigation/bottom-navigation';
 import { SettingsService } from './services/settings.service';
+import { LocationSharingService } from './services/location-sharing.service';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -46,6 +47,7 @@ export class AppComponent implements OnInit {
     private fcm: FcmService,
     private cdr: ChangeDetectorRef,
     private settingsService: SettingsService,
+    private locationSharingService: LocationSharingService,
     @Inject(PLATFORM_ID) private platformId: Object,
   ) {}
 
@@ -56,6 +58,9 @@ export class AppComponent implements OnInit {
     const actualYear = new Date().getFullYear();
     localStorage.setItem('topic', `${actualYear}`);
     this.loadSettings();
+    if (isPlatformBrowser(this.platformId)) {
+      this.locationSharingService.resumeFromStorage();
+    }
     // Only initialize FCM if platform supports it
     if (isPlatformBrowser(this.platformId)) {
       try {

@@ -1,5 +1,5 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Whatsapp } from '../../models/whatsapp.model';
 import { QrService } from '../../services/qr.service';
@@ -8,15 +8,18 @@ import { ModalComponent } from '../../components/modal.component';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { FcmService } from '../../services/fcm.service';
+import { FormsModule } from '@angular/forms';
+import { LocationSharingService } from '../../services/location-sharing.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-qr',
   standalone: true,
-  imports: [CommonModule, MatIconModule],
+  imports: [CommonModule, FormsModule, MatIconModule],
   templateUrl: './qr.component.html',
   styleUrls: ['./qr.component.scss']
 })
-export class QrComponent implements OnInit {
+export class QrComponent implements OnInit, OnDestroy {
   uuid = '';
   extraParam = '';
 
@@ -34,9 +37,14 @@ export class QrComponent implements OnInit {
   zoneWhatsappLink = '';
   installPromptEvent: any = null;
   currentStep = 1;
-  readonly totalSteps = 5;
+  readonly allowedSharingTypes = ['coor', 'boss', 'coor_manana'];
   notificationPermission: NotificationPermission | 'unsupported' = 'default';
   notificationStatusMessage = '';
+  sharingLocation = false;
+  sharingStatusMessage = '';
+  sharingIntervalMinutes = 3;
+
+  private sharingStateSub?: Subscription;
 
   constructor(
     private route: ActivatedRoute,
@@ -45,6 +53,7 @@ export class QrComponent implements OnInit {
     private whatsappService: WhatsappService,
     private dialog: MatDialog,
     private fcmService: FcmService,
+    private locationSharingService: LocationSharingService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -56,6 +65,12 @@ export class QrComponent implements OnInit {
 
     this.uuid = (qp.get('uuid') || '').trim();
     this.extraParam = (qp.get('extra') || '').trim();
+
+    this.sharingStateSub = this.locationSharingService.state$.subscribe(state => {
+      this.sharingLocation = state.active;
+      this.sharingIntervalMinutes = state.intervalMinutes || this.sharingIntervalMinutes;
+      this.sharingStatusMessage = state.statusMessage;
+    });
 
     if (isPlatformBrowser(this.platformId)) {
       this.isAndroid = /android/i.test(navigator.userAgent);
@@ -123,6 +138,41 @@ export class QrComponent implements OnInit {
     }
   }
 
+  async toggleLocationSharing(): Promise<void> {
+    if (!isPlatformBrowser(this.platformId) || !this.isValid || !this.isAndroid || !this.canShareLocation()) {
+      if (!this.canShareLocation()) {
+        this.sharingStatusMessage = 'Solo pueden compartir ubicación los perfiles COOR, BOSS y COOR_MAÑANA.';
+      }
+      return;
+    }
+
+    if (this.sharingLocation) {
+      this.locationSharingService.stopSharing();
+      return;
+    }
+
+    this.locationSharingService.startSharing({
+      uuid: this.uuid,
+      zona: this.zona,
+      userType: this.type,
+      intervalMinutes: this.sharingIntervalMinutes,
+      displayName: this.type || this.uuid,
+      source: 'android'
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.sharingStateSub?.unsubscribe();
+  }
+
+  get shouldShowLocationSharingStep(): boolean {
+    return this.isAndroid && this.canShareLocation();
+  }
+
+  get totalSteps(): number {
+    return this.shouldShowLocationSharingStep ? 6 : 5;
+  }
+
   private validateUuid(): void {
     this.qrService.validateUuid(this.uuid).subscribe({
       next: response => {
@@ -168,6 +218,10 @@ export class QrComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  private canShareLocation(): boolean {
+    return this.allowedSharingTypes.includes(this.type);
   }
 
   private getGeneralWhatsappLink(list: Whatsapp[]): string {

@@ -151,6 +151,11 @@
   color: #fff;
 }
 
+.action-btn-location {
+  background: linear-gradient(135deg, #c62828, #ef5350);
+  color: #fff;
+}
+
 .action-btn-notifications {
   background: linear-gradient(135deg, #005f73, #0a9396);
   color: #fff;
@@ -207,6 +212,27 @@
 
 .status-warn {
   color: #ffc178;
+}
+
+.location-share-field {
+  display: grid;
+  gap: 6px;
+
+  span {
+    font-size: 0.88rem;
+    color: #c7d0e0;
+  }
+
+  input {
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.07);
+    color: #f4f7fb;
+    padding: 12px 14px;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
 }
 
 .meta {
