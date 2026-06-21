@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { FcmService } from '../../services/fcm.service';
 import { LocationSharingService } from '../../services/location-sharing.service';
-import { WhatsappService } from '../../services/whatsapp.service';
 import { ModalComponent } from '../../components/modal.component';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -23,18 +22,17 @@ export class AjustesComponent implements OnInit {
   installPromptEvent: any = null;
 
   sharingLocation = false;
-  sharingIntervalMinutes = 3;
+  sharingIntervalMinutes = 2;
 
   zona = '';
   userType = '';
-  availableZones: string[] = [];
+  availableZones: string[] = ['blanca', 'roja', 'naranja', 'amarilla', 'verde', 'azul', 'violeta', 'rosa'];
 
   readonly zoneSelectionTypes = ['coor', 'coor_manana', 'boss'];
 
   constructor(
     private fcmService: FcmService,
     private locationSharingService: LocationSharingService,
-    private whatsappService: WhatsappService,
     private dialog: MatDialog,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
@@ -49,20 +47,12 @@ export class AjustesComponent implements OnInit {
     this.playStoreUrl = `https://voluntariadolgtbapp.es/app.apk`;
     this.syncNotificationPermission();
 
-    this.locationSharingService.state$.subscribe(state => {
-      this.sharingLocation = !!state.active;
-      this.sharingIntervalMinutes = state.intervalMinutes || this.sharingIntervalMinutes;
-    });
-
-    this.whatsappService.getWhatsapp().subscribe({
-      next: data => {
-        this.availableZones = data
-          .filter(item => !['comunidad', 'grupo'].includes((item.zona || '').toLocaleLowerCase()))
-          .map(item => (item.zona || '').toLocaleLowerCase())
-          .filter((v, i, a) => v && a.indexOf(v) === i)
-          .sort();
-      }
-    });
+    if (this.canChangeZone) {
+        this.locationSharingService.state$.subscribe(state => {
+            this.sharingLocation = !!state.active;
+            this.sharingIntervalMinutes = state.intervalMinutes || this.sharingIntervalMinutes;
+        });
+    }
   }
 
   private syncNotificationPermission(): void {
