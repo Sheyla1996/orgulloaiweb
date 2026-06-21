@@ -1,20 +1,19 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, ViewEncapsulation, OnInit, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
-import { Router, RouterModule, RouterOutlet, NavigationEnd } from '@angular/router';
+import { RouterModule, RouterOutlet } from '@angular/router';
 import { CommonModule, isPlatformBrowser, TitleCasePipe } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { filter } from 'rxjs/operators';
 import { WebSocketService } from './services/websocket.service';
 import { ToastrService } from 'ngx-toastr';
-import { PushService } from './services/push.service';
 import { NgxSpinnerModule } from "ngx-spinner";
 import { ErrorModalService } from './components/error-modal/error-modal.service';
 import { FcmService } from './services/fcm.service';
 import { BottomNavigation } from './components/bottom-navigation/bottom-navigation';
 import { SettingsService } from './services/settings.service';
 import { LocationSharingService } from './services/location-sharing.service';
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -36,11 +35,8 @@ import { LocationSharingService } from './services/location-sharing.service';
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppComponent implements OnInit {
-  title = 'orgullo2022';
-  notificationsOn = false;
 
   constructor(
-    private router: Router,
     private wsService: WebSocketService,
     private toastr: ToastrService,
     private errorModal: ErrorModalService,
@@ -51,17 +47,12 @@ export class AppComponent implements OnInit {
     @Inject(PLATFORM_ID) private platformId: Object,
   ) {}
 
-  get currentUrl(): string {
-    return this.router.url;
-  }
+
   ngOnInit(): void {
-    
     this.loadSettings();
+
     if (isPlatformBrowser(this.platformId)) {
       this.locationSharingService.resumeFromStorage();
-    }
-    // Only initialize FCM if platform supports it
-    if (isPlatformBrowser(this.platformId)) {
       try {
         this.fcm.requestPermission();
       } catch (error) {
@@ -72,6 +63,13 @@ export class AppComponent implements OnInit {
         this.fcm.listen();
       } catch (error) {
         console.error('Error in FCM listen:', error);
+      }
+
+      try {
+        this.setViewportHeight();
+        window.visualViewport?.addEventListener('resize', this.setViewportHeight);
+      } catch (error) {
+        console.error('Error in viewport setup:', error);
       }
     }
 
@@ -85,15 +83,6 @@ export class AppComponent implements OnInit {
       this.subscribeToWebSocketMessages();
     } catch (error) {
       console.error('Error in subscribeToWebSocketMessages:', error);
-    }
-
-    if (isPlatformBrowser(this.platformId)) {
-      try {
-        this.setViewportHeight();
-        window.visualViewport?.addEventListener('resize', this.setViewportHeight);
-      } catch (error) {
-        console.error('Error in viewport setup:', error);
-      }
     }
 
     try {
@@ -119,7 +108,7 @@ export class AppComponent implements OnInit {
         closeButton: true,
         timeOut: 20000
       });
-    } else if (msg.type === 'actualizar_listado_carr' && ['mañana', 'boss', 'willy', 'test_coor'].includes(userType)) {
+    } else if (msg.type === 'actualizar_listado_carr' && ['coor_manana', 'boss'].includes(userType)) {
       this.showCarrozaNotification(msg.carroza);
     }
   }

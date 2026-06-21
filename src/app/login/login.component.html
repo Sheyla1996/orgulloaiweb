@@ -29,10 +29,8 @@
       </button>
     </form>
 
-    <p *ngIf="error" class="error">No tienes permisos para acceder</p>
-
-    <button class="action-btn action-btn-webapp" matButton="filled" *ngIf="showInstallButton" (click)="onInstallPwa()">
-      Instalar aplicacion
-    </button>
+    @if (error) {
+      <p class="error">No tienes permisos para acceder</p>
+    }
   </section>
 </main>

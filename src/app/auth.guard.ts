@@ -17,6 +17,11 @@ export class AuthGuard implements CanActivate {
       const allowed = route.data['allowed'] as string[] | undefined;
       const year = localStorage.getItem('year');
       const actualYear = new Date().getFullYear();
+
+      if (state.url === '/login') {
+        return true;
+      }
+
       if (year !== actualYear.toString()) {
         return this.router.parseUrl('/login');
       }
@@ -27,11 +32,6 @@ export class AuthGuard implements CanActivate {
 
       if (userType) {
         return this.router.parseUrl('');
-      }
-
-      // 🚫 Evita redirigir a login si ya estás en login
-      if (state.url === '/login') {
-        return true;
       }
 
       return this.router.parseUrl('/login');

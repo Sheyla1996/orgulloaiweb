@@ -24,7 +24,8 @@ export class HomeComponent implements OnInit {
             if (!userType) {
                 this.router.navigate(['/login']);
             } else {
-                if (['coor_manana', 'boss'].includes(userType.toLocaleLowerCase())) {
+                const isMorning = new Date().getHours() < 14;
+                if (['coor', 'boss', 'willy', 'test_coor'].includes(userType.toLocaleLowerCase()) && isMorning) {
                     this.router.navigate(['/carrozas']);
                 } else {
                     this.router.navigate(['/asociaciones']);

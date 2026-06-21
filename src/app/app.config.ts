@@ -19,6 +19,5 @@ export const appConfig: ApplicationConfig = {
     provideToastr(),
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
     provideMessaging(() => getMessaging())
-    // ServiceWorkerModule.register should be added to the imports array of your AppModule, not here
   ]
 };

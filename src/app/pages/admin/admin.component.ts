@@ -19,6 +19,7 @@ import { Whatsapp } from "../../models/whatsapp.model";
 import { Pulsera, QrService } from "../../services/qr.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { SettingsService } from "../../services/settings.service";
+import { c } from "../../../../node_modules/@angular/cdk/a11y-module.d-DBHGyKoh";
 
 @Component({
     selector: 'app-admin',

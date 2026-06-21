@@ -5,7 +5,6 @@ import { MessagesService } from '../../services/messages.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { WebSocketService } from '../../services/websocket.service';
-import { NgxSpinnerService } from 'ngx-spinner';
 import { ErrorModalService } from '../../components/error-modal/error-modal.service';
 
 @Component({
@@ -26,13 +25,23 @@ export class ChatComponent {
   messages: { text: string; hour: string; sent: boolean }[] = [];
   newMessage = '';
 
+  // Mensajes predefinidos para envío rápido
+  predefinedMessages: string[] = [
+    'Cabecera en marcha',
+    'Cabecera en nepturo',
+    'Zona Amarilla en marcha',
+    'Todos a Coón',
+    'Mensaje personalizado',
+    'Zona Roja en marcha',
+    'Zona Azul en marcha'
+  ];
+
   @ViewChild('messagesContainer') private messagesContainer?: ElementRef<HTMLDivElement>;
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private messagesService: MessagesService,
     private wsService: WebSocketService,
-    private spinner: NgxSpinnerService,
     private errorModal: ErrorModalService
   ) {}
 
@@ -49,7 +58,6 @@ export class ChatComponent {
   }
 
   private loadMessages(): void {
-    this.spinner.show();
     this.messagesService.getMessages().subscribe({
       next: (data: any[]) => {
         this.messages = data.map(msg => ({
@@ -58,7 +66,6 @@ export class ChatComponent {
           sent: true
         }));
         this.scrollToBottom();
-        this.spinner.hide();
       },
       error: error => {
         this.handleError(error, 'Error al obtener los mensajes');
@@ -70,7 +77,6 @@ export class ChatComponent {
     const message = this.newMessage.trim();
     if (!message) return;
 
-    this.spinner.show();
     this.messagesService.sendMessage({ message, topic: localStorage.getItem('topic') || `global` }).subscribe({
       next: () => {
         this.newMessage = '';
@@ -80,6 +86,12 @@ export class ChatComponent {
         this.handleError(error, 'Error al enviar el mensaje');
       }
     });
+  }
+
+  sendPredefined(messageText: string): void {
+    this.newMessage = messageText;
+    // enviar inmediatamente
+    this.sendMessage();
   }
 
   private scrollToBottom(): void {
@@ -103,6 +115,5 @@ export class ChatComponent {
   private handleError(error: any, logMessage: string): void {
     this.errorModal.openDialog(error);
     console.error(`${logMessage}:`, error);
-    this.spinner.hide();
   }
 }

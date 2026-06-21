@@ -35,29 +35,23 @@ export class QrService {
   constructor(private http: HttpClient) {}
 
   validateUuid(uuid: string): Observable<QrValidationResponse> {
-    return this.http.get<QrValidationResponse>(`${this.getApiUrl()}/pulsera/${encodeURIComponent(uuid)}`);
+    return this.http.get<QrValidationResponse>(`${this.apiBase}/pulsera/${encodeURIComponent(uuid)}`);
   }
 
   getPulseras(): Observable<Pulsera[]> {
-    return this.http.get<Pulsera[]>(`${this.getApiUrl()}/pulsera`);
+    return this.http.get<Pulsera[]>(`${this.apiBase}/pulsera`);
   }
 
   createPulsera(payload: PulseraPayload): Observable<Pulsera> {
-    return this.http.post<Pulsera>(`${this.getApiUrl()}/pulsera`, payload);
+    return this.http.post<Pulsera>(`${this.apiBase}/pulsera`, payload);
   }
 
   updatePulsera(uuid: string, payload: Partial<PulseraPayload>): Observable<Pulsera> {
-    return this.http.put<Pulsera>(`${this.getApiUrl()}/pulsera/${encodeURIComponent(uuid)}`, payload);
+    return this.http.put<Pulsera>(`${this.apiBase}/pulsera/${encodeURIComponent(uuid)}`, payload);
   }
 
   deletePulsera(uuid: string): Observable<void> {
-    return this.http.delete<void>(`${this.getApiUrl()}/pulsera/${encodeURIComponent(uuid)}`);
+    return this.http.delete<void>(`${this.apiBase}/pulsera/${encodeURIComponent(uuid)}`);
   }
 
-  private getApiUrl(): string {
-    const userType = (localStorage.getItem('userType') || 'normal').toLowerCase();
-    const forceTestMode = localStorage.getItem('test') === 'true';
-    const isTestUser = ['test', 'test_coor'].includes(userType);
-    return `${this.apiBase}/${''}`.replace(/\/$/, '');
-  }
 }

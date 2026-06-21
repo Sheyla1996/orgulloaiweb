@@ -1,4 +1,11 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
 .chat-container {
+  height: calc(var(--vh, 1vh) * 100 - 95px);
+  position: relative;
   display: flex;
   flex-direction: column;
   max-width: 600px;
@@ -13,18 +20,17 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 67vh;
 }
 
 .hour {
-    font-size: 12px;
+  font-size: 12px;
   color: var(--app-muted);
-    text-align: right;
-    margin: 0;
+  text-align: right;
+  margin: 0;
 }
 
 .message-bubble {
-    position: relative;
+  position: relative;
   max-width: 70%;
   padding: 10px 14px;
   border-radius: 20px;
@@ -46,19 +52,41 @@
   color: #d7deeb;
 }
 
-.input-area {
-    position:fixed;
-    bottom: 20px;
-  display: flex;
-  padding: 12px;
-width: 70vw;
-}
 
 .input-wrapper {
     position: relative;
     flex: 1;
     display: flex;
     align-items: center;
+}
+
+.predefined-and-input {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+}
+
+.predefined-list {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+      max-height: 78px;
+    overflow-y: auto;
+}
+
+.preset-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--app-text);
+  padding: 8px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.preset-btn:hover {
+  background: rgba(255,255,255,0.02);
 }
 
 input {
@@ -73,7 +101,7 @@ input {
     color: var(--app-text);
 }
 
-button {
+.send-btn {
     position: absolute;
     right: 8px;
     top: 50%;

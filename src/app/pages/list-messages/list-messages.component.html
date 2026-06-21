@@ -1,20 +1,29 @@
-<h2 style="margin-bottom: 0;">Avisos</h2>
 <div class="chat-container">
   <div #messagesContainer class="messages">
-    <div *ngFor="let msg of messages" [ngClass]="{'sent': msg.sent, 'received': !msg.sent}" class="message-bubble">
-      {{ msg.text }}
-      <p class="hour">{{msg.hour}}</p>
-    </div>
+    @for (msg of messages; track $index) {
+      <div [ngClass]="{'sent': msg.sent, 'received': !msg.sent}" class="message-bubble">
+        {{ msg.text }}
+        <p class="hour">{{msg.hour}}</p>
+      </div>
+    }
   </div>
-    @if (['boss', 'willy'].includes(userType || 'normal')) {
-    <form (ngSubmit)="sendMessage()" class="input-area">
-        <div class="input-wrapper">
-            <input [(ngModel)]="newMessage" name="message" placeholder="Escribe tu mensaje..." required />
-
-            <button matIconButton type="submit">
-                <mat-icon>send</mat-icon>
-            </button>
+    @if (['boss'].includes(userType || 'normal')) {
+      <div class="predefined-and-input">
+        <div class="predefined-list">
+          <button *ngFor="let p of predefinedMessages" type="button" class="preset-btn" (click)="sendPredefined(p)">
+            {{ p }}
+          </button>
         </div>
-    </form>
+
+        <form (ngSubmit)="sendMessage()" class="input-area">
+            <div class="input-wrapper">
+                <input [(ngModel)]="newMessage" name="message" placeholder="Escribe tu mensaje..." required />
+
+                <button matIconButton type="submit" class="send-btn">
+                    <mat-icon fontSet="material-symbols-outlined">send</mat-icon>
+                </button>
+            </div>
+        </form>
+      </div>
     }
 </div>

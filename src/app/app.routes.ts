@@ -13,13 +13,13 @@ import { QrComponent } from './pages/qr/qr.component';
 export const routes: Routes = [
     { path: '', component: HomeComponent },
     { path: 'qr', component: QrComponent },
+    { path: 'login', component: LoginComponent },
     {
         path: 'asociaciones',
         component: ListAsociacionesComponent,
         canActivate: [AuthGuard],
-        data: { allowed: ['normal', 'mañana', 'coor', 'boss', 'tarde', 'willy', 'test_coor', 'test'] }
+        data: { allowed: ['normal', 'coor_manana', 'coor', 'boss'] }
     },
-    { path: 'login', component: LoginComponent },
     {
         path: 'carrozas',
         component: ListCarrozasComponent,
@@ -30,13 +30,13 @@ export const routes: Routes = [
         path: 'telefonos',
         component: ListTelefonosComponent,
         canActivate: [AuthGuard],
-        data: { allowed: ['normal', 'mañana', 'coor', 'boss', 'tarde', 'willy', 'test_coor', 'test'] }
+        data: { allowed: ['normal', 'coor_manana', 'coor', 'boss'] }
     },
     {
         path: 'messages',
         component: ChatComponent,
         canActivate: [AuthGuard],
-        data: { allowed: ['normal', 'mañana', 'coor', 'boss', 'tarde', 'willy', 'test_coor', 'test'] }
+        data: { allowed: ['boss'] }
     },
     {
         path: 'admin',

@@ -6,66 +6,93 @@
     <h1>{{ title }}</h1>
   </header>
 
-  <section class="admin-editor__card" *ngIf="type === 'asociacion'">
-    <input type="text" placeholder="Nombre" [(ngModel)]="asociacionForm.name" />
-    <input type="text" placeholder="Nombre corto" [(ngModel)]="asociacionForm.shortName" />
-    <input type="text" placeholder="Logo" [(ngModel)]="asociacionForm.logo" />
-    <select [(ngModel)]="asociacionForm.zona">
-      <option value="">Zona</option>
-      <option *ngFor="let z of zonas" [value]="z">{{ z | titlecase }}</option>
-    </select>
-    <label class="check-row">
-      <input type="checkbox" [(ngModel)]="asociacionForm.isBatucada" />
-      Es batucada
-    </label>
-  </section>
+  @if (type === 'asociacion'){
+    <section class="admin-editor__card">
+      <input type="text" placeholder="Nombre" [(ngModel)]="asociacionForm.name" />
+      <input type="text" placeholder="Nombre corto" [(ngModel)]="asociacionForm.shortName" />
+      <input type="text" placeholder="Logo" [(ngModel)]="asociacionForm.logo" />
+      <select [(ngModel)]="asociacionForm.zona">
+        <option value="">Zona</option>
+        @for (z of zonas; track $index) {
+          <option [value]="z">{{ z | titlecase }}</option>
+        }
+      </select>
+      <label class="check-row">
+        <input type="checkbox" [(ngModel)]="asociacionForm.isBatucada" />
+        Es batucada
+      </label>
+    </section>
+  }
 
-  <section class="admin-editor__card" *ngIf="type === 'carroza'">
-    <input type="text" placeholder="Nombre" [(ngModel)]="carrozaForm.name" />
-    <input type="text" placeholder="Logo" [(ngModel)]="carrozaForm.logo" />
-    <select [(ngModel)]="carrozaForm.zona">
-      <option value="">Zona</option>
-      <option *ngFor="let z of zonas" [value]="z">{{ z | titlecase }}</option>
-    </select>
-    <select [(ngModel)]="carrozaForm.status">
-      <option *ngFor="let st of carrozaStatusOptions" [value]="st">{{ st | titlecase }}</option>
-    </select>
-    <select [(ngModel)]="carrozaForm.size">
-      <option value="">Tamano</option>
-      <option *ngFor="let sz of carrozaSizeOptions" [value]="sz">{{ sz | titlecase }}</option>
-    </select>
-  </section>
+  @if (type === 'carroza') {
+    <section class="admin-editor__card">
+      <input type="text" placeholder="Nombre" [(ngModel)]="carrozaForm.name" />
+      <input type="text" placeholder="Logo" [(ngModel)]="carrozaForm.logo" />
+      <select [(ngModel)]="carrozaForm.zona">
+        <option value="">Zona</option>
+        @for (z of zonas; track $index) {
+          <option [value]="z">{{ z | titlecase }}</option>
+        }
+      </select>
+      <select [(ngModel)]="carrozaForm.status">
+        <option value="">Estado</option>
+        @for (st of carrozaStatusOptions; track $index) {
+          <option [value]="st">{{ st | titlecase }}</option>
+        }
+      </select>
+      <select [(ngModel)]="carrozaForm.size">
+        <option value="">Tamaño</option>
+        @for (sz of carrozaSizeOptions; track $index) {
+          <option [value]="sz">{{ sz | titlecase }}</option>
+        }
+      </select>
+    </section>
+  }
 
-  <section class="admin-editor__card" *ngIf="type === 'telefono'">
-    <input type="text" placeholder="Nombre" [(ngModel)]="telefonoForm.name" />
-    <input type="text" placeholder="Telefono" [(ngModel)]="telefonoForm.telefono" />
-    <select [(ngModel)]="telefonoForm.zona">
-      <option value="">Zona</option>
-      <option *ngFor="let z of zonas" [value]="z">{{ z | titlecase }}</option>
-    </select>
-  </section>
+  @if (type === 'telefono') {
+    <section class="admin-editor__card">
+      <input type="text" placeholder="Nombre" [(ngModel)]="telefonoForm.name" />
+      <input type="text" placeholder="Telefono" [(ngModel)]="telefonoForm.telefono" />
+      <select [(ngModel)]="telefonoForm.zona">
+        <option value="">Zona</option>
+        @for (z of zonas; track $index) {
+          <option [value]="z">{{ z | titlecase }}</option>
+        }
+      </select>
+    </section>
+  }
 
-  <section class="admin-editor__card" *ngIf="type === 'whatsapp'">
-    <select [(ngModel)]="whatsappForm.zona">
-      <option value="">Zona</option>
-      <option *ngFor="let z of zonas" [value]="z">{{ z | titlecase }}</option>
-    </select>
-    <input type="text" placeholder="Link de invitacion" [(ngModel)]="whatsappForm.link" />
-  </section>
+  @if (type === 'whatsapp') {
+    <section class="admin-editor__card">
+      <select [(ngModel)]="whatsappForm.zona">
+        <option value="">Zona</option>
+        @for (z of zonas; track $index) {
+          <option [value]="z">{{ z | titlecase }}</option>
+        }
+      </select>
+      <input type="text" placeholder="Link de invitacion" [(ngModel)]="whatsappForm.link" />
+    </section>
+  }
 
-  <section class="admin-editor__card" *ngIf="type === 'pulsera'">
-    <input type="text" placeholder="Descripcion (opcional)" [(ngModel)]="pulseraForm.description" />
-    <input type="text" placeholder="UUID (opcional al crear)" [(ngModel)]="pulseraForm.uuid" [disabled]="!!idParam" />
-    <select [(ngModel)]="pulseraForm.zona">
-      <option value="">Zona</option>
-      <option *ngFor="let z of zonas" [value]="z">{{ z | titlecase }}</option>
-    </select>
-    <select [(ngModel)]="pulseraForm.type">
-      <option value="">Tipo</option>
-      <option *ngFor="let t of typeOptions" [value]="t">{{ t | titlecase }}</option>
-    </select>
-    <input type="number" placeholder="Año" [(ngModel)]="pulseraForm.year"/>
-  </section>
+  @if (type === 'pulsera'){
+    <section class="admin-editor__card">
+      <input type="text" placeholder="Descripcion (opcional)" [(ngModel)]="pulseraForm.description" />
+      <input type="text" placeholder="UUID (opcional al crear)" [(ngModel)]="pulseraForm.uuid" [disabled]="!!idParam" />
+      <select [(ngModel)]="pulseraForm.zona">
+        <option value="">Zona</option>
+        @for (z of zonas; track $index) {
+          <option [value]="z">{{ z | titlecase }}</option>
+        }
+      </select>
+      <select [(ngModel)]="pulseraForm.type">
+        <option value="">Tipo</option>
+        @for (t of typeOptions; track $index) {
+          <option [value]="t">{{ t | titlecase }}</option>
+        }
+      </select>
+      <input type="number" placeholder="Año" [(ngModel)]="pulseraForm.year"/>
+    </section>
+  }
 
   <div class="admin-editor__actions">
     <button mat-flat-button (click)="save()">Guardar</button>

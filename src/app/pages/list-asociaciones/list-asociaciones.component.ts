@@ -53,7 +53,6 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
   private scrollHandler?: () => void;
   sharingLocationActive = false;
   private locationSharingSub?: Subscription;
-  
 
   constructor(
     private asociacionesService: AsociacionesService,

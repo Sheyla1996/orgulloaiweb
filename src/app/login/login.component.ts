@@ -33,8 +33,6 @@ export class LoginComponent implements OnInit {
   password = '';
   error = false;
   selectZone?: string;
-  installPromptEvent: any = null;
-  showInstallButton = false;
 
   constructor(
     private router: Router,
@@ -46,7 +44,7 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
     const params = new URLSearchParams(window.location.search);
-    const pass = params.get('pass');
+    const pass = params.get('uuid');
     const type = params.get('type');
     if (pass && type) {
       this.password = pass;
@@ -92,15 +90,6 @@ export class LoginComponent implements OnInit {
     localStorage.removeItem('zone');
     localStorage.removeItem('year');
     this.error = true;
-  }
-
-  onInstallPwa(): void {
-    if (!this.installPromptEvent) return;
-    this.installPromptEvent.prompt();
-    this.installPromptEvent.userChoice.then(() => {
-      this.showInstallButton = false;
-      this.installPromptEvent = null;
-    });
   }
 
   openDialogQr(): void {

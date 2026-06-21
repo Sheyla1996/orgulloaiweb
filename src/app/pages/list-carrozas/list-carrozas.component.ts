@@ -92,7 +92,7 @@ export class ListCarrozasComponent implements OnInit, OnDestroy {
         this.getCarrozas(cached);
       }
     });
-    
+
   }
 
   getCarrozas(cached: any): void {
@@ -135,7 +135,6 @@ export class ListCarrozasComponent implements OnInit, OnDestroy {
 
   private handleViewportResize = () => {
     if (!this.showMap || !this.map) return;
-    
     if (this.activeCarrozaId && this.map) {
       const activeCarroza = this.carrozas.find(a => a.id === this.activeCarrozaId);
       if (activeCarroza) {
@@ -404,7 +403,6 @@ export class ListCarrozasComponent implements OnInit, OnDestroy {
       });
   }
 
-  
   clear() {
     this.searchText = '';
     this.onSearchChange('');

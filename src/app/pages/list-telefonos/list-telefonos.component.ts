@@ -137,7 +137,7 @@ export class ListTelefonosComponent implements OnInit {
       },
       error: error => {
         this.errorModal.openDialog(error);
-        console.error('Error fetching telefonos:', error);
+        console.error('Error fetching whatsapp:', error);
         this.spinner.hide();
       }
     });
@@ -188,9 +188,9 @@ export class ListTelefonosComponent implements OnInit {
 
   onShortClick(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-
     localStorage.removeItem('userType');
     localStorage.removeItem('zone');
+    localStorage.removeItem('year');
     window.location.reload();
   }
 }

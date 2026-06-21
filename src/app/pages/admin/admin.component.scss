@@ -138,6 +138,7 @@
   padding: 12px;
   display: grid;
   gap: 8px;
+  height: fit-content;
 
   h3 {
     margin: 0 0 4px;
@@ -145,25 +146,6 @@
     color: var(--text);
   }
 
-  input,
-  select {
-    width: 100%;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 12px;
-    font-size: 0.95rem;
-    background: #121720;
-    color: var(--text);
-
-    &::placeholder {
-      color: var(--muted);
-    }
-
-    &:focus {
-      outline: 2px solid rgba(103, 183, 255, 0.45);
-      border-color: var(--accent);
-    }
-  }
 
   &__buttons {
     display: flex;

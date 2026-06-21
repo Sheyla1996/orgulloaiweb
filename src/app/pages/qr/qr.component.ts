@@ -140,9 +140,6 @@ export class QrComponent implements OnInit, OnDestroy {
 
   async toggleLocationSharing(): Promise<void> {
     if (!isPlatformBrowser(this.platformId) || !this.isValid || !this.isAndroid || !this.canShareLocation()) {
-      if (!this.canShareLocation()) {
-        this.sharingStatusMessage = 'Solo pueden compartir ubicación los perfiles COOR, BOSS y COOR_MAÑANA.';
-      }
       return;
     }
 

@@ -70,6 +70,7 @@ export class BottomNavigation implements OnInit {
     }
     this.navigationItems.push({ label: 'Teléfonos', icon: 'contact_phone', route: '/telefonos' });
     if (userType === 'boss') {
+      this.navigationItems.push({ label: 'Notificaciones', icon: 'notifications', route: '/messages' });
       this.navigationItems.push({ label: 'Admin', icon: 'shield_person', route: '/admin' });
     }
   }

@@ -1,5 +1,5 @@
 export interface Carroza {
-    id: number;
+  id: number;
   name: string;
   logo: string;
   position: number;
@@ -11,4 +11,3 @@ export interface Carroza {
   status?: string;
   size?: string;
 }
-  
