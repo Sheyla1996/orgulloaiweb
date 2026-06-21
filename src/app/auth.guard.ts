@@ -26,7 +26,7 @@ export class AuthGuard implements CanActivate {
         return this.router.parseUrl('/login');
       }
 
-      if (!allowed || allowed.includes(userType || zona || '')) {
+      if (!allowed || allowed.includes(userType || '') || allowed.includes(zona || '')) {
         return true;
       }
 
