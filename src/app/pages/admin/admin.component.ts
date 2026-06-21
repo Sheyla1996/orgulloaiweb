@@ -18,6 +18,7 @@ import { WhatsappService } from "../../services/whatsapp.service";
 import { Whatsapp } from "../../models/whatsapp.model";
 import { Pulsera, QrService } from "../../services/qr.service";
 import { ActivatedRoute, Router } from "@angular/router";
+import { SettingsService } from "../../services/settings.service";
 
 @Component({
     selector: 'app-admin',
@@ -36,6 +37,10 @@ import { ActivatedRoute, Router } from "@angular/router";
 export class AdminComponent implements OnInit {
     tab = 0;
     searchText = '';
+    useTestTables = false;
+    testSettingId: string | null = null;
+    loadingSettings = false;
+    savingSettings = false;
 
     asociaciones: Asociacion[] = [];
     carrozas: Carroza[] = [];
@@ -67,6 +72,7 @@ export class AdminComponent implements OnInit {
         private telefonosService: TelefonosService,
         private whatsappService: WhatsappService,
         private qrService: QrService,
+        private settingsService: SettingsService,
         private spinner: NgxSpinnerService,
         private errorModal: ErrorModalService,
         @Inject(PLATFORM_ID) private platformId: Object,
@@ -75,7 +81,7 @@ export class AdminComponent implements OnInit {
     ngOnInit(): void {
         const tabParam = this.route.snapshot.queryParamMap.get('tab');
         const parsed = Number(tabParam);
-        this.tab = Number.isInteger(parsed) && parsed >= 0 && parsed <= 4 ? parsed : 0;
+        this.tab = Number.isInteger(parsed) && parsed >= 0 && parsed <= 5 ? parsed : 0;
         this.loadDataForCurrentTab();
     }
 
@@ -100,6 +106,7 @@ export class AdminComponent implements OnInit {
         if (this.tab === 2) this.loadTelefonos();
         if (this.tab === 3) this.loadWhatsapp();
         if (this.tab === 4) this.loadPulseras();
+        if (this.tab === 5) this.loadSettingsTab();
     }
 
     getSearchPlaceholder(): string {
@@ -107,7 +114,52 @@ export class AdminComponent implements OnInit {
         if (this.tab === 2) return 'Buscar telefono';
         if (this.tab === 3) return 'Buscar whatsapp';
         if (this.tab === 4) return 'Buscar pulsera';
+        if (this.tab === 5) return 'Ajustes';
         return 'Buscar asociacion';
+    }
+
+    private loadSettingsTab(): void {
+        this.loadingSettings = true;
+        this.settingsService.getSettings().subscribe({
+            next: settings => {
+                const setting = (settings ?? []).find(s => String(s.key || '').toLowerCase() === 'test');
+                this.testSettingId = setting?.id != null ? String(setting.id) : null;
+                this.useTestTables = this.parseBooleanSetting(setting?.value);
+                localStorage.setItem('test', this.useTestTables ? 'true' : 'false');
+                this.loadingSettings = false;
+            },
+            error: error => {
+                this.loadingSettings = false;
+                this.handleError('Error al cargar ajustes', error);
+            }
+        });
+    }
+
+    saveTestSetting(): void {
+        const value = this.useTestTables ? 'true' : 'false';
+        const payload = { key: 'test', value };
+        this.savingSettings = true;
+
+        const request$ = this.testSettingId
+            ? this.settingsService.updateSetting(this.testSettingId, payload)
+            : this.settingsService.createSetting(payload);
+
+        request$.subscribe({
+            next: () => {
+                localStorage.setItem('test', value);
+                this.savingSettings = false;
+                this.loadSettingsTab();
+            },
+            error: error => {
+                this.savingSettings = false;
+                this.handleError('Error al guardar ajuste de tablas test', error);
+            }
+        });
+    }
+
+    private parseBooleanSetting(value: unknown): boolean {
+        const normalized = String(value ?? '').trim().toLowerCase();
+        return ['true', '1', 'si', 'sí', 'yes', 'on'].includes(normalized);
     }
 
     getAsociacionesView(): Asociacion[] {

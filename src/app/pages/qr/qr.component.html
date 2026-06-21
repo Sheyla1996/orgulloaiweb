@@ -19,8 +19,11 @@
 
     @if (currentStep === 1) {
       <h1>Bienvenid{{'@'}}</h1>
-      @if (zona === 'coor') {
+      @if (zona === 'coor' && type !== 'boss') {
         <p>Tu acceso es de rango coordinacion.</p>
+      }
+      @else if (type === 'boss') {
+        <p>Tu acceso es de administrador</p>
       }
       @else {
         <p>Estas de voluntari{{'@'}} en la zona {{ zona | titlecase }}</p>

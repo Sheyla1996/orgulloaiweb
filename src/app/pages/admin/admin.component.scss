@@ -127,6 +127,10 @@
   }
 }
 
+.admin-section--settings {
+  grid-template-rows: 1fr;
+}
+
 .editor-card {
   background: linear-gradient(180deg, var(--surface), var(--surface-2));
   border-radius: 14px;

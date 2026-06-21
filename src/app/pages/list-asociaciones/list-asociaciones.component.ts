@@ -13,6 +13,8 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { ErrorModalService } from '../../components/error-modal/error-modal.service';
 import { SearchComponent } from '../../components/search/search.component';
 import { UbicacionCompartida } from '../../services/asociaciones.service';
+import { LocationSharingService } from '../../services/location-sharing.service';
+import { Subscription } from 'rxjs';
 
 
 
@@ -49,10 +51,13 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
   private readonly liveLocationsTtlMinutes = 10;
   private scrollContainer: HTMLElement | null = null;
   private scrollHandler?: () => void;
+  sharingLocationActive = false;
+  private locationSharingSub?: Subscription;
   
 
   constructor(
     private asociacionesService: AsociacionesService,
+    private locationSharingService: LocationSharingService,
     @Inject(PLATFORM_ID) private platformId: Object,
     private spinner: NgxSpinnerService,
     private dialog: MatDialog,
@@ -61,6 +66,11 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     if (!isPlatformBrowser(this.platformId)) return;
+
+    this.sharingLocationActive = this.locationSharingService.getCurrentState().active;
+    this.locationSharingSub = this.locationSharingService.state$.subscribe(state => {
+      this.sharingLocationActive = state.active;
+    });
 
     this.leaflet = await import('leaflet');
     this.handlePwaPrompt();
@@ -106,6 +116,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
   
 
   ngOnDestroy(): void {
+    this.locationSharingSub?.unsubscribe();
     if (typeof window !== 'undefined' && (window as any).visualViewport) {
       (window as any).visualViewport.removeEventListener('resize', this.handleViewportResize);
     }
@@ -471,5 +482,9 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
         this.initScrollSync();
       }, 100);
     }
+  }
+
+  stopLocationSharing(): void {
+    this.locationSharingService.stopSharing();
   }
 }

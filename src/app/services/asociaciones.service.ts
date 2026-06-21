@@ -20,52 +20,54 @@ export interface UbicacionCompartida {
 
 @Injectable({ providedIn: 'root' })
 export class AsociacionesService {
-  userType = localStorage.getItem('userType') || 'normal';
-  private apiUrl = 'https://apiorgullo.sheylamartinez.es/' + (['test', 'test_coor'].includes(this.userType) ? 'test/' : '') + 'asociacion';
+  private readonly apiBase = 'https://apiorgullo.sheylamartinez.es';
 
   constructor(private http: HttpClient) {}
 
   getAsociaciones(): Observable<Asociacion[]> {
-    return this.http.get<Asociacion[]>(this.apiUrl);
+    return this.http.get<Asociacion[]>(this.getApiUrl('asociacion'));
   }
 
   getUbicacionesCompartidas(ttlMinutes = 10): Observable<UbicacionCompartida[]> {
-    return this.http.get<UbicacionCompartida[]>(`${this.getUbicacionApiUrl()}?ttlMinutes=${ttlMinutes}`);
+    return this.http.get<UbicacionCompartida[]>(`${this.getApiUrl('ubicacion')}?ttlMinutes=${ttlMinutes}`);
   }
 
   upsertUbicacionCompartida(payload: Partial<UbicacionCompartida> & { clientId: string; uuid: string; zona: string; userType: string; lat: number; lng: number; }): Observable<{ ok: boolean }> {
-    return this.http.post<{ ok: boolean }>(this.getUbicacionApiUrl(), payload);
+    return this.http.post<{ ok: boolean }>(this.getApiUrl('ubicacion'), payload);
   }
 
   deleteUbicacionCompartida(clientId: string): Observable<void> {
-    return this.http.delete<void>(`${this.getUbicacionApiUrl()}/${encodeURIComponent(clientId)}`);
+    return this.http.delete<void>(`${this.getApiUrl('ubicacion')}/${encodeURIComponent(clientId)}`);
   }
 
   getAsociacionesFromSheet(): Observable<Asociacion[]> {
-    return this.http.get<Asociacion[]>(`${this.apiUrl}/from-sheet`);
+    return this.http.get<Asociacion[]>(`${this.getApiUrl('asociacion')}/from-sheet`);
   }
 
   updatePosition(asociacion: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/posicion`, asociacion);
+    return this.http.post<any>(`${this.getApiUrl('asociacion')}/posicion`, asociacion);
   }
 
   createAsociacion(payload: Partial<Asociacion>): Observable<Asociacion> {
-    return this.http.post<Asociacion>(this.apiUrl, payload);
+    return this.http.post<Asociacion>(this.getApiUrl('asociacion'), payload);
   }
 
   updateAsociacion(id: number, payload: Partial<Asociacion>): Observable<Asociacion> {
-    return this.http.put<Asociacion>(`${this.apiUrl}/${id}`, payload);
+    return this.http.put<Asociacion>(`${this.getApiUrl('asociacion')}/${id}`, payload);
   }
 
   deleteAsociacion(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.getApiUrl('asociacion')}/${id}`);
   }
 
   changePosicion(id: number, nuevaPosicion: number): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}/posicion`, { nuevaPosicion });
+    return this.http.put<any>(`${this.getApiUrl('asociacion')}/${id}/posicion`, { nuevaPosicion });
   }
 
-  private getUbicacionApiUrl(): string {
-    return this.apiUrl.replace('/asociacion', '/ubicacion');
+  private getApiUrl(resource: string): string {
+    const userType = (localStorage.getItem('userType') || 'normal').toLowerCase();
+    const forceTestMode = localStorage.getItem('test') === 'true';
+    const isTestUser = ['test', 'test_coor'].includes(userType);
+    return `${this.apiBase}/${forceTestMode || isTestUser ? 'test/' : ''}${resource}`;
   }
 }

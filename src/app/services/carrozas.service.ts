@@ -5,40 +5,46 @@ import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class CarrozasService {
-  userType = localStorage.getItem('userType') || 'normal';
-  private apiUrl = 'https://apiorgullo.sheylamartinez.es/' + (['test', 'test_coor'].includes(this.userType) ? 'test/' : '') + 'carroza';
+  private readonly apiBase = 'https://apiorgullo.sheylamartinez.es';
 
   constructor(private http: HttpClient) {}
 
   getCarrozas(): Observable<Carroza[]> {
-    return this.http.get<Carroza[]>(this.apiUrl);
+    return this.http.get<Carroza[]>(this.getApiUrl());
   }
 
   getCarrozasFromSheet(): Observable<Carroza[]> {
-    return this.http.get<Carroza[]>(`${this.apiUrl}/from-sheet`);
+    return this.http.get<Carroza[]>(`${this.getApiUrl()}/from-sheet`);
   }
 
   updatePosition(carrozas: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/posicion`, carrozas);
+    return this.http.post<any>(`${this.getApiUrl()}/posicion`, carrozas);
   }
 
   updateState(id:number, carroza: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}/estado`, carroza);
+    return this.http.put<any>(`${this.getApiUrl()}/${id}/estado`, carroza);
   }
 
   createCarroza(payload: any): Observable<Carroza> {
-    return this.http.post<Carroza>(this.apiUrl, payload);
+    return this.http.post<Carroza>(this.getApiUrl(), payload);
   }
 
   updateCarroza(id: number, payload: any): Observable<Carroza> {
-    return this.http.put<Carroza>(`${this.apiUrl}/${id}`, payload);
+    return this.http.put<Carroza>(`${this.getApiUrl()}/${id}`, payload);
   }
 
   deleteCarroza(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.getApiUrl()}/${id}`);
   }
 
   changePosicion(id: number, nuevaPosicion: number): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}/posicion`, { nuevaPosicion });
+    return this.http.put<any>(`${this.getApiUrl()}/${id}/posicion`, { nuevaPosicion });
+  }
+
+  private getApiUrl(): string {
+    const userType = (localStorage.getItem('userType') || 'normal').toLowerCase();
+    const forceTestMode = localStorage.getItem('test') === 'true';
+    const isTestUser = ['test', 'test_coor'].includes(userType);
+    return `${this.apiBase}/${forceTestMode || isTestUser ? 'test/' : ''}carroza`;
   }
 }

@@ -183,5 +183,30 @@
         </div>
       </section>
     </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon fontSet="material-symbols-outlined">tune</mat-icon>
+      </ng-template>
+      <section class="admin-section admin-section--settings">
+        <article class="editor-card">
+          <h3>Ajustes</h3>
+          <p class="note">Activa este modo para que admin y usuarios trabajen contra tablas <strong>_test</strong>.</p>
+
+          <label class="check-row">
+            <input type="checkbox" [(ngModel)]="useTestTables" />
+            Usar entorno de pruebas (tablas test)
+          </label>
+
+          <div class="admin-section__actions">
+            <button mat-flat-button (click)="saveTestSetting()" [disabled]="loadingSettings || savingSettings">
+              {{ savingSettings ? 'Guardando...' : 'Guardar ajuste' }}
+            </button>
+          </div>
+
+          <p class="note" *ngIf="loadingSettings">Cargando configuración...</p>
+        </article>
+      </section>
+    </mat-tab>
   </mat-tab-group>
 </div>

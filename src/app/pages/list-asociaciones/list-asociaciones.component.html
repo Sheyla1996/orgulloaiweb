@@ -12,6 +12,11 @@
   <div class="keyboard-toggle" (click)="changeShowKeyboard()">
     <mat-icon fontSet="material-symbols-outlined">{{showKeyboard ? 'keyboard_off' : 'keyboard' }}</mat-icon>
   </div>
+  @if (sharingLocationActive) {
+    <button class="location-sharing-toggle" type="button" (click)="stopLocationSharing()">
+      <mat-icon fontSet="material-symbols-outlined">location_off</mat-icon>
+    </button>
+  }
   <!-- Listado con scroll ocupa el resto -->
   <div class="list" [ngClass]="{ 'list--full': !showMap }" id="list-container">
     <ng-container *ngFor="let asociacion of asociaciones">
