@@ -78,7 +78,23 @@
         }
       }
 
-      @if (currentStep === 4 && shouldShowLocationSharingStep) {
+      @if (currentStep === 4 && shouldShowZoneSelectionStep) {
+        <h1>Selecciona tu zona</h1>
+
+        <p>Selecciona la zona en la que vas a coordinar.</p>
+
+        <label class="location-share-field" for="zone-select">
+          <span>Zona</span>
+          <select id="zone-select" [(ngModel)]="coor_zona" (ngModelChange)="onZoneChanged()">
+            <option value="">Selecciona una zona</option>
+            @for(z of availableZones; track $index) {
+              <option [value]="z">{{ z | titlecase }}</option>
+            }
+          </select>
+        </label>
+      }
+
+      @if (currentStep === (shouldShowZoneSelectionStep ? 5 : 4) && shouldShowLocationSharingStep) {
         <h1>Comparte tu ubicación</h1>
 
         <p>Activa el compartido para enviar tu posición al mapa de asociaciones cada pocos minutos.</p>
@@ -101,7 +117,7 @@
         </button>
       }
 
-      @if (currentStep === (shouldShowLocationSharingStep ? 5 : 4)) {
+      @if (currentStep === (shouldShowZoneSelectionStep ? (shouldShowLocationSharingStep ? 6 : 5) : (shouldShowLocationSharingStep ? 5 : 4))) {
         <h1>Grupos de WhatsApp</h1>
         <p>Unete a los grupos para estar coordinad{{'@'}} en tiempo real.</p>
 
@@ -139,7 +155,7 @@
         }
       }
 
-      @if (currentStep === (shouldShowLocationSharingStep ? 6 : 5)) {
+      @if (currentStep === totalSteps) {
         <h1>Todo listo</h1>
 
         <button class="action-btn action-btn-web" type="button" (click)="goToWeb()">

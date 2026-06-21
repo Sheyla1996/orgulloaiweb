@@ -1,0 +1,122 @@
+main.ajustes-page { 
+  .card { max-width: 720px; margin: 16px auto; padding: 16px; }
+}
+.action-btn {
+  width: 100%;
+  text-align: center;
+  border: none;
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  gap: 8px;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.action-btn-play {
+  background: linear-gradient(135deg, #810f9d, #9134a8);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(129, 15, 157, 0.35);
+margin-top: 8px;
+}
+
+.action-btn-webapp {
+  background: linear-gradient(135deg, #9d4f0f, #a85934);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(157, 79, 15,  0.35);
+  margin-top: 8px;
+}
+
+.action-btn-whatsapp {
+  background: #1faa4b;
+  color: #fff;
+}
+
+.action-btn-zone {
+  &__blanca {
+    background: #fff;
+    color: #000 !important;
+  }
+  &__roja {
+    background: #f44336;
+    color: #fff;
+  }
+  &__naranja {
+    background: #f08103;
+    color: #fff !important;
+  }
+  &__amarilla {
+    background: #ffeb3b;
+    color: #000 !important;
+  }
+  &__verde {
+    background: #4caf50;
+    color: #fff;
+  }
+  &__azul {
+    background: #2196f3;
+    color: #fff;
+  }
+  &__violeta {
+    background: #9c27b0;
+    color: #fff;
+  }
+  &__rosa {
+    background: #e91e63;
+    color: #fff;
+  }
+}
+
+.action-btn-web {
+  background: #1a73e8;
+  color: #fff;
+}
+
+.action-btn-location {
+  background: linear-gradient(135deg, #c62828, #ef5350);
+  color: #fff;
+}
+
+.action-btn-notifications {
+  background: linear-gradient(135deg, #005f73, #0a9396);
+  color: #fff;
+}
+
+.location-share-field {
+  display: grid;
+  gap: 6px;
+
+  span {
+    font-size: 0.88rem;
+    color: #c7d0e0;
+  }
+
+  input {
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.07);
+    color: #f4f7fb;
+    padding: 12px 14px;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+}
+select {
+    border: 1px solid var(--app-border, #2f3b4e);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    background: #0f141d;
+    color: var(--app-text, #eaf0fb);
+  }

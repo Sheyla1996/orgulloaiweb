@@ -73,5 +73,7 @@ export class BottomNavigation implements OnInit {
       this.navigationItems.push({ label: 'Notificaciones', icon: 'notifications', route: '/messages' });
       this.navigationItems.push({ label: 'Admin', icon: 'shield_person', route: '/admin' });
     }
+    // Ajustes accesible para todos
+    this.navigationItems.push({ label: 'Ajustes', icon: 'settings', route: '/ajustes' });
   }
 }

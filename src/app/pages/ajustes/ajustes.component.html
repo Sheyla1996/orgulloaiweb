@@ -1,0 +1,42 @@
+<main class="ajustes-page">
+  <section class="card">
+    <h1>Ajustes</h1>
+
+    <p>Notificaciones: <strong>{{ notificationPermission === 'granted' ? 'Activadas' : 'Desactivadas' }}</strong></p>
+    @if (notificationPermission !== 'granted') {
+        <button class="action-btn action-btn-notifications" type="button" (click)="requestNotifications()">
+            Activar notificaciones
+            <mat-icon fontSet="material-symbols-outlined">notifications_active</mat-icon>
+        </button>
+    }
+
+    <a class="action-btn action-btn-play" [href]="playStoreUrl" target="_blank" rel="noopener noreferrer">Descargar App Android</a>
+    <button
+        class="action-btn action-btn-webapp"
+        (click)="onInstallPwa()">
+        Instalar Web
+        <mat-icon fontSet="material-symbols-outlined">install_mobile</mat-icon>
+    </button>
+    @if(isAndroid && canChangeZone) {
+        <h2>Ubicación</h2>
+        <div>
+            <button class="action-btn action-btn-location" type="button" (click)="toggleLocationSharing()">{{ sharingLocation ? 'Detener ubicación' : 'Empezar ubicación' }}</button>
+        </div>
+    }
+    @if (canChangeZone) {
+        <h2>Zona</h2>
+        <div>
+        <label for="zone-select">
+            <span>Zona actual: </span>
+            <select id="zone-select" [(ngModel)]="zona" (ngModelChange)="onZoneChanged()">
+                <option value="">Selecciona una zona</option>
+                @for(z of availableZones; track $index) {
+                    <option [value]="z">{{ z | titlecase }}</option>
+                }
+            </select>
+        </label>
+        </div>
+    }
+
+  </section>
+</main>

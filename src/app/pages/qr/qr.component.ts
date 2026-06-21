@@ -24,6 +24,8 @@ export class QrComponent implements OnInit, OnDestroy {
   extraParam = '';
 
   zona = '';
+  coor_zona = '';
+  availableZones: string[] = [];
   type = '';
   year = 0;
 
@@ -38,6 +40,7 @@ export class QrComponent implements OnInit, OnDestroy {
   installPromptEvent: any = null;
   currentStep = 1;
   readonly allowedSharingTypes = ['coor', 'boss', 'coor_manana'];
+  readonly zoneSelectionTypes = ['coor', 'coor_manana'];
   notificationPermission: NotificationPermission | 'unsupported' = 'default';
   notificationStatusMessage = '';
   sharingLocation = false;
@@ -166,8 +169,14 @@ export class QrComponent implements OnInit, OnDestroy {
     return this.isAndroid && this.canShareLocation();
   }
 
+  get shouldShowZoneSelectionStep(): boolean {
+    return this.zoneSelectionTypes.includes(this.type);
+  }
+
   get totalSteps(): number {
-    return this.shouldShowLocationSharingStep ? 6 : 5;
+    let base = this.shouldShowLocationSharingStep ? 6 : 5;
+    if (this.shouldShowZoneSelectionStep) base += 1;
+    return base;
   }
 
   private validateUuid(): void {
@@ -209,12 +218,22 @@ export class QrComponent implements OnInit, OnDestroy {
       next: data => {
         this.generalWhatsappLink = this.getGeneralWhatsappLink(data);
         this.zoneWhatsappLink = this.getZoneWhatsappLink(data, this.zona);
+        // populate available zones for selectors
+        this.availableZones = data
+          .filter(item => !['comunidad', 'grupo'].includes((item.zona || '').toLocaleLowerCase()))
+          .map(item => this.normalizeZone((item.zona || '').toLocaleLowerCase()))
+          .filter((v, i, a) => v && a.indexOf(v) === i)
+          .sort();
         this.loading = false;
       },
       error: () => {
         this.loading = false;
       }
     });
+  }
+
+  onZoneChanged(): void {
+    if (this.coor_zona) localStorage.setItem('coor_zone', this.coor_zona || '');
   }
 
   private canShareLocation(): boolean {

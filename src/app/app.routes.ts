@@ -50,4 +50,11 @@ export const routes: Routes = [
         canActivate: [AuthGuard],
         data: { allowed: ['boss'] }
     }
+    ,
+    {
+        path: 'ajustes',
+        loadComponent: () => import('./pages/ajustes/ajustes.component').then(m => m.AjustesComponent),
+        canActivate: [AuthGuard],
+        data: { allowed: ['normal', 'coor_manana', 'coor', 'boss'] }
+    }
 ];
