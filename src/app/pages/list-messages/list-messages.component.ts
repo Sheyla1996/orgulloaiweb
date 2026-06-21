@@ -47,7 +47,7 @@ export class ChatComponent {
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
-      this.userType = localStorage.getItem('userType');
+      this.userType = localStorage.getItem('userType')?.toLocaleLowerCase() || 'normal';
       this.loadMessages();
       this.wsService.messages$.subscribe(msg => {
         if (msg?.type === 'message') {

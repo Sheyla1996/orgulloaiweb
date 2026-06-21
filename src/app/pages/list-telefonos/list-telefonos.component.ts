@@ -57,7 +57,7 @@ export class ListTelefonosComponent implements OnInit {
     if (!isPlatformBrowser(this.platformId)) return;
 
     this.userZone = localStorage.getItem('zone');
-    this.userType = localStorage.getItem('userType') || 'normal';
+    this.userType = localStorage.getItem('userType')?.toLocaleLowerCase() || 'normal';
     const cached = localStorage.getItem('telefonos');
     const shouldUseCache = this.shouldUseCache();
 

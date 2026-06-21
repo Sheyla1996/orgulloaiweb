@@ -20,12 +20,12 @@ export class HomeComponent implements OnInit {
 
     async ngOnInit(): Promise<void> {
         if (isPlatformBrowser(this.platformId)) {
-            const userType = localStorage.getItem('userType');
+            const userType = localStorage.getItem('userType')?.toLocaleLowerCase();
             if (!userType) {
                 this.router.navigate(['/login']);
             } else {
                 const isMorning = new Date().getHours() < 14;
-                if (['coor', 'boss', 'willy', 'test_coor'].includes(userType.toLocaleLowerCase()) && isMorning) {
+                if (['coor', 'boss', 'willy', 'test_coor'].includes(userType) && isMorning) {
                     this.router.navigate(['/carrozas']);
                 } else {
                     this.router.navigate(['/asociaciones']);

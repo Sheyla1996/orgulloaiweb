@@ -12,8 +12,8 @@ export class AuthGuard implements CanActivate {
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
     if (isPlatformBrowser(this.platformId)) {
-      const userType = localStorage.getItem('userType');
-      const zona = localStorage.getItem('zone');
+      const userType = localStorage.getItem('userType')?.toLocaleLowerCase();
+      const zona = localStorage.getItem('zone')?.toLocaleLowerCase();
       const allowed = route.data['allowed'] as string[] | undefined;
       const year = localStorage.getItem('year');
       const actualYear = new Date().getFullYear();

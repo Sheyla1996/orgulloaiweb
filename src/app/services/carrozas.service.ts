@@ -42,7 +42,7 @@ export class CarrozasService {
   }
 
   private getApiUrl(): string {
-    const userType = (localStorage.getItem('userType') || 'normal').toLowerCase();
+    const userType = (localStorage.getItem('userType') || 'normal')?.toLocaleLowerCase();
     const forceTestMode = localStorage.getItem('test') === 'true';
     const isTestUser = ['test', 'test_coor'].includes(userType);
     return `${this.apiBase}/${forceTestMode || isTestUser ? 'test/' : ''}carroza`;

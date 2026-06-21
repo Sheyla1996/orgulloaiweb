@@ -39,9 +39,9 @@ export class BottomNavigation implements OnInit {
   }
 
   private checkUserType(): void {
-    const userType = localStorage.getItem('userType');
+    const userType = localStorage.getItem('userType')?.toLocaleLowerCase() ;
     const year = localStorage.getItem('year');
-    const zone = localStorage.getItem('zone');
+    const zone = localStorage.getItem('zone')?.toLocaleLowerCase();
 
     if (!userType || !year || !zone) {
       this.showNavigation = false;
@@ -61,8 +61,8 @@ export class BottomNavigation implements OnInit {
   }
 
   modifyNavigation(): void {
-    const userType = localStorage.getItem('userType');
-    const zona = localStorage.getItem('zone');
+    const userType = localStorage.getItem('userType')?.toLocaleLowerCase() || 'normal';
+    const zona = localStorage.getItem('zone')?.toLocaleLowerCase();
     this.navigationItems = [];
     this.navigationItems.push({ label: 'Asociaciones', icon: 'map_search', route: '/asociaciones' });
     if (['boss', 'coor_manana'].includes(userType || '') || ['rosa'].includes(zona || '')) {
