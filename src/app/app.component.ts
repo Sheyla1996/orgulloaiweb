@@ -55,8 +55,7 @@ export class AppComponent implements OnInit {
     return this.router.url;
   }
   ngOnInit(): void {
-    const actualYear = new Date().getFullYear();
-    localStorage.setItem('topic', `${actualYear}`);
+    
     this.loadSettings();
     if (isPlatformBrowser(this.platformId)) {
       this.locationSharingService.resumeFromStorage();
@@ -158,6 +157,8 @@ export class AppComponent implements OnInit {
       next: (settings) => {
         const testSettings = settings.find(s => s.key === 'test');
         localStorage.setItem('test', testSettings ? testSettings.value : 'false');
+        const actualYear = new Date().getFullYear();
+        localStorage.setItem('topic', `${actualYear}${ testSettings ? (testSettings.value === 'true' ? '_test' : '') : ''}`);
       },
       error: (err) => this.handleError('Error loading settings:', err)
     });
