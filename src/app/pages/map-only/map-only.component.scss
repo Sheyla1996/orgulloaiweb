@@ -1,0 +1,11 @@
+:host {
+  display: block;
+}
+.map-container {
+  width: 100%;
+  height: calc(100vh - 56px); /* leave space if bottom nav is present */
+}
+
+.live-location-popup {
+  font-size: 13px;
+}

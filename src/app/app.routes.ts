@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { ListCarrozasComponent } from './pages/list-carrozas/list-carrozas.component';
 import { ListAsociacionesComponent } from './pages/list-asociaciones/list-asociaciones.component';
 import { ListTelefonosComponent } from './pages/list-telefonos/list-telefonos.component';
+import { MapOnlyComponent } from './pages/map-only/map-only.component';
 import { AuthGuard } from './auth.guard';
 import { LoginComponent } from './login/login.component';
 import { AdminComponent } from './pages/admin/admin.component';
@@ -17,6 +18,12 @@ export const routes: Routes = [
     {
         path: 'asociaciones',
         component: ListAsociacionesComponent,
+        canActivate: [AuthGuard],
+        data: { allowed: ['normal', 'coor_manana', 'coor', 'boss'] }
+    },
+    {
+        path: 'mapa',
+        component: MapOnlyComponent,
         canActivate: [AuthGuard],
         data: { allowed: ['normal', 'coor_manana', 'coor', 'boss'] }
     },

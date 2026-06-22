@@ -102,7 +102,7 @@ export class AppComponent implements OnInit {
 
   private handleWebSocketMessage(msg: any): void {
     if (!msg || !isPlatformBrowser(this.platformId)) return;
-    const userType = localStorage.getItem('userType') || 'normal';
+    const userType = localStorage.getItem('userType')?.toLocaleLowerCase() || 'normal';
     if (msg.type === 'message') {
       this.toastr.success(msg.message, 'Nuevo mensaje:', {
         closeButton: true,
