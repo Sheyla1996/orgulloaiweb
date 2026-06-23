@@ -186,7 +186,7 @@ export class LocationSharingService {
       uuid: String(config.uuid || '').trim(),
       zona: String(config.zona || '').trim().toLowerCase(),
       userType: String(config.userType || '').trim().toLowerCase(),
-      intervalMinutes: Math.max(1, Math.floor(Number(config.intervalMinutes) || 3)),
+      intervalMinutes: Math.max(1, Math.floor(Number(config.intervalMinutes) || 1)),
       displayName: config.displayName ? String(config.displayName).trim() : undefined,
       source: config.source ? String(config.source).trim() : 'web',
     };
@@ -208,7 +208,7 @@ export class LocationSharingService {
     const uuid = localStorage.getItem(this.storageKeys.uuid) || '';
     const zona = localStorage.getItem(this.storageKeys.zona) || '';
     const userType = localStorage.getItem(this.storageKeys.userType) || '';
-    const intervalMinutes = Number(localStorage.getItem(this.storageKeys.intervalMinutes) || '3');
+    const intervalMinutes = Number(localStorage.getItem(this.storageKeys.intervalMinutes) || '1');
 
     if (!clientId || !uuid || !zona || !userType) {
       return null;
@@ -219,7 +219,7 @@ export class LocationSharingService {
       uuid,
       zona,
       userType,
-      intervalMinutes: Number.isFinite(intervalMinutes) && intervalMinutes > 0 ? intervalMinutes : 3,
+      intervalMinutes: Number.isFinite(intervalMinutes) && intervalMinutes > 0 ? intervalMinutes : 1,
       displayName: localStorage.getItem(this.storageKeys.displayName) || undefined,
       source: localStorage.getItem(this.storageKeys.source) || 'web',
     };

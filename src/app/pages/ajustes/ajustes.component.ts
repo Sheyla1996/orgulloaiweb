@@ -22,7 +22,7 @@ export class AjustesComponent implements OnInit {
   installPromptEvent: any = null;
 
   sharingLocation = false;
-  sharingIntervalMinutes = 2;
+  sharingIntervalMinutes = 1;
 
   zona = '';
   userType = '';

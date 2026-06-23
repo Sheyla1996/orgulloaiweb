@@ -45,7 +45,7 @@ export class QrComponent implements OnInit, OnDestroy {
   notificationStatusMessage = '';
   sharingLocation = false;
   sharingStatusMessage = '';
-  sharingIntervalMinutes = 3;
+  sharingIntervalMinutes = 1;
 
   private sharingStateSub?: Subscription;
 
