@@ -255,7 +255,7 @@ export class LocationSharingService {
   }
 
   private isAllowedUserType(userType: string): boolean {
-    return ['coor', 'boss', 'coor_manana'].includes((userType || '').toLowerCase()) || (userType === 'test' && localStorage.getItem('zone')?.toLowerCase() === 'coor');
+    return ['coor', 'boss', 'coor_manana'].includes((userType || '').toLowerCase()) || (userType === 'test' && localStorage.getItem('zona')?.toLowerCase() === 'coor');
   }
 
   private getOrCreateClientId(): string {
@@ -287,5 +287,57 @@ export class LocationSharingService {
 
   private getHttpErrorMessage(error: any): string {
     return error?.error?.message || error?.message || 'No se pudo guardar la ubicación.';
+  }
+
+  /**
+   * Force-send the current location immediately regardless of the configured interval.
+   * Uses stored config (or current config) and does not alter timers or persisted config.
+   */
+  async forceShareNow(): Promise<void> {
+    if (!this.canRunInBrowser()) return;
+
+    const config = this.currentConfig ?? this.readConfigFromStorage();
+    if (!config || !this.isAllowedUserType(config.userType)) {
+      this.patchState({ lastError: 'Perfil no autorizado o configuración ausente.' });
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      this.patchState({ lastError: 'Tu navegador no permite obtener la ubicación.' });
+      return;
+    }
+
+    const position = await new Promise<GeolocationPosition | null>(resolve => {
+      navigator.geolocation.getCurrentPosition(
+        pos => resolve(pos),
+        error => {
+          this.patchState({ lastError: this.getGeolocationErrorMessage(error) });
+          resolve(null);
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      );
+    });
+
+    if (!position) return;
+
+    this.asociacionesService.upsertUbicacionCompartida({
+      clientId: config.clientId || this.getOrCreateClientId(),
+      uuid: config.uuid,
+      displayName: config.displayName || config.userType || config.uuid,
+      zona: config.zona,
+      userType: config.userType,
+      lat: position.coords.latitude,
+      lng: position.coords.longitude,
+      accuracy: position.coords.accuracy,
+      source: config.source || 'web',
+    }).subscribe({
+      next: () => {
+        const time = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        this.patchState({ lastSentAt: time, lastError: null, statusMessage: `Último envío: ${time}.` });
+      },
+      error: error => {
+        this.patchState({ lastError: this.getHttpErrorMessage(error) });
+      }
+    });
   }
 }

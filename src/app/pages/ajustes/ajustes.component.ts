@@ -129,7 +129,7 @@ export class AjustesComponent implements OnInit {
       localStorage.removeItem('uuid');
       localStorage.removeItem('userType');
       localStorage.removeItem('coor_zone');
-      localStorage.removeItem('zone');
+      localStorage.removeItem('zona');
       localStorage.removeItem('year');
       window.location.href = '/login';
     }

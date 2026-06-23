@@ -56,7 +56,7 @@ export class ListTelefonosComponent implements OnInit {
 
     if (!isPlatformBrowser(this.platformId)) return;
 
-    this.userZone = localStorage.getItem('zone');
+    this.userZone = localStorage.getItem('zona');
     this.userType = localStorage.getItem('userType')?.toLocaleLowerCase() || 'normal';
     const cached = localStorage.getItem('telefonos');
     const shouldUseCache = this.shouldUseCache();
@@ -189,7 +189,7 @@ export class ListTelefonosComponent implements OnInit {
   onShortClick(): void {
     if (!isPlatformBrowser(this.platformId)) return;
     localStorage.removeItem('userType');
-    localStorage.removeItem('zone');
+    localStorage.removeItem('zona');
     localStorage.removeItem('year');
     window.location.reload();
   }

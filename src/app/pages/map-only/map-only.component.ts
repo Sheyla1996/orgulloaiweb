@@ -3,11 +3,12 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { AsociacionesService, UbicacionCompartida } from '../../services/asociaciones.service';
 import { LocationSharingService } from '../../services/location-sharing.service';
 import { NgxSpinnerService } from 'ngx-spinner';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-map-only',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatIconModule],
   templateUrl: './map-only.component.html',
   styleUrls: ['./map-only.component.scss']
 })
@@ -23,6 +24,7 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
   private readonly gradientSpeed = 20; // px per second (controls speed)
   private liveLocationsTimer: ReturnType<typeof setInterval> | null = null;
   private readonly liveLocationsTtlMinutes = 10;
+  showForceShareButton = false;
 
   constructor(
     private asociacionesService: AsociacionesService,
@@ -35,6 +37,14 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
     if (!isPlatformBrowser(this.platformId)) return;
 
     this.leaflet = await import('leaflet');
+    // determine whether to show force-share button based on userType
+    try {
+      const ut = (localStorage.getItem('userType') || localStorage.getItem('shareLocationUserType') || '').toLowerCase();
+      const zona = (localStorage.getItem('zona') || '').toLowerCase();
+      this.showForceShareButton = ['coor', 'coor_manana', 'boss', 'test'].includes(ut) || (ut === 'test' && zona === 'coor');
+    } catch (e) {
+      this.showForceShareButton = false;
+    }
     await this.loadDataAndInitMap();
     this.liveLocationsTimer = setInterval(() => this.loadLiveLocations(false), 60000);
   }
@@ -311,6 +321,14 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
         }
       }
     } catch (err) {
+      // ignore
+    }
+  }
+
+  forceShareNow(): void {
+    try {
+      void this.locationSharingService.forceShareNow();
+    } catch (e) {
       // ignore
     }
   }

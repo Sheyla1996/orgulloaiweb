@@ -32,7 +32,7 @@ export class BottomNavigation implements OnInit {
       });
 
     window.addEventListener('storage', (event: StorageEvent) => {
-      if (['userType', 'zone', 'year'].includes(event.key || '')) {
+      if (['userType', 'zona', 'year'].includes(event.key || '')) {
         this.checkUserType();
       }
     });
@@ -41,7 +41,7 @@ export class BottomNavigation implements OnInit {
   private checkUserType(): void {
     const userType = localStorage.getItem('userType')?.toLocaleLowerCase() ;
     const year = localStorage.getItem('year');
-    const zone = localStorage.getItem('zone')?.toLocaleLowerCase();
+    const zone = localStorage.getItem('zona')?.toLocaleLowerCase();
 
     if (!userType || !year || !zone) {
       this.showNavigation = false;
@@ -62,7 +62,7 @@ export class BottomNavigation implements OnInit {
 
   modifyNavigation(): void {
     const userType = localStorage.getItem('userType')?.toLocaleLowerCase() || 'normal';
-    const zona = localStorage.getItem('zone')?.toLocaleLowerCase();
+    const zona = localStorage.getItem('zona')?.toLocaleLowerCase();
     this.navigationItems = [];
     this.navigationItems.push({ label: 'Mapa', icon: 'map', route: '/mapa' });
     this.navigationItems.push({ label: 'Asociaciones', icon: 'groups', route: '/asociaciones' });

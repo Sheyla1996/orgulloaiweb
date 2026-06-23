@@ -43,7 +43,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     localStorage.removeItem('userType');
-    localStorage.removeItem('zone');
+    localStorage.removeItem('zona');
     localStorage.removeItem('year');
     if (!isPlatformBrowser(this.platformId)) return;
     const params = new URLSearchParams(window.location.search);
@@ -69,7 +69,7 @@ export class LoginComponent implements OnInit {
       const date = new Date(now.getFullYear(), 6, 4, 1, 0, 0);
       if (now < date) {
         localStorage.setItem('userType', 'test');
-        localStorage.setItem('zone', this.selectZone || 'coor');
+        localStorage.setItem('zona', this.selectZone || 'coor');
         localStorage.setItem('year', now.getFullYear().toString());
         this.router.navigate(['/asociaciones']);
         return;
@@ -89,7 +89,7 @@ export class LoginComponent implements OnInit {
         }
 
         localStorage.setItem('userType', response.type || 'normal');
-        localStorage.setItem('zone', zona);
+        localStorage.setItem('zona', zona);
         localStorage.setItem('year', response.year?.toString() || '0');
 
         const isMorning = new Date().getHours() < 12;
@@ -149,7 +149,7 @@ export class LoginComponent implements OnInit {
 
   private handleLoginError(): void {
     localStorage.removeItem('userType');
-    localStorage.removeItem('zone');
+    localStorage.removeItem('zona');
     localStorage.removeItem('year');
     this.error = true;
   }

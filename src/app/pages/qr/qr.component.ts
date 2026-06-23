@@ -93,7 +93,7 @@ export class QrComponent implements OnInit, OnDestroy {
       return;
     } else {
       localStorage.removeItem('userType');
-      localStorage.removeItem('zone');
+      localStorage.removeItem('zona');
       localStorage.removeItem('year');
     }
 
@@ -112,7 +112,7 @@ export class QrComponent implements OnInit, OnDestroy {
     if (!isPlatformBrowser(this.platformId) || !this.isValid) return;
 
     localStorage.setItem('userType', this.type || 'normal');
-    localStorage.setItem('zone', this.zona || '');
+    localStorage.setItem('zona', this.zona || '');
     localStorage.setItem('year', this.year.toString() || '0');
 
     const isMorning = new Date().getHours() < 12;
@@ -200,7 +200,7 @@ export class QrComponent implements OnInit, OnDestroy {
       const date = new Date(now.getFullYear(), 6, 4, 1, 0, 0);
       if (now < date) {
         localStorage.setItem('userType', 'test');
-        localStorage.setItem('zone', this.zona || 'coor');
+        localStorage.setItem('zona', this.zona || 'coor');
         localStorage.setItem('year', now.getFullYear().toString());
         this.isValid = true;
 
@@ -218,7 +218,7 @@ export class QrComponent implements OnInit, OnDestroy {
           this.isValid = false;
           this.loading = false;
           localStorage.removeItem('userType');
-          localStorage.removeItem('zone');
+          localStorage.removeItem('zona');
           localStorage.removeItem('year');
           this.errorMessage = 'No tienes permisos para acceder.';
           return;
@@ -233,7 +233,7 @@ export class QrComponent implements OnInit, OnDestroy {
       },
       error: () => {
         localStorage.removeItem('userType');
-        localStorage.removeItem('zone');
+        localStorage.removeItem('zona');
         localStorage.removeItem('year');
         this.isValid = false;
         this.loading = false;
