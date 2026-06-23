@@ -40,7 +40,7 @@ export class QrComponent implements OnInit, OnDestroy {
   installPromptEvent: any = null;
   currentStep = 1;
   readonly allowedSharingTypes = ['coor', 'boss', 'coor_manana'];
-  readonly zoneSelectionTypes = ['coor', 'coor_manana'];
+  readonly zoneSelectionTypes = ['coor', 'boss', 'coor_manana'];
   notificationPermission: NotificationPermission | 'unsupported' = 'default';
   notificationStatusMessage = '';
   sharingLocation = false;
@@ -61,9 +61,7 @@ export class QrComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    localStorage.removeItem('userType');
-    localStorage.removeItem('zone');
-    localStorage.removeItem('year');
+    
     const qp = this.route.snapshot.queryParamMap;
 
     this.uuid = (qp.get('uuid') || '').trim();
@@ -80,6 +78,23 @@ export class QrComponent implements OnInit, OnDestroy {
       this.playStoreUrl = this.buildPlayStoreUrl(this.uuid);
       this.setupPwaPrompt();
       this.syncNotificationPermission();
+    }
+
+    // If we received validated data via navigation state from Login, use it
+    const navState: any = (history && (history.state as any)) || {};
+    if (navState && navState.prevalidated) {
+      this.uuid = (navState.uuid || this.uuid).trim();
+      this.zona = navState.zona || this.zona;
+      this.type = (navState.type || this.type || '').toLowerCase();
+      this.year = navState.year || this.year;
+      this.isValid = true;
+      this.loading = false;
+      this.loadWhatsappLinks();
+      return;
+    } else {
+      localStorage.removeItem('userType');
+      localStorage.removeItem('zone');
+      localStorage.removeItem('year');
     }
 
     if (!this.uuid) {
@@ -101,7 +116,7 @@ export class QrComponent implements OnInit, OnDestroy {
     localStorage.setItem('year', this.year.toString() || '0');
 
     const isMorning = new Date().getHours() < 12;
-    const navigate = ['coor', 'boss', 'willy', 'test_coor'].includes(this.type) && isMorning ? '/carrozas' : '/asociaciones';
+    const navigate = ['coor', 'coor_manana','boss'].includes(this.type) && isMorning ? '/carrozas' : '/asociaciones';
 
     this.router.navigate([navigate]);
   }
@@ -170,7 +185,7 @@ export class QrComponent implements OnInit, OnDestroy {
   }
 
   get shouldShowZoneSelectionStep(): boolean {
-    return this.zoneSelectionTypes.includes(this.type);
+    return this.zoneSelectionTypes.includes(this.type) || (this.type === 'test' && this.zona === 'coor');
   }
 
   get totalSteps(): number {
@@ -180,6 +195,20 @@ export class QrComponent implements OnInit, OnDestroy {
   }
 
   private validateUuid(): void {
+    if (this.uuid === 'test') {
+      const now = new Date();
+      const date = new Date(now.getFullYear(), 6, 4, 1, 0, 0);
+      if (now < date) {
+        localStorage.setItem('userType', 'test');
+        localStorage.setItem('zone', this.zona || 'coor');
+        localStorage.setItem('year', now.getFullYear().toString());
+        this.isValid = true;
+
+        this.loadWhatsappLinks();
+        return;
+      }
+    }
+
     this.qrService.validateUuid(this.uuid).subscribe({
       next: response => {
         const ok = response?.ok && response?.result === 'ok' && !!response?.zona && !!response?.type;
@@ -237,7 +266,7 @@ export class QrComponent implements OnInit, OnDestroy {
   }
 
   private canShareLocation(): boolean {
-    return this.allowedSharingTypes.includes(this.type);
+    return this.allowedSharingTypes.includes(this.type) || (this.type === 'test' && this.zona === 'coor');
   }
 
   private getGeneralWhatsappLink(list: Whatsapp[]): string {

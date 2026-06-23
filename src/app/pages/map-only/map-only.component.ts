@@ -17,6 +17,10 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
   asociaciones: any[] = [];
   ubicacionesVivas: UbicacionCompartida[] = [];
   liveLocationsLayer: any = null;
+  private gradientAnimId: number | null = null;
+  private gradientStartTime = 0;
+  private readonly gradientLength = 120; // tile height in px (e.g. 6 stripes x 20px)
+  private readonly gradientSpeed = 20; // px per second (controls speed)
   private liveLocationsTimer: ReturnType<typeof setInterval> | null = null;
   private readonly liveLocationsTtlMinutes = 10;
 
@@ -41,6 +45,7 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
       this.liveLocationsTimer = null;
     }
     this.destroyMap();
+    this.stopGradientAnimation();
   }
 
   private async loadDataAndInitMap(): Promise<void> {
@@ -74,9 +79,17 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
       this.map = this.leaflet.map('map-mapa').setView([40.416511, -3.691149], 15);
       this.leaflet.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
         attribution: '© OpenStreetMap',
-        maxZoom: 19,
-        minZoom: 15
+        maxZoom: 15,
+        minZoom: 15,
       }).addTo(this.map);
+      this.map.dragging.disable();
+      this.map.touchZoom.disable();
+      this.map.doubleClickZoom.disable();
+      this.map.scrollWheelZoom.disable();
+      this.map.boxZoom.disable();
+      this.map.keyboard.disable();
+      this.map.zoomControl.remove();
+      if (this.map.tap) this.map.tap.disable();
       this.liveLocationsLayer = this.leaflet.layerGroup().addTo(this.map);
     } else {
       this.clearMapLayers();
@@ -158,16 +171,19 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
     grad.setAttribute('x1', '0');
     grad.setAttribute('y1', '0');
     grad.setAttribute('x2', '0');
-    grad.setAttribute('y2', '600');
-    grad.setAttribute('spreadMethod', 'reflect');
+    grad.setAttribute('y2', String(this.gradientLength));
+    grad.setAttribute('spreadMethod', 'repeat');
 
+    // Define a short tile with 6 color stops and duplicate first color at the end
+    // so the repeat doesn't show a hard seam (last = first)
     const colors = [
       { offset: '0%', color: '#e40303' },
-      { offset: '20%', color: '#ff8c00' },
-      { offset: '40%', color: '#ffed00' },
-      { offset: '60%', color: '#008026' },
-      { offset: '80%', color: '#004dff' },
-      { offset: '100%', color: '#750787' }
+      { offset: '16.66%', color: '#ff8c00' },
+      { offset: '33.33%', color: '#ffed00' },
+      { offset: '50%', color: '#008026' },
+      { offset: '66.66%', color: '#004dff' },
+      { offset: '83.33%', color: '#750787' },
+      { offset: '100%', color: '#e40303' }
     ];
     colors.forEach(s => {
       const stop = document.createElementNS(SVG_NS, 'stop');
@@ -176,16 +192,8 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
       grad.appendChild(stop);
     });
 
-    // animate the gradient translation upwards over a larger span
-    const animate = document.createElementNS(SVG_NS, 'animateTransform');
-    animate.setAttribute('attributeName', 'gradientTransform');
-    animate.setAttribute('type', 'translate');
-    // move from 0 to -600 (upwards)
-    animate.setAttribute('from', '0 0');
-    animate.setAttribute('to', '0 -600');
-    animate.setAttribute('dur', '4s');
-    animate.setAttribute('repeatCount', 'indefinite');
-    grad.appendChild(animate);
+    // We animate the gradient via JavaScript (requestAnimationFrame)
+    // to avoid visible SMIL reset jumps; see startGradientAnimation().
 
     defs.appendChild(grad);
     try {
@@ -193,6 +201,30 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
       // eslint-disable-next-line no-console
       console.log('rainbowGradient injected into SVG defs');
     } catch (e) {}
+    // start JS animation loop if not already running
+    this.startGradientAnimation();
+  }
+
+  private startGradientAnimation(): void {
+    if (this.gradientAnimId !== null) return; // already running
+    this.gradientStartTime = performance.now();
+    const step = (ts: number) => {
+      const elapsed = (ts - this.gradientStartTime) / 1000; // seconds
+      const offset = (elapsed * this.gradientSpeed) % this.gradientLength;
+      try {
+        const grads = document.querySelectorAll('linearGradient#rainbowGradient');
+        grads.forEach(g => g.setAttribute('gradientTransform', `translate(0 ${-offset})`));
+      } catch (e) {}
+      this.gradientAnimId = requestAnimationFrame(step);
+    };
+    this.gradientAnimId = requestAnimationFrame(step);
+  }
+
+  private stopGradientAnimation(): void {
+    if (this.gradientAnimId !== null) {
+      cancelAnimationFrame(this.gradientAnimId);
+      this.gradientAnimId = null;
+    }
   }
 
   private clearMapLayers(): void {

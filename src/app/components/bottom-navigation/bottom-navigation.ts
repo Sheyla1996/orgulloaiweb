@@ -65,8 +65,8 @@ export class BottomNavigation implements OnInit {
     const zona = localStorage.getItem('zone')?.toLocaleLowerCase();
     this.navigationItems = [];
     this.navigationItems.push({ label: 'Mapa', icon: 'map', route: '/mapa' });
-    this.navigationItems.push({ label: 'Asociaciones', icon: 'group', route: '/asociaciones' });
-    if (['boss', 'coor_manana'].includes(userType || '') || ['rosa'].includes(zona || '')) {
+    this.navigationItems.push({ label: 'Asociaciones', icon: 'groups', route: '/asociaciones' });
+    if (['boss', 'coor_manana'].includes(userType || '') || ['rosa'].includes(zona || '') || (userType === 'test' && zona === 'coor')) {
       this.navigationItems.push({ label: 'Carrozas', icon: 'airport_shuttle', route: '/carrozas' });
     }
     this.navigationItems.push({ label: 'Teléfonos', icon: 'contact_phone', route: '/telefonos' });

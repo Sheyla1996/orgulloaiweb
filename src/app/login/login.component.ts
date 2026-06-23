@@ -42,6 +42,9 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    localStorage.removeItem('userType');
+    localStorage.removeItem('zone');
+    localStorage.removeItem('year');
     if (!isPlatformBrowser(this.platformId)) return;
     const params = new URLSearchParams(window.location.search);
     const pass = params.get('uuid');
@@ -59,6 +62,20 @@ export class LoginComponent implements OnInit {
       this.handleLoginError();
       return;
     }
+
+    // Test mode: password 'test' before July 4th at 1 AM
+    if (this.password === 'test') {
+      const now = new Date();
+      const date = new Date(now.getFullYear(), 6, 4, 1, 0, 0);
+      if (now < date) {
+        localStorage.setItem('userType', 'test');
+        localStorage.setItem('zone', this.selectZone || 'coor');
+        localStorage.setItem('year', now.getFullYear().toString());
+        this.router.navigate(['/asociaciones']);
+        return;
+      }
+    }
+    
     this.qrService.validateUuid(this.password).subscribe({
       next: (response: any) => {
         const ok = response?.ok && response?.result === 'ok' && !!response?.zona && !!response?.type;
@@ -76,10 +93,55 @@ export class LoginComponent implements OnInit {
         localStorage.setItem('year', response.year?.toString() || '0');
 
         const isMorning = new Date().getHours() < 12;
-        const navigate = ['coor', 'boss', 'willy', 'test_coor'].includes(response.type) && isMorning ? '/carrozas' : '/asociaciones';
+        const navigate = ['coor', 'boss'].includes(response.type) && isMorning ? '/carrozas' : '/asociaciones';
 
         this.router.navigate([navigate]);
 
+      },
+      error: () => this.handleLoginError()
+    });
+  }
+
+  /**
+   * Validate here in login and navigate to the QR flow carrying the validated
+   * data in history.state so `QrComponent` can skip its own validation.
+   */
+  goToQr(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    if (!this.password) {
+      this.handleLoginError();
+      return;
+    }
+
+    // Test shortcut
+    if (this.password === 'test') {
+      const now = new Date();
+      const date = new Date(now.getFullYear(), 6, 4, 1, 0, 0);
+      if (now < date) {
+        const zona = this.selectZone || 'coor';
+        const type = 'test';
+        const year = now.getFullYear();
+        this.router.navigate(['/qr'], { state: { prevalidated: true, uuid: this.password, zona, type, year } });
+        return;
+      }
+    }
+
+    this.qrService.validateUuid(this.password).subscribe({
+      next: (response: any) => {
+        const ok = response?.ok && response?.result === 'ok' && !!response?.zona && !!response?.type;
+        const actualYear = new Date().getFullYear();
+        const zona = this.normalizeZone(response.zona || '');
+
+        if (!ok || response.year !== actualYear) {
+          this.handleLoginError();
+          return;
+        }
+
+        const type = (response.type || 'normal').toLowerCase();
+        const year = response.year || actualYear;
+
+        // Navigate to QR passing validated data in navigation state
+        this.router.navigate(['/qr'], { state: { prevalidated: true, uuid: this.password, zona, type, year } });
       },
       error: () => this.handleLoginError()
     });

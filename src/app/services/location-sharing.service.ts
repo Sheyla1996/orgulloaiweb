@@ -255,7 +255,7 @@ export class LocationSharingService {
   }
 
   private isAllowedUserType(userType: string): boolean {
-    return ['coor', 'boss', 'coor_manana'].includes((userType || '').toLowerCase());
+    return ['coor', 'boss', 'coor_manana'].includes((userType || '').toLowerCase()) || (userType === 'test' && localStorage.getItem('zone')?.toLowerCase() === 'coor');
   }
 
   private getOrCreateClientId(): string {

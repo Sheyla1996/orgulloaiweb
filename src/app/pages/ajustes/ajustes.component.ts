@@ -79,7 +79,7 @@ export class AjustesComponent implements OnInit {
     if (!isPlatformBrowser(this.platformId) || !this.isAndroid) return;
 
     const allowed = ['coor', 'boss', 'coor_manana'];
-    if (!allowed.includes(this.userType)) return;
+    if (!allowed.includes(this.userType) && !(this.userType === 'test' && this.zona === 'coor')) return;
 
     if (this.sharingLocation) {
       this.locationSharingService.stopSharing();
@@ -101,7 +101,7 @@ export class AjustesComponent implements OnInit {
   }
 
   get canChangeZone(): boolean {
-    return this.zoneSelectionTypes.includes(this.userType);
+    return this.zoneSelectionTypes.includes(this.userType) || (this.userType === 'test' && this.zona === 'coor');
   }
 
    private setupPwaPrompt(): void {

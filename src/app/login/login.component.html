@@ -3,9 +3,8 @@
     <img class="logo" src="assets/logo.png" alt="Logo Orgullo 2026" />
 
     <h1>Acceso voluntariado</h1>
-    <p>Selecciona tu zona y valida tu pulsera para entrar.</p>
 
-    <form class="form" (ngSubmit)="login()">
+    <form class="form" (ngSubmit)="goToQr()">
       <label for="zona">Zona:</label>
         <select [(ngModel)]="selectZone" name="zona" id="zona">
           <option value="blanca">Zona Blanca</option>

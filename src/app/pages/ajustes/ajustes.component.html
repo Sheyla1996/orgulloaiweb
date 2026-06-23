@@ -10,7 +10,10 @@
         </button>
     }
 
-    <a class="action-btn action-btn-play" [href]="playStoreUrl" target="_blank" rel="noopener noreferrer">Descargar App Android</a>
+    <a class="action-btn action-btn-play" [href]="playStoreUrl" target="_blank" rel="noopener noreferrer">
+        Descargar App Android
+        <mat-icon fontSet="material-symbols-outlined">apk_install</mat-icon>
+    </a>
     <button
         class="action-btn action-btn-webapp"
         (click)="onInstallPwa()">
@@ -20,7 +23,10 @@
     @if(isAndroid && canChangeZone) {
         <h2>Ubicación</h2>
         <div>
-            <button class="action-btn action-btn-location" type="button" (click)="toggleLocationSharing()">{{ sharingLocation ? 'Detener ubicación' : 'Empezar ubicación' }}</button>
+            <button class="action-btn action-btn-location" type="button" (click)="toggleLocationSharing()">
+                {{ sharingLocation ? 'Detener ubicación' : 'Empezar ubicación' }}
+                <mat-icon fontSet="material-symbols-outlined">{{sharingLocation ? 'location_disabled' : 'my_location'}}</mat-icon>
+            </button>
         </div>
     }
     @if (canChangeZone) {
@@ -38,7 +44,7 @@
         </div>
     }
     <div>
-            <button class="action-btn action-btn-location" type="button" (click)="logout()">Cerrar sesión</button>
+            <button class="action-btn action-btn-logout" type="button" (click)="logout()">Cerrar sesión</button>
         </div>
 
   </section>

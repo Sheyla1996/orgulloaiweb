@@ -19,25 +19,25 @@ export const routes: Routes = [
         path: 'asociaciones',
         component: ListAsociacionesComponent,
         canActivate: [AuthGuard],
-        data: { allowed: ['normal', 'coor_manana', 'coor', 'boss'] }
+        data: { allowed: ['normal', 'coor_manana', 'coor', 'boss', 'test'] }
     },
     {
         path: 'mapa',
         component: MapOnlyComponent,
         canActivate: [AuthGuard],
-        data: { allowed: ['normal', 'coor_manana', 'coor', 'boss'] }
+        data: { allowed: ['normal', 'coor_manana', 'coor', 'boss', 'test'] }
     },
     {
         path: 'carrozas',
         component: ListCarrozasComponent,
         canActivate: [AuthGuard],
-        data: { allowed: ['boss', 'coor_manana', 'rosa'] }
+        data: { allowed: ['boss', 'coor_manana', 'rosa', 'test'] }
     },
     {
         path: 'telefonos',
         component: ListTelefonosComponent,
         canActivate: [AuthGuard],
-        data: { allowed: ['normal', 'coor_manana', 'coor', 'boss'] }
+        data: { allowed: ['normal', 'coor_manana', 'coor', 'boss', 'test'] }
     },
     {
         path: 'messages',
@@ -62,6 +62,6 @@ export const routes: Routes = [
         path: 'ajustes',
         loadComponent: () => import('./pages/ajustes/ajustes.component').then(m => m.AjustesComponent),
         canActivate: [AuthGuard],
-        data: { allowed: ['normal', 'coor_manana', 'coor', 'boss'] }
+        data: { allowed: ['normal', 'coor_manana', 'coor', 'boss', 'test'] }
     }
 ];
