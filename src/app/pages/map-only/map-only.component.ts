@@ -20,7 +20,7 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
   liveLocationsLayer: any = null;
   private gradientAnimId: number | null = null;
   private gradientStartTime = 0;
-  private readonly gradientLength = 120; // tile height in px (e.g. 6 stripes x 20px)
+  private readonly gradientLength = 220; // tile height in px (e.g. 6 stripes x 20px)
   private readonly gradientSpeed = 20; // px per second (controls speed)
   private liveLocationsTimer: ReturnType<typeof setInterval> | null = null;
   private readonly liveLocationsTtlMinutes = 10;
