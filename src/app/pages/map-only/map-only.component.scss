@@ -9,3 +9,13 @@
 .live-location-popup {
   font-size: 13px;
 }
+
+/* Ensure injected SVG pattern works and the rainbow stroke is smooth */
+:host ::ng-deep .leaflet-interactive {
+  shape-rendering: geometricPrecision;
+}
+
+/* Fallback styling for browsers that don't pick up the pattern stroke via attributes */
+:host ::ng-deep .rainbow-line {
+  stroke-linecap: round;
+}

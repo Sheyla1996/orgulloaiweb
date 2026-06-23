@@ -65,13 +65,13 @@ export class BottomNavigation implements OnInit {
     const zona = localStorage.getItem('zone')?.toLocaleLowerCase();
     this.navigationItems = [];
     this.navigationItems.push({ label: 'Mapa', icon: 'map', route: '/mapa' });
-    this.navigationItems.push({ label: 'Asociaciones', icon: 'map_search', route: '/asociaciones' });
+    this.navigationItems.push({ label: 'Asociaciones', icon: 'group', route: '/asociaciones' });
     if (['boss', 'coor_manana'].includes(userType || '') || ['rosa'].includes(zona || '')) {
       this.navigationItems.push({ label: 'Carrozas', icon: 'airport_shuttle', route: '/carrozas' });
     }
     this.navigationItems.push({ label: 'Teléfonos', icon: 'contact_phone', route: '/telefonos' });
     if (userType === 'boss') {
-      this.navigationItems.push({ label: 'Notificaciones', icon: 'notifications', route: '/messages' });
+      //this.navigationItems.push({ label: 'Notificaciones', icon: 'notifications', route: '/messages' });
       this.navigationItems.push({ label: 'Admin', icon: 'shield_person', route: '/admin' });
     }
     // Ajustes accesible para todos

@@ -15,8 +15,8 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
   map: any = null;
   leaflet: any;
   asociaciones: any[] = [];
-  liveLocationsLayer: any = null;
   ubicacionesVivas: UbicacionCompartida[] = [];
+  liveLocationsLayer: any = null;
   private liveLocationsTimer: ReturnType<typeof setInterval> | null = null;
   private readonly liveLocationsTtlMinutes = 10;
 
@@ -49,8 +49,8 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
       next: async data => {
         this.asociaciones = data.map(a => ({ ...a, lat: a.lat, lng: a.lng })).sort((a, b) => a.position - b.position);
         await this.waitForMapDiv();
-        this.initMap();
         this.spinner.hide();
+          this.initMap();
       },
       error: () => {
         this.spinner.hide();
@@ -82,9 +82,117 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
       this.clearMapLayers();
     }
 
+    // ensure the animated rainbow SVG gradient is available
+    this.ensureRainbowPattern();
+
+    // draw main polylines (asociaciones) with gradient
     this.drawPolylines();
+
     this.drawExtraLine();
     this.drawLiveLocations();
+  }
+
+  private drawPolylines(): void {
+    if (!this.map || !this.asociaciones) return;
+    for (let i = 1; i < this.asociaciones.length; i++) {
+      const prev = this.asociaciones[i - 1];
+      const curr = this.asociaciones[i];
+      const pl = this.leaflet.polyline([[prev.lat, prev.lng], [curr.lat, curr.lng]], { weight: 6, renderer: this.leaflet.svg() }).addTo(this.map);
+      try {
+        const path = (pl as any)._path as SVGElement | null;
+        if (path) {
+          // ensure gradient exists in this SVG
+          try {
+            const ownerSvg = (path as any).ownerSVGElement as SVGSVGElement | null;
+            if (ownerSvg) this.ensureRainbowPatternOnSvg(ownerSvg);
+          } catch (err) {}
+          path.setAttribute('stroke', 'url(#rainbowGradient)');
+          path.setAttribute('stroke-width', '6');
+          path.setAttribute('stroke-linecap', 'round');
+          try {
+            (path as any).style.stroke = 'url(#rainbowGradient)';
+            (path as any).style.strokeWidth = '6px';
+            (path as any).style.strokeLinecap = 'round';
+          } catch (e) {}
+        }
+      } catch (err) {
+        // ignore
+      }
+    }
+  }
+
+  // Inject an SVG <pattern> with horizontal rainbow stripes and an animation
+  // that translates the pattern from bottom to top. The pattern is referenced
+  // from polylines by setting their `stroke` attribute to `url(#rainbowPattern)`.
+  private ensureRainbowPattern(): void {
+    if (!this.map) return;
+    try {
+      const overlayPane = this.map.getPanes().overlayPane as HTMLElement;
+      const svg = overlayPane.querySelector('svg');
+      if (svg) {
+        this.ensureRainbowPatternOnSvg(svg as unknown as SVGSVGElement);
+      }
+    } catch (err) {
+      console.error('Error creating rainbow pattern:', err);
+    }
+  }
+
+  // Ensure the rainbow pattern exists inside the given SVG element. This helps
+  // when the global overlay SVG isn't yet present — we can inject into the
+  // specific SVG that contains the polyline path (path.ownerSVGElement).
+  private ensureRainbowPatternOnSvg(svg: SVGSVGElement | null): void {
+    if (!svg) return;
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    let defs = svg.querySelector('defs');
+    if (!defs) {
+      defs = document.createElementNS(SVG_NS, 'defs');
+      svg.insertBefore(defs, svg.firstChild || null);
+    }
+    if (defs.querySelector('#rainbowGradient')) return; // already present
+
+    // create a vertical linearGradient and animate its transform to move upward
+    const grad = document.createElementNS(SVG_NS, 'linearGradient');
+    grad.setAttribute('id', 'rainbowGradient');
+    grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+    // start and end Y values cover the stripe block height
+    grad.setAttribute('x1', '0');
+    grad.setAttribute('y1', '0');
+    grad.setAttribute('x2', '0');
+    grad.setAttribute('y2', '600');
+    grad.setAttribute('spreadMethod', 'reflect');
+
+    const colors = [
+      { offset: '0%', color: '#e40303' },
+      { offset: '20%', color: '#ff8c00' },
+      { offset: '40%', color: '#ffed00' },
+      { offset: '60%', color: '#008026' },
+      { offset: '80%', color: '#004dff' },
+      { offset: '100%', color: '#750787' }
+    ];
+    colors.forEach(s => {
+      const stop = document.createElementNS(SVG_NS, 'stop');
+      stop.setAttribute('offset', s.offset);
+      stop.setAttribute('stop-color', s.color);
+      grad.appendChild(stop);
+    });
+
+    // animate the gradient translation upwards over a larger span
+    const animate = document.createElementNS(SVG_NS, 'animateTransform');
+    animate.setAttribute('attributeName', 'gradientTransform');
+    animate.setAttribute('type', 'translate');
+    // move from 0 to -600 (upwards)
+    animate.setAttribute('from', '0 0');
+    animate.setAttribute('to', '0 -600');
+    animate.setAttribute('dur', '4s');
+    animate.setAttribute('repeatCount', 'indefinite');
+    grad.appendChild(animate);
+
+    defs.appendChild(grad);
+    try {
+      // small log to help debugging in browser console
+      // eslint-disable-next-line no-console
+      console.log('rainbowGradient injected into SVG defs');
+    } catch (e) {}
   }
 
   private clearMapLayers(): void {
@@ -119,7 +227,7 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
   private drawLiveLocations(): void {
     if (!this.map || !this.liveLocationsLayer) return;
     this.liveLocationsLayer.clearLayers();
-    this.ubicacionesVivas.forEach(location => {
+    this.ubicacionesVivas.forEach((location: UbicacionCompartida) => {
       const color = this.getZonaColor(location.zona);
       const circle = this.leaflet.circleMarker([location.lat, location.lng], {
         radius: 12,
@@ -136,15 +244,7 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
     });
   }
 
-  private drawPolylines(): void {
-    if (!this.map || !this.asociaciones) return;
-    for (let i = 1; i < this.asociaciones.length; i++) {
-      const prev = this.asociaciones[i - 1];
-      const curr = this.asociaciones[i];
-      const color = this.getZonaColor(curr.zona);
-      this.leaflet.polyline([[prev.lat, prev.lng], [curr.lat, curr.lng]], { color, weight: 6 }).addTo(this.map);
-    }
-  }
+  
 
   private drawExtraLine(): void {
     if (!this.map) return;
@@ -155,8 +255,32 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
       [40.412416, -3.692842]
     ];
     // color violeta claro
-    const color = '#d8b4fe';
-    this.leaflet.polyline(coords, { color, weight: 6, opacity: 0.9 }).addTo(this.map);
+    const pl = this.leaflet.polyline(coords, { weight: 6, opacity: 0.9, renderer: this.leaflet.svg() }).addTo(this.map);
+    try {
+      const path = (pl as any)._path as SVGElement | null;
+      if (path) {
+        // ensure the pattern exists in the SVG that contains this path
+        try {
+          const ownerSvg = (path as any).ownerSVGElement as SVGSVGElement | null;
+          if (ownerSvg) this.ensureRainbowPatternOnSvg(ownerSvg);
+        } catch (err) {
+          // ignore
+        }
+        // set both presentation attributes and inline style to override Leaflet
+        path.setAttribute('stroke', 'url(#rainbowGradient)');
+        path.setAttribute('stroke-width', '6');
+        path.setAttribute('stroke-linecap', 'round');
+        try {
+          (path as any).style.stroke = 'url(#rainbowGradient)';
+          (path as any).style.strokeWidth = '6px';
+          (path as any).style.strokeLinecap = 'round';
+        } catch (e) {
+          // ignore
+        }
+      }
+    } catch (err) {
+      // ignore
+    }
   }
 
   private getZonaColor(zona: string): string {
