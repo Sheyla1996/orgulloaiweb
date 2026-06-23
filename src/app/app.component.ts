@@ -1,5 +1,5 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, ViewEncapsulation, OnInit, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
-import { RouterModule, RouterOutlet } from '@angular/router';
+import { Router, RouterModule, RouterOutlet } from '@angular/router';
 import { CommonModule, isPlatformBrowser, TitleCasePipe } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
@@ -44,11 +44,21 @@ export class AppComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private settingsService: SettingsService,
     private locationSharingService: LocationSharingService,
+    private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object,
   ) {}
 
 
   ngOnInit(): void {
+    const now = new Date();
+    const date = new Date(now.getFullYear(), 6, 4, 1, 0, 0);
+    const userType = localStorage.getItem('userType')?.toLocaleLowerCase();
+    if (userType === 'test' && now > date) {
+      localStorage.removeItem('userType');
+      localStorage.removeItem('zona');
+      localStorage.removeItem('year');
+      this.router.navigate(['/login']);
+    }
     this.loadSettings();
 
     if (isPlatformBrowser(this.platformId)) {
