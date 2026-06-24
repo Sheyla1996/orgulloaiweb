@@ -33,6 +33,12 @@ export class AjustesComponent implements OnInit {
   mapGradientActive: string | null = null;
   lastSuccessfulMapInit: string | null = null;
   lastGradientStopped: string | null = null;
+  // early bootstrap diagnostics
+  lastBootstrapAttempt: string | null = null;
+  bootstrapAttempts: string | null = null;
+  lastBootstrapFailed: string | null = null;
+  appBootstrapComplete: string | null = null;
+  appDomLoaded: string | null = null;
   readonly zoneSelectionTypes = ['coor', 'coor_manana', 'boss'];
 
   constructor(
@@ -66,6 +72,11 @@ export class AjustesComponent implements OnInit {
       this.mapGradientActive = localStorage.getItem('mapGradientActive');
       this.lastSuccessfulMapInit = localStorage.getItem('lastSuccessfulMapInit');
       this.lastGradientStopped = localStorage.getItem('lastGradientStopped');
+      this.lastBootstrapAttempt = localStorage.getItem('lastBootstrapAttempt');
+      this.bootstrapAttempts = localStorage.getItem('bootstrapAttempts');
+      this.lastBootstrapFailed = localStorage.getItem('lastBootstrapFailed');
+      this.appBootstrapComplete = localStorage.getItem('appBootstrapComplete');
+      this.appDomLoaded = localStorage.getItem('appDomLoaded');
     } catch (e) {}
   }
 
