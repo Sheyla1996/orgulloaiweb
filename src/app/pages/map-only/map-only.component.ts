@@ -39,6 +39,7 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
   async ngOnInit(): Promise<void> {
     if (!isPlatformBrowser(this.platformId)) return;
     this.isIosSafari = this.checkIsIosSafari();
+    try { localStorage.setItem('mapInitInProgress', '1'); } catch (e) {}
     this.leaflet = await import('leaflet');
     // determine whether to show force-share button based on userType
     try {
@@ -63,6 +64,8 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
             userAgent: navigator.userAgent,
             timestamp: Date.now(),
             asociacionesCount: this.asociaciones?.length ?? 0,
+            mapInitInProgress: (localStorage.getItem('mapInitInProgress') || null),
+            mapGradientActive: (localStorage.getItem('mapGradientActive') || null),
           };
           localStorage.setItem('lastClientError', JSON.stringify(info));
         } catch (e) {}
@@ -75,6 +78,8 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
             userAgent: navigator.userAgent,
             timestamp: Date.now(),
             asociacionesCount: this.asociaciones?.length ?? 0,
+            mapInitInProgress: (localStorage.getItem('mapInitInProgress') || null),
+            mapGradientActive: (localStorage.getItem('mapGradientActive') || null),
           };
           localStorage.setItem('lastClientError', JSON.stringify(info));
         } catch (e) {}
@@ -102,6 +107,7 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
     }
     this.destroyMap();
     this.stopGradientAnimation();
+    try { localStorage.setItem('mapInitInProgress', '0'); } catch (e) {}
   }
 
   private async loadDataAndInitMap(): Promise<void> {
@@ -277,6 +283,7 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
   private startGradientAnimation(): void {
     if (this.gradientAnimId !== null) return; // already running
     this.gradientStartTime = performance.now();
+    try { localStorage.setItem('mapGradientActive', '1'); } catch (e) {}
     const step = (ts: number) => {
       // throttle to ~gradientFps and skip when page hidden
       if (document.hidden) {
@@ -304,6 +311,10 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
       cancelAnimationFrame(this.gradientAnimId);
       this.gradientAnimId = null;
     }
+    try {
+      localStorage.setItem('mapGradientActive', '0');
+      localStorage.setItem('lastGradientStopped', String(Date.now()));
+    } catch (e) {}
   }
 
   private clearMapLayers(): void {

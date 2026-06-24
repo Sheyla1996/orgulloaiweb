@@ -28,7 +28,11 @@ export class AjustesComponent implements OnInit {
   coor_zona = '';
   userType = '';
   availableZones: string[] = ['blanca', 'roja', 'naranja', 'amarilla', 'verde', 'azul', 'violeta', 'rosa'];
-  last = localStorage.getItem('lastClientError');
+  last: string | null = null;
+  mapInitInProgress: string | null = null;
+  mapGradientActive: string | null = null;
+  lastSuccessfulMapInit: string | null = null;
+  lastGradientStopped: string | null = null;
   readonly zoneSelectionTypes = ['coor', 'coor_manana', 'boss'];
 
   constructor(
@@ -55,6 +59,14 @@ export class AjustesComponent implements OnInit {
             this.sharingIntervalMinutes = state.intervalMinutes || this.sharingIntervalMinutes;
         });
     }
+    // refresh diagnostics from localStorage
+    try {
+      this.last = localStorage.getItem('lastClientError');
+      this.mapInitInProgress = localStorage.getItem('mapInitInProgress');
+      this.mapGradientActive = localStorage.getItem('mapGradientActive');
+      this.lastSuccessfulMapInit = localStorage.getItem('lastSuccessfulMapInit');
+      this.lastGradientStopped = localStorage.getItem('lastGradientStopped');
+    } catch (e) {}
   }
 
   private syncNotificationPermission(): void {
