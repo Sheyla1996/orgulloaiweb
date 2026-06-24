@@ -159,7 +159,7 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
         preferCanvas: this.isIos
       }).setView([40.414911, -3.691149], 14);
 
-      this.leaflet.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      this.leaflet.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
         attribution: '© OpenStreetMap',
         maxZoom: 15,
         minZoom: 15,
