@@ -46,22 +46,5 @@
     <div>
             <button class="action-btn action-btn-logout" type="button" (click)="logout()">Cerrar sesión</button>
         </div>
-        <h2>Diagnóstico (local)</h2>
-        <div class="diagnostics">
-            <p><strong>Último error guardado:</strong></p>
-            <pre *ngIf="last">{{ last }}</pre>
-            <p *ngIf="!last">(ninguno)</p>
-            <p><strong>mapInitInProgress:</strong> {{ mapInitInProgress }}</p>
-            <p><strong>mapGradientActive:</strong> {{ mapGradientActive }}</p>
-            <p><strong>lastSuccessfulMapInit:</strong> {{ lastSuccessfulMapInit }}</p>
-            <p><strong>lastGradientStopped:</strong> {{ lastGradientStopped }}</p>
-            <h3>Bootstrap temprano</h3>
-            <p><strong>lastBootstrapAttempt:</strong> {{ lastBootstrapAttempt }}</p>
-            <p><strong>bootstrapAttempts:</strong> {{ bootstrapAttempts }}</p>
-            <p><strong>lastBootstrapFailed:</strong> {{ lastBootstrapFailed }}</p>
-            <p><strong>appBootstrapComplete:</strong> {{ appBootstrapComplete }}</p>
-            <p><strong>appDomLoaded:</strong> {{ appDomLoaded }}</p>
-            <p><strong>appBootstrapStarted:</strong> {{ appBootstrapStarted }}</p>
-        </div>
   </section>
 </div>

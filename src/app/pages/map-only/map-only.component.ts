@@ -51,8 +51,6 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
 
     this.isIos = this.checkIsIos();
 
-    try { localStorage.setItem('mapInitInProgress', '1'); } catch (e) {}
-
     this.leaflet = await import('leaflet');
 
     try {
@@ -62,8 +60,6 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
     } catch (e) {
       this.showForceShareButton = false;
     }
-
-    this.installClientErrorLogger();
 
     await this.loadDataAndInitMap();
 
@@ -84,44 +80,6 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
     } catch (e) {
       return false;
     }
-  }
-
-  private installClientErrorLogger(): void {
-    try {
-      window.addEventListener('error', (ev: ErrorEvent) => {
-        try {
-          const info = {
-            type: 'error',
-            message: ev.message,
-            filename: ev.filename,
-            lineno: ev.lineno,
-            colno: ev.colno,
-            stack: ev.error?.stack ?? null,
-            userAgent: navigator.userAgent,
-            timestamp: Date.now(),
-            asociacionesCount: this.asociaciones?.length ?? 0,
-            mapInitInProgress: localStorage.getItem('mapInitInProgress') || null,
-            mapGradientActive: localStorage.getItem('mapGradientActive') || null,
-          };
-          localStorage.setItem('lastClientError', JSON.stringify(info));
-        } catch (e) {}
-      });
-
-      window.addEventListener('unhandledrejection', (ev: PromiseRejectionEvent) => {
-        try {
-          const info = {
-            type: 'unhandledrejection',
-            reason: this.safeStringify(ev.reason),
-            userAgent: navigator.userAgent,
-            timestamp: Date.now(),
-            asociacionesCount: this.asociaciones?.length ?? 0,
-            mapInitInProgress: localStorage.getItem('mapInitInProgress') || null,
-            mapGradientActive: localStorage.getItem('mapGradientActive') || null,
-          };
-          localStorage.setItem('lastClientError', JSON.stringify(info));
-        } catch (e) {}
-      });
-    } catch (e) {}
   }
 
   private safeStringify(value: unknown): string {
@@ -147,8 +105,6 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
 
     this.stopGradientAnimation();
     this.destroyMap();
-
-    try { localStorage.setItem('mapInitInProgress', '0'); } catch (e) {}
   }
 
   private async loadDataAndInitMap(): Promise<void> {
@@ -168,7 +124,6 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
       },
       error: error => {
         this.spinner.hide();
-        this.saveClientStageError('getAsociacionesError', error);
       }
     });
 
@@ -190,8 +145,6 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
 
   private initMap(): void {
     if (!this.map) {
-      try { localStorage.setItem('mapStep', 'creatingMap'); } catch (e) {}
-
       this.svgRenderer = this.leaflet.svg();
 
       this.map = this.leaflet.map('map-mapa', {
@@ -206,49 +159,25 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
         preferCanvas: this.isIos
       }).setView([40.346750, -3.695119], 15);
 
-      try {
-        this.leaflet.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap',
-          maxZoom: 15,
-          minZoom: 15,
-          updateWhenIdle: true,
-          keepBuffer: this.isIos ? 1 : 2,
-        }).addTo(this.map);
-        try { localStorage.setItem('mapStep', 'tileLayerAdded'); } catch (e) {}
-      } catch (err) {
-        this.saveClientStageError('tileLayerError', err);
-      }
+      this.leaflet.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap',
+        maxZoom: 15,
+        minZoom: 15,
+        updateWhenIdle: true,
+        keepBuffer: this.isIos ? 1 : 2,
+      }).addTo(this.map);
 
       if (this.map.tap) this.map.tap.disable();
 
       this.liveLocationsLayer = this.leaflet.layerGroup().addTo(this.map);
-      try { localStorage.setItem('mapStep', 'layerGroupAdded'); } catch (e) {}
     } else {
       this.clearMapLayers();
     }
 
     this.ensureRainbowPattern();
-
-    try {
-      this.drawPolylines();
-      try { localStorage.setItem('mapStep', 'polylinesDrawn'); } catch (e) {}
-    } catch (err) {
-      this.saveClientStageError('drawPolylines', err);
-    }
-
-    try {
-      this.drawExtraLine();
-      try { localStorage.setItem('mapStep', 'extraLineDrawn'); } catch (e) {}
-    } catch (err) {
-      this.saveClientStageError('drawExtraLine', err);
-    }
-
-    try {
-      this.drawLiveLocations();
-      try { localStorage.setItem('mapStep', 'liveLocationsDrawn'); } catch (e) {}
-    } catch (err) {
-      this.saveClientStageError('drawLiveLocations', err);
-    }
+    this.drawPolylines();
+    this.drawExtraLine();
+    this.drawLiveLocations();
   }
 
   /**
@@ -300,13 +229,10 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
   private ensureRainbowPattern(): void {
     if (!this.map || this.isIos) return;
 
-    try {
-      const overlayPane = this.map.getPanes().overlayPane as HTMLElement;
-      const svg = overlayPane.querySelector('svg');
-      if (svg) this.ensureRainbowPatternOnSvg(svg as unknown as SVGSVGElement);
-    } catch (err) {
-      this.saveClientStageError('ensureRainbowPattern', err);
-    }
+    const overlayPane = this.map.getPanes().overlayPane as HTMLElement;
+    const svg = overlayPane.querySelector('svg');
+    if (svg) this.ensureRainbowPatternOnSvg(svg as unknown as SVGSVGElement);
+    
   }
 
   private ensureRainbowPatternOnSvg(svg: SVGSVGElement | null): void {
@@ -357,7 +283,6 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
     if (this.gradientAnimId !== null) return;
 
     this.gradientStartTime = performance.now();
-    try { localStorage.setItem('mapGradientActive', '1'); } catch (e) {}
 
     const step = (ts: number) => {
       if (document.hidden) {
@@ -391,10 +316,6 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
       this.gradientAnimId = null;
     }
 
-    try {
-      localStorage.setItem('mapGradientActive', '0');
-      localStorage.setItem('lastGradientStopped', String(Date.now()));
-    } catch (e) {}
   }
 
   private clearMapLayers(): void {
@@ -438,7 +359,7 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
 
         if (refreshMap) this.drawLiveLocations();
       },
-      error: error => this.saveClientStageError('loadLiveLocations', error)
+      error: error => {}
     });
   }
 
@@ -543,17 +464,4 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
       .replace(/'/g, '&#039;');
   }
 
-  private saveClientStageError(stage: string, error: unknown): void {
-    try {
-      localStorage.setItem('mapStep', `${stage}Error`);
-      localStorage.setItem('lastClientError', JSON.stringify({
-        stage,
-        message: this.safeStringify(error),
-        ts: Date.now(),
-        userAgent: navigator.userAgent,
-        asociacionesCount: this.asociaciones?.length ?? 0,
-        ubicacionesVivasCount: this.ubicacionesVivas?.length ?? 0
-      }));
-    } catch (e) {}
-  }
 }

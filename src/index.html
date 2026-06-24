@@ -14,31 +14,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&amp;display=swap" />
   <link rel="manifest" href="manifest.webmanifest">
-  <script>
-    // Early bootstrap diagnostics: runs before Angular bundles load
-    try {
-      const prevComplete = localStorage.getItem('appBootstrapComplete');
-      const now = Date.now();
-      localStorage.setItem('lastBootstrapAttempt', String(now));
-      const attempts = parseInt(localStorage.getItem('bootstrapAttempts') || '0', 10) || 0;
-      localStorage.setItem('bootstrapAttempts', String(attempts + 1));
-      // if previous run didn't complete, mark lastBootstrapFailed
-      if (prevComplete !== '1') {
-        localStorage.setItem('lastBootstrapFailed', String(now));
-      }
-      // clear complete flag for this run; app should set it to '1' when ready
-      localStorage.setItem('appBootstrapComplete', '0');
-    } catch (e) {}
-  </script>
 </head>
 <body class="mat-typography" style="margin: 0" translate="no">
   <app-root></app-root>
-  <script>
-    // mark bootstrap complete as soon as the DOM has app-root (very early)
-    try {
-      localStorage.setItem('appDomLoaded', String(Date.now()));
-    } catch (e) {}
-  </script>
   <noscript>Please enable JavaScript to continue using this application.</noscript>
   
 </body>
