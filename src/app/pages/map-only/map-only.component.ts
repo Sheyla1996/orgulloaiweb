@@ -139,11 +139,17 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
   private initMap(): void {
     if (!this.map) {
       this.map = this.leaflet.map('map-mapa').setView([/*40.416511, -3.691149*/40.346750, -3.695119], 15);
-      this.leaflet.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      try { localStorage.setItem('mapStep', 'creatingMap'); } catch (e) {}
+      try {
+        this.leaflet.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap',
         maxZoom: 15,
         minZoom: 15,
-      }).addTo(this.map);
+        }).addTo(this.map);
+        try { localStorage.setItem('mapStep', 'tileLayerAdded'); } catch (e) {}
+      } catch (err) {
+        try { localStorage.setItem('mapStep', 'tileLayerError'); } catch (e) {}
+      }
       this.map.dragging.disable();
       this.map.touchZoom.disable();
       this.map.doubleClickZoom.disable();
@@ -153,6 +159,7 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
       this.map.zoomControl.remove();
       if (this.map.tap) this.map.tap.disable();
       this.liveLocationsLayer = this.leaflet.layerGroup().addTo(this.map);
+      try { localStorage.setItem('mapStep', 'layerGroupAdded'); } catch (e) {}
     } else {
       this.clearMapLayers();
     }
@@ -161,10 +168,29 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
     this.ensureRainbowPattern();
 
     // draw main polylines (asociaciones) with gradient
-    this.drawPolylines();
+    try {
+      this.drawPolylines();
+      try { localStorage.setItem('mapStep', 'polylinesDrawn'); } catch (e) {}
+    } catch (err) {
+      try { localStorage.setItem('mapStep', 'polylinesError'); } catch (e) {}
+      try { localStorage.setItem('lastClientError', JSON.stringify({stage: 'drawPolylines', message: String(err), ts: Date.now()})); } catch (e) {}
+    }
 
-    this.drawExtraLine();
-    this.drawLiveLocations();
+    try {
+      this.drawExtraLine();
+      try { localStorage.setItem('mapStep', 'extraLineDrawn'); } catch (e) {}
+    } catch (err) {
+      try { localStorage.setItem('mapStep', 'extraLineError'); } catch (e) {}
+      try { localStorage.setItem('lastClientError', JSON.stringify({stage: 'drawExtraLine', message: String(err), ts: Date.now()})); } catch (e) {}
+    }
+
+    try {
+      this.drawLiveLocations();
+      try { localStorage.setItem('mapStep', 'liveLocationsDrawn'); } catch (e) {}
+    } catch (err) {
+      try { localStorage.setItem('mapStep', 'liveLocationsError'); } catch (e) {}
+      try { localStorage.setItem('lastClientError', JSON.stringify({stage: 'drawLiveLocations', message: String(err), ts: Date.now()})); } catch (e) {}
+    }
   }
 
   private drawPolylines(): void {

@@ -39,6 +39,7 @@ export class AjustesComponent implements OnInit {
   lastBootstrapFailed: string | null = null;
   appBootstrapComplete: string | null = null;
   appDomLoaded: string | null = null;
+  appBootstrapStarted: string | null = null;
   readonly zoneSelectionTypes = ['coor', 'coor_manana', 'boss'];
 
   constructor(
@@ -77,6 +78,7 @@ export class AjustesComponent implements OnInit {
       this.lastBootstrapFailed = localStorage.getItem('lastBootstrapFailed');
       this.appBootstrapComplete = localStorage.getItem('appBootstrapComplete');
       this.appDomLoaded = localStorage.getItem('appDomLoaded');
+      this.appBootstrapStarted = localStorage.getItem('appBootstrapStarted');
     } catch (e) {}
   }
 
