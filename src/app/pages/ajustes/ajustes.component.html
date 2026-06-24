@@ -1,6 +1,5 @@
-<main class="ajustes-page">
+<div class="ajustes-page">
   <section class="card">
-    <h1>Ajustes</h1>
 
     <p>Notificaciones: <strong>{{ notificationPermission === 'granted' ? 'Activadas' : 'Desactivadas' }}</strong></p>
     @if (notificationPermission !== 'granted') {
@@ -20,8 +19,9 @@
         Instalar Web
         <mat-icon fontSet="material-symbols-outlined">install_mobile</mat-icon>
     </button>
-    @if(isAndroid && canChangeZone) {
+    @if( canChangeZone) {
         <h2>Ubicación</h2>
+        <p>Activa la ubicación para compartir la posición de tu zona con la coordinación.</p>
         <div>
             <button class="action-btn action-btn-location" type="button" (click)="toggleLocationSharing()">
                 {{ sharingLocation ? 'Detener ubicación' : 'Empezar ubicación' }}
@@ -34,7 +34,7 @@
         <div>
         <label for="zone-select">
             <span>Zona actual: </span>
-            <select id="zone-select" [(ngModel)]="zona" (ngModelChange)="onZoneChanged()">
+            <select id="zone-select" [(ngModel)]="coor_zona" (ngModelChange)="onZoneChanged()">
                 <option value="">Selecciona una zona</option>
                 @for(z of availableZones; track $index) {
                     <option [value]="z">{{ z | titlecase }}</option>
@@ -48,4 +48,4 @@
         </div>
 
   </section>
-</main>
+</div>

@@ -20,7 +20,6 @@ export class FcmService {
       'serviceWorker' in navigator &&
       !/iPad|iPhone|iPod/.test(navigator.userAgent);
     
-    console.log('FCM Support check:', this.isSupported);
     return this.isSupported;
   }
 
@@ -35,7 +34,6 @@ export class FcmService {
         getToken(this.messaging, {
           vapidKey: environment.firebaseConfig.vapidKey
         }).then(async token => {
-          console.log('Token:', token);
           const topic = localStorage.getItem('topic');
           await fetch('https://apiorgullo.sheylamartinez.es/push/suscribir', {
             method: 'POST',
@@ -60,7 +58,6 @@ export class FcmService {
 
     try {
       onMessage(this.messaging, (payload) => {
-        console.log('Mensaje recibido', payload);
         this.currentMessage.next(payload.notification?.body || null);
         if ('Notification' in window) {
           new Notification(payload?.notification?.title || 'Mensaje', { body: payload?.notification?.body });

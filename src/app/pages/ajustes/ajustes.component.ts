@@ -25,6 +25,7 @@ export class AjustesComponent implements OnInit {
   sharingIntervalMinutes = 1;
 
   zona = '';
+  coor_zona = '';
   userType = '';
   availableZones: string[] = ['blanca', 'roja', 'naranja', 'amarilla', 'verde', 'azul', 'violeta', 'rosa'];
 
@@ -40,7 +41,8 @@ export class AjustesComponent implements OnInit {
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
     this.setupPwaPrompt();
-    this.zona = localStorage.getItem('coor_zone') || '';
+    this.coor_zona = localStorage.getItem('coor_zone')?.toLocaleLowerCase() || '';
+    this.zona = localStorage.getItem('zona')?.toLocaleLowerCase() || '';
     this.userType = (localStorage.getItem('userType') || '').toLowerCase();
 
     this.isAndroid = /android/i.test(navigator.userAgent);
@@ -87,17 +89,18 @@ export class AjustesComponent implements OnInit {
     }
 
     this.locationSharingService.startSharing({
-      uuid: localStorage.getItem('uuid') || '',
-      zona: this.zona,
+      clientId: this.locationSharingService.getOrCreateClientId(),
+      uuid: "SIN",
+      zona: this.coor_zona,
       userType: this.userType,
       intervalMinutes: this.sharingIntervalMinutes,
-      displayName: this.userType || 'usuario',
+      displayName: 'Web',
       source: 'web'
     });
   }
 
   onZoneChanged(): void {
-    localStorage.setItem('coor_zone', this.zona || '');
+    localStorage.setItem('coor_zone', this.coor_zona || '');
   }
 
   get canChangeZone(): boolean {
@@ -119,13 +122,15 @@ export class AjustesComponent implements OnInit {
         if (result === 'install') {
           this.installPromptEvent.prompt();
           this.installPromptEvent.userChoice.then(() => {
-            this.installPromptEvent = null;
           });
         } 
       });
     }
 
     logout(): void {
+      if (this.sharingLocation) {
+        this.locationSharingService.stopSharing();
+      }
       localStorage.removeItem('uuid');
       localStorage.removeItem('userType');
       localStorage.removeItem('coor_zone');

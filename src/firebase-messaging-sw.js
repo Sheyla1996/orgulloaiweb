@@ -23,7 +23,6 @@ const messaging = firebase.messaging();
 
 // Lógica para cuando se recibe un mensaje mientras el Service Worker está activo (app cerrada o en segundo plano)
 messaging.onBackgroundMessage((payload) => {
-  console.log('[firebase-messaging-sw.js] Received background message ', payload);
 
   // Personaliza la notificación aquí
   const notificationTitle = payload.notification.title;

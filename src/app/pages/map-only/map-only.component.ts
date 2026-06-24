@@ -22,8 +22,11 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
   private gradientStartTime = 0;
   private readonly gradientLength = 220; // tile height in px (e.g. 6 stripes x 20px)
   private readonly gradientSpeed = 20; // px per second (controls speed)
+  private isIosSafari = false;
+  private lastGradientUpdate = 0;
+  private readonly gradientFps = 30;
   private liveLocationsTimer: ReturnType<typeof setInterval> | null = null;
-  private readonly liveLocationsTtlMinutes = 10;
+  private readonly liveLocationsTtlMinutes = 5;
   showForceShareButton = false;
 
   constructor(
@@ -35,7 +38,7 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     if (!isPlatformBrowser(this.platformId)) return;
-
+    this.isIosSafari = this.checkIsIosSafari();
     this.leaflet = await import('leaflet');
     // determine whether to show force-share button based on userType
     try {
@@ -46,7 +49,18 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
       this.showForceShareButton = false;
     }
     await this.loadDataAndInitMap();
-    this.liveLocationsTimer = setInterval(() => this.loadLiveLocations(false), 60000);
+    this.liveLocationsTimer = setInterval(() => this.loadLiveLocations(true), 30000);
+  }
+
+  private checkIsIosSafari(): boolean {
+    try {
+      const ua = navigator.userAgent || '';
+      const isIphoneOrIpodOrIpad = /iP(hone|od|ad)/i.test(ua);
+      const isSafari = /Safari/i.test(ua) && !/CriOS|FxiOS|Edg|OPiOS|Chrome/i.test(ua);
+      return isIphoneOrIpodOrIpad && isSafari;
+    } catch (e) {
+      return false;
+    }
   }
 
   ngOnDestroy(): void {
@@ -86,8 +100,8 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
 
   private initMap(): void {
     if (!this.map) {
-      this.map = this.leaflet.map('map-mapa').setView([40.416511, -3.691149], 15);
-      this.leaflet.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
+      this.map = this.leaflet.map('map-mapa').setView([/*40.416511, -3.691149*/40.346750, -3.695119], 15);
+      this.leaflet.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap',
         maxZoom: 15,
         minZoom: 15,
@@ -206,25 +220,38 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
     // to avoid visible SMIL reset jumps; see startGradientAnimation().
 
     defs.appendChild(grad);
-    try {
-      // small log to help debugging in browser console
-      // eslint-disable-next-line no-console
-      console.log('rainbowGradient injected into SVG defs');
-    } catch (e) {}
-    // start JS animation loop if not already running
-    this.startGradientAnimation();
+    // If iOS Safari, avoid continuous RAF animation (heavy on CPU/mem).
+    if (this.isIosSafari) {
+      // keep gradient static (or very slow) to prevent repeated crashes
+      try {
+        grad.setAttribute('gradientTransform', `translate(0 0)`);
+      } catch (e) {}
+    } else {
+      // start JS animation loop if not already running
+      this.startGradientAnimation();
+    }
   }
 
   private startGradientAnimation(): void {
     if (this.gradientAnimId !== null) return; // already running
     this.gradientStartTime = performance.now();
     const step = (ts: number) => {
+      // throttle to ~gradientFps and skip when page hidden
+      if (document.hidden) {
+        this.gradientStartTime = ts;
+        this.gradientAnimId = requestAnimationFrame(step);
+        return;
+      }
       const elapsed = (ts - this.gradientStartTime) / 1000; // seconds
       const offset = (elapsed * this.gradientSpeed) % this.gradientLength;
-      try {
-        const grads = document.querySelectorAll('linearGradient#rainbowGradient');
-        grads.forEach(g => g.setAttribute('gradientTransform', `translate(0 ${-offset})`));
-      } catch (e) {}
+      const minDelta = 1000 / this.gradientFps;
+      if (ts - this.lastGradientUpdate >= minDelta) {
+        try {
+          const grads = document.querySelectorAll('linearGradient#rainbowGradient');
+          grads.forEach(g => g.setAttribute('gradientTransform', `translate(0 ${-offset})`));
+        } catch (e) {}
+        this.lastGradientUpdate = ts;
+      }
       this.gradientAnimId = requestAnimationFrame(step);
     };
     this.gradientAnimId = requestAnimationFrame(step);
@@ -273,10 +300,10 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
       const color = this.getZonaColor(location.zona);
       const circle = this.leaflet.circleMarker([location.lat, location.lng], {
         radius: 12,
-        color: this.getCircleBorderColor(location.zona),
-        weight: 2,
+        color: '#ffffff',
+        weight: 3,
         fillColor: color,
-        fillOpacity: 0.42,
+        fillOpacity: 1,
       });
 
       const label = location.displayName || `UUID ${location.uuid?.slice(0, 6)}`;

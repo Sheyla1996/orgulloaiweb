@@ -25,7 +25,7 @@ export class QrComponent implements OnInit, OnDestroy {
 
   zona = '';
   coor_zona = '';
-  availableZones: string[] = [];
+  availableZones: string[] = ["Blanca", "Roja", "Naranja", "Amarilla", "Verde", "Azul", "Violeta", "Rosa"];
   type = '';
   year = 0;
 
@@ -46,6 +46,7 @@ export class QrComponent implements OnInit, OnDestroy {
   sharingLocation = false;
   sharingStatusMessage = '';
   sharingIntervalMinutes = 1;
+  deviceName = '';
 
   private sharingStateSub?: Subscription;
 
@@ -78,6 +79,7 @@ export class QrComponent implements OnInit, OnDestroy {
       this.playStoreUrl = this.buildPlayStoreUrl(this.uuid);
       this.setupPwaPrompt();
       this.syncNotificationPermission();
+      this.getDeviceName();
     }
 
     // If we received validated data via navigation state from Login, use it
@@ -110,6 +112,7 @@ export class QrComponent implements OnInit, OnDestroy {
 
   goToWeb(): void {
     if (!isPlatformBrowser(this.platformId) || !this.isValid) return;
+    
 
     localStorage.setItem('userType', this.type || 'normal');
     localStorage.setItem('zona', this.zona || '');
@@ -123,6 +126,8 @@ export class QrComponent implements OnInit, OnDestroy {
 
   nextStep(): void {
     if (!this.isValid || this.currentStep >= this.totalSteps) return;
+    // Only validate zone selection when the user is on the zone-selection step
+    if (this.currentStep === 4 && this.shouldShowZoneSelectionStep && !this.validateZoneSelection()) return;
     this.currentStep += 1;
   }
 
@@ -167,12 +172,13 @@ export class QrComponent implements OnInit, OnDestroy {
     }
 
     this.locationSharingService.startSharing({
+      clientId: this.locationSharingService.getOrCreateClientId(),
       uuid: this.uuid,
-      zona: this.zona,
+      zona: this.coor_zona,
       userType: this.type,
       intervalMinutes: this.sharingIntervalMinutes,
-      displayName: this.type || this.uuid,
-      source: 'android'
+      displayName: this.deviceName,
+      source: 'web'
     });
   }
 
@@ -248,11 +254,6 @@ export class QrComponent implements OnInit, OnDestroy {
         this.generalWhatsappLink = this.getGeneralWhatsappLink(data);
         this.zoneWhatsappLink = this.getZoneWhatsappLink(data, this.zona);
         // populate available zones for selectors
-        this.availableZones = data
-          .filter(item => !['comunidad', 'grupo'].includes((item.zona || '').toLocaleLowerCase()))
-          .map(item => this.normalizeZone((item.zona || '').toLocaleLowerCase()))
-          .filter((v, i, a) => v && a.indexOf(v) === i)
-          .sort();
         this.loading = false;
       },
       error: () => {
@@ -263,10 +264,27 @@ export class QrComponent implements OnInit, OnDestroy {
 
   onZoneChanged(): void {
     if (this.coor_zona) localStorage.setItem('coor_zone', this.coor_zona || '');
+    // Clear any previous validation error once user selects a zone
+    if (this.coor_zona) this.errorMessage = '';
   }
 
   private canShareLocation(): boolean {
     return this.allowedSharingTypes.includes(this.type) || (this.type === 'test' && this.zona === 'coor');
+  }
+
+  private validateZoneSelection(): boolean {
+    // If the UI shows the zone-selection step, require a zone to be selected
+    if (this.shouldShowZoneSelectionStep && !this.coor_zona) {
+      this.errorMessage = 'Debes seleccionar una zona antes de continuar.';
+      return false;
+    }
+
+    // clear previous message if valid
+    if (this.errorMessage === 'Debes seleccionar una zona antes de continuar.') {
+      this.errorMessage = '';
+    }
+
+    return true;
   }
 
   private getGeneralWhatsappLink(list: Whatsapp[]): string {
@@ -339,7 +357,6 @@ export class QrComponent implements OnInit, OnDestroy {
       if (result === 'install') {
         this.installPromptEvent.prompt();
         this.installPromptEvent.userChoice.then(() => {
-          this.installPromptEvent = null;
         });
       } 
     });
@@ -352,5 +369,23 @@ export class QrComponent implements OnInit, OnDestroy {
     }
 
     this.notificationPermission = Notification.permission;
+  }
+
+  private getDeviceName(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    
+    try {
+      // Obtener el nombre del dispositivo desde navigator.userAgent o usar un valor por defecto
+      const userAgent = navigator.userAgent;
+      
+      // Intentar obtener el nombre si está disponible
+      if ((navigator as any).deviceMemory) {
+        this.deviceName = `Device-${Date.now()}`;
+      } else {
+        this.deviceName = `Device-${Date.now()}`;
+      }
+    } catch (error) {
+      this.deviceName = `Device-${Date.now()}`;
+    }
   }
 }

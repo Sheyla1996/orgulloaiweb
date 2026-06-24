@@ -4,6 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { AsociacionesService } from './asociaciones.service';
 
 export interface LocationSharingConfig {
+  clientId: string;
   uuid: string;
   zona: string;
   userType: string;
@@ -24,10 +25,10 @@ export interface LocationSharingState {
 export class LocationSharingService {
   private readonly storageKeys = {
     enabled: 'shareLocationEnabled',
-    clientId: 'locationClientId',
-    uuid: 'shareLocationUuid',
-    zona: 'shareLocationZona',
-    userType: 'shareLocationUserType',
+    clientId: 'clientId',
+    uuid: 'uuid',
+    zona: 'coor_zona',
+    userType: 'userType',
     intervalMinutes: 'shareLocationIntervalMinutes',
     displayName: 'shareLocationDisplayName',
     source: 'shareLocationSource',
@@ -153,7 +154,7 @@ export class LocationSharingService {
 
     this.asociacionesService.upsertUbicacionCompartida({
       clientId: config.clientId,
-      uuid: config.uuid,
+      uuid: "SIN",
       displayName: config.displayName || config.userType || config.uuid,
       zona: config.zona,
       userType: config.userType,
@@ -183,6 +184,7 @@ export class LocationSharingService {
   private normalizeConfig(config: LocationSharingConfig): LocationSharingConfig {
     return {
       ...config,
+      clientId: String(config.clientId || '').trim(),
       uuid: String(config.uuid || '').trim(),
       zona: String(config.zona || '').trim().toLowerCase(),
       userType: String(config.userType || '').trim().toLowerCase(),
@@ -204,15 +206,11 @@ export class LocationSharingService {
   }
 
   private readConfigFromStorage(): (LocationSharingConfig & { clientId: string }) | null {
-    const clientId = localStorage.getItem(this.storageKeys.clientId) || '';
-    const uuid = localStorage.getItem(this.storageKeys.uuid) || '';
-    const zona = localStorage.getItem(this.storageKeys.zona) || '';
-    const userType = localStorage.getItem(this.storageKeys.userType) || '';
+    const clientId = this.getOrCreateClientId();
+    const uuid = localStorage.getItem("uuid") || '';
+    const zona = localStorage.getItem("coor_zone") || '';
+    const userType = localStorage.getItem("userType") || '';
     const intervalMinutes = Number(localStorage.getItem(this.storageKeys.intervalMinutes) || '1');
-
-    if (!clientId || !uuid || !zona || !userType) {
-      return null;
-    }
 
     return {
       clientId,
@@ -258,7 +256,7 @@ export class LocationSharingService {
     return ['coor', 'boss', 'coor_manana'].includes((userType || '').toLowerCase()) || (userType === 'test' && localStorage.getItem('zona')?.toLowerCase() === 'coor');
   }
 
-  private getOrCreateClientId(): string {
+  getOrCreateClientId(): string {
     const existing = localStorage.getItem(this.storageKeys.clientId);
     if (existing) return existing;
 
@@ -322,7 +320,7 @@ export class LocationSharingService {
 
     this.asociacionesService.upsertUbicacionCompartida({
       clientId: config.clientId || this.getOrCreateClientId(),
-      uuid: config.uuid,
+      uuid: "SIN",
       displayName: config.displayName || config.userType || config.uuid,
       zona: config.zona,
       userType: config.userType,

@@ -1,5 +1,22 @@
-main.ajustes-page { 
-  .card { max-width: 720px; margin: 16px auto; padding: 16px; }
+:host {
+  display: block;
+  max-height: calc(100vh - 80px);
+  height: 100%;
+  min-height: 0;
+}
+.ajustes-page {
+      overflow-y: scroll;
+    display: block;
+    height: 100%;
+  .card {
+    max-width: 720px;
+    margin: 16px auto;
+    padding: 16px;
+    overflow-y: auto;
+  }
+  h1 {
+    margin-top: 0;
+  }
 }
 .action-btn {
   width: 100%;

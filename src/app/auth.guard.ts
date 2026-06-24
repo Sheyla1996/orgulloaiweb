@@ -22,7 +22,7 @@ export class AuthGuard implements CanActivate {
         return true;
       }
 
-      if (year !== actualYear.toString()) {
+      if (year !== actualYear.toString() || userType === undefined || zona === null) {
         return this.router.parseUrl('/login');
       }
 

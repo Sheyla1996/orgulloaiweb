@@ -68,12 +68,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onChange = (input: string) => {
     this.value = input;
-    console.log("Input changed", input);
     this.searchTerm.emit(this.value);
   };
 
   onKeyPress = (button: string) => {
-    console.log("Button pressed", button);
     /**
     * If you want to handle the shift and caps lock buttons
     */
