@@ -127,7 +127,7 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.loadLiveLocations(false);
+    this.loadLiveLocations(true);
   }
 
   private waitForMapDiv(): Promise<void> {
@@ -157,7 +157,7 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
         keyboard: false,
         tap: false,
         preferCanvas: this.isIos
-      }).setView([40.416511, -3.691149], 15);
+      }).setView([40.414911, -3.691149], 14);
 
       this.leaflet.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap',
@@ -331,7 +331,7 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
       this.extraPolyline = null;
     }
 
-    this.liveLocationsLayer?.clearLayers();
+    //this.liveLocationsLayer?.clearLayers();
   }
 
   private destroyMap(): void {
