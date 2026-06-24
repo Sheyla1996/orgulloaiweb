@@ -78,7 +78,7 @@ export class AjustesComponent implements OnInit {
 
 
   toggleLocationSharing(): void {
-    if (!isPlatformBrowser(this.platformId) || !this.isAndroid) return;
+    if (!isPlatformBrowser(this.platformId)) return;
 
     const allowed = ['coor', 'boss', 'coor_manana'];
     if (!allowed.includes(this.userType) && !(this.userType === 'test' && this.zona === 'coor')) return;
