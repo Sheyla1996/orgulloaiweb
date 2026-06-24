@@ -48,6 +48,38 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
     } catch (e) {
       this.showForceShareButton = false;
     }
+    
+    // Add lightweight client-side error capture to help diagnose crashes
+    try {
+      window.addEventListener('error', (ev: ErrorEvent) => {
+        try {
+          const info = {
+            type: 'error',
+            message: ev.message,
+            filename: ev.filename,
+            lineno: ev.lineno,
+            colno: ev.colno,
+            stack: (ev.error && ev.error.stack) ? ev.error.stack : null,
+            userAgent: navigator.userAgent,
+            timestamp: Date.now(),
+            asociacionesCount: this.asociaciones?.length ?? 0,
+          };
+          localStorage.setItem('lastClientError', JSON.stringify(info));
+        } catch (e) {}
+      });
+      window.addEventListener('unhandledrejection', (ev: PromiseRejectionEvent) => {
+        try {
+          const info = {
+            type: 'unhandledrejection',
+            reason: ev.reason,
+            userAgent: navigator.userAgent,
+            timestamp: Date.now(),
+            asociacionesCount: this.asociaciones?.length ?? 0,
+          };
+          localStorage.setItem('lastClientError', JSON.stringify(info));
+        } catch (e) {}
+      });
+    } catch (e) {}
     await this.loadDataAndInitMap();
     this.liveLocationsTimer = setInterval(() => this.loadLiveLocations(true), 30000);
   }
@@ -141,13 +173,21 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
           // ensure gradient exists in this SVG
           try {
             const ownerSvg = (path as any).ownerSVGElement as SVGSVGElement | null;
-            if (ownerSvg) this.ensureRainbowPatternOnSvg(ownerSvg);
+            if (!this.isIosSafari && ownerSvg) this.ensureRainbowPatternOnSvg(ownerSvg);
           } catch (err) {}
-          path.setAttribute('stroke', 'url(#rainbowGradient)');
+          if (this.isIosSafari) {
+            path.setAttribute('stroke', '#7c3aed');
+          } else {
+            path.setAttribute('stroke', 'url(#rainbowGradient)');
+          }
           path.setAttribute('stroke-width', '6');
           path.setAttribute('stroke-linecap', 'round');
           try {
-            (path as any).style.stroke = 'url(#rainbowGradient)';
+            if (this.isIosSafari) {
+              (path as any).style.stroke = '#7c3aed';
+            } else {
+              (path as any).style.stroke = 'url(#rainbowGradient)';
+            }
             (path as any).style.strokeWidth = '6px';
             (path as any).style.strokeLinecap = 'round';
           } catch (e) {}
@@ -163,6 +203,7 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
   // from polylines by setting their `stroke` attribute to `url(#rainbowPattern)`.
   private ensureRainbowPattern(): void {
     if (!this.map) return;
+    if (this.isIosSafari) return; // avoid injecting patterns on iOS Safari
     try {
       const overlayPane = this.map.getPanes().overlayPane as HTMLElement;
       const svg = overlayPane.querySelector('svg');
@@ -179,6 +220,7 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
   // specific SVG that contains the polyline path (path.ownerSVGElement).
   private ensureRainbowPatternOnSvg(svg: SVGSVGElement | null): void {
     if (!svg) return;
+    if (this.isIosSafari) return; // skip SVG defs/gradients on iOS Safari
     const SVG_NS = 'http://www.w3.org/2000/svg';
     let defs = svg.querySelector('defs');
     if (!defs) {
@@ -331,16 +373,24 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
         // ensure the pattern exists in the SVG that contains this path
         try {
           const ownerSvg = (path as any).ownerSVGElement as SVGSVGElement | null;
-          if (ownerSvg) this.ensureRainbowPatternOnSvg(ownerSvg);
+          if (!this.isIosSafari && ownerSvg) this.ensureRainbowPatternOnSvg(ownerSvg);
         } catch (err) {
           // ignore
         }
         // set both presentation attributes and inline style to override Leaflet
-        path.setAttribute('stroke', 'url(#rainbowGradient)');
+        if (this.isIosSafari) {
+          path.setAttribute('stroke', '#c4a3ff');
+        } else {
+          path.setAttribute('stroke', 'url(#rainbowGradient)');
+        }
         path.setAttribute('stroke-width', '6');
         path.setAttribute('stroke-linecap', 'round');
         try {
-          (path as any).style.stroke = 'url(#rainbowGradient)';
+          if (this.isIosSafari) {
+            (path as any).style.stroke = '#c4a3ff';
+          } else {
+            (path as any).style.stroke = 'url(#rainbowGradient)';
+          }
           (path as any).style.strokeWidth = '6px';
           (path as any).style.strokeLinecap = 'round';
         } catch (e) {
