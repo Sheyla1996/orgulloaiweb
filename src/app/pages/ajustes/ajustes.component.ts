@@ -28,7 +28,7 @@ export class AjustesComponent implements OnInit {
   coor_zona = '';
   userType = '';
   availableZones: string[] = ['blanca', 'roja', 'naranja', 'amarilla', 'verde', 'azul', 'violeta', 'rosa'];
-
+  last = localStorage.getItem('lastClientError');
   readonly zoneSelectionTypes = ['coor', 'coor_manana', 'boss'];
 
   constructor(
