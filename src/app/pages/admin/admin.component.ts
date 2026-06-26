@@ -164,11 +164,11 @@ export class AdminComponent implements OnInit {
     }
 
     getAsociacionesView(): Asociacion[] {
-        return [...this.asociaciones].sort((a, b) => (a.sheet_row ?? 0) - (b.sheet_row ?? 0));
+        return [...this.asociaciones].sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
     }
 
     getCarrozasView(): Carroza[] {
-        return [...this.carrozas].sort((a, b) => (a.sheet_row ?? 0) - (b.sheet_row ?? 0));
+        return [...this.carrozas].sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
     }
 
     getTelefonosView(): Telefono[] {
