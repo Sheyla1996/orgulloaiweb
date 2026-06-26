@@ -167,7 +167,7 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
     this.centerMapOnRoute();
   }
 
-  private centerMapOnRoute(): void {
+  centerMapOnRoute(): void {
     try {
       if (!this.map) return;
       if (this.extraPolyline) {

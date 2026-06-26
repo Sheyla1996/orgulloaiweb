@@ -1,6 +1,10 @@
 <div id="map-mapa" class="map-container"></div>
-
-<!-- Floating button to force-share location immediately (visible only to allowed user types) -->
-<button *ngIf="showForceShareButton" class="floating-force-btn" type="button" (click)="forceShareNow()" aria-label="Forzar compartir ubicación">
-	<mat-icon fontSet="material-symbols-outlined">my_location</mat-icon>
+@if (showForceShareButton) {
+	<!-- Floating button to force-share location immediately (visible only to allowed user types) -->
+	<button class="floating-force-btn" type="button" (click)="forceShareNow()" aria-label="Forzar compartir ubicación">
+		<mat-icon fontSet="material-symbols-outlined">my_location</mat-icon>
+	</button>
+}
+<button class="floating-center-btn" type="button" (click)="centerMapOnRoute()" aria-label="Forzar centrar mapa">
+	<mat-icon fontSet="material-symbols-outlined">arrows_input</mat-icon>
 </button>

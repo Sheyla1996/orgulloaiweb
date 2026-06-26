@@ -23,7 +23,7 @@
 .floating-force-btn {
   position: fixed;
   right: 30px;
-  top: 30px;
+  top: 100px;
   width: 52px;
   height: 52px;
   border-radius: 12px;
@@ -41,6 +41,26 @@
 }
 .floating-force-btn:hover { opacity: 0.95; transform: translateY(-2px); }
 .floating-force-btn:active { transform: translateY(0); }
+
+.floating-center-btn {
+  position: fixed;
+  right: 30px;
+  top: 30px;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.52);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.35);
+  border: none;
+  z-index: 9999;
+  font-size: 22px;
+  cursor: pointer;
+  transition: opacity 180ms ease, transform 120ms ease;
+}
 
 .offscreen-arrow {
   pointer-events: none;
