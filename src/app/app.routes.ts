@@ -14,6 +14,7 @@ import { QrComponent } from './pages/qr/qr.component';
 export const routes: Routes = [
     { path: '', component: HomeComponent },
     { path: 'qr', component: QrComponent },
+    { path: 'init', loadComponent: () => import('./pages/init/init.component').then(m => m.InitComponent) },
     { path: 'login', component: LoginComponent },
     {
         path: 'asociaciones',

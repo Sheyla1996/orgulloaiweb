@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID, ViewEncapsulation } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { AsociacionesService, UbicacionCompartida } from '../../services/asociaciones.service';
@@ -11,17 +11,17 @@ import { MatIconModule } from '@angular/material/icon';
   standalone: true,
   imports: [CommonModule, MatIconModule],
   templateUrl: './map-only.component.html',
-  styleUrls: ['./map-only.component.scss']
+  styleUrls: ['./map-only.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class MapOnlyComponent implements OnInit, OnDestroy {
   map: any = null;
   leaflet: any;
-  asociaciones: any[] = [];
   ubicacionesVivas: UbicacionCompartida[] = [];
   liveLocationsLayer: any = null;
+  private offscreenLayer: any = null;
 
   private svgRenderer: any = null;
-  private routePolyline: any = null;
   private extraPolyline: any = null;
 
   private gradientAnimId: number | null = null;
@@ -33,8 +33,9 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
   private readonly gradientFps = 30;
 
   private liveLocationsTimer: ReturnType<typeof setInterval> | null = null;
-  private asociacionesSub: Subscription | null = null;
   private liveLocationsSub: Subscription | null = null;
+  private scheduleDrawOnMoveBound: any = null;
+  private mapMoveScheduled = false;
 
   private readonly liveLocationsTtlMinutes = 5;
   showForceShareButton = false;
@@ -42,7 +43,6 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
   constructor(
     private asociacionesService: AsociacionesService,
     private locationSharingService: LocationSharingService,
-    private spinner: NgxSpinnerService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -97,9 +97,6 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
       this.liveLocationsTimer = null;
     }
 
-    this.asociacionesSub?.unsubscribe();
-    this.asociacionesSub = null;
-
     this.liveLocationsSub?.unsubscribe();
     this.liveLocationsSub = null;
 
@@ -108,25 +105,8 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
   }
 
   private async loadDataAndInitMap(): Promise<void> {
-    this.spinner.show();
-
-    this.asociacionesSub?.unsubscribe();
-    this.asociacionesSub = this.asociacionesService.getAsociaciones().subscribe({
-      next: async data => {
-        this.asociaciones = (data ?? [])
-          .map(a => ({ ...a, lat: Number(a.lat), lng: Number(a.lng) }))
-          .filter(a => Number.isFinite(a.lat) && Number.isFinite(a.lng))
-          .sort((a, b) => a.position - b.position);
-
-        await this.waitForMapDiv();
-        this.spinner.hide();
-        this.initMap();
-      },
-      error: error => {
-        this.spinner.hide();
-      }
-    });
-
+    await this.waitForMapDiv();
+    this.initMap();
     this.loadLiveLocations(true);
   }
 
@@ -148,20 +128,20 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
       this.svgRenderer = this.leaflet.svg();
 
       this.map = this.leaflet.map('map-mapa', {
-        zoomControl: false,
+        /*zoomControl: false,
         dragging: false,
         touchZoom: false,
         doubleClickZoom: false,
         scrollWheelZoom: false,
         boxZoom: false,
         keyboard: false,
-        tap: false,
+        tap: false,*/
         preferCanvas: this.isIos
       }).setView([40.414911, -3.691149], 14);
 
       this.leaflet.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
         attribution: '© OpenStreetMap',
-        maxZoom: 15,
+        maxZoom: 17,
         minZoom: 15,
         updateWhenIdle: true,
         keepBuffer: this.isIos ? 1 : 2,
@@ -170,41 +150,38 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
       if (this.map.tap) this.map.tap.disable();
 
       this.liveLocationsLayer = this.leaflet.layerGroup().addTo(this.map);
+      this.offscreenLayer = this.leaflet.layerGroup().addTo(this.map);
+
+      // bind throttled redraw on map interactions so arrows/dots follow
+      this.scheduleDrawOnMoveBound = this.scheduleDrawOnMove.bind(this);
+      this.map.on('move', this.scheduleDrawOnMoveBound);
+      this.map.on('zoom', this.scheduleDrawOnMoveBound);
+      this.map.on('resize', this.scheduleDrawOnMoveBound);
     } else {
       this.clearMapLayers();
     }
 
     this.ensureRainbowPattern();
-    this.drawPolylines();
     this.drawExtraLine();
     this.drawLiveLocations();
+    this.centerMapOnRoute();
   }
 
-  /**
-   * Antes se creaba una polyline por cada tramo y un renderer SVG por tramo.
-   * En iOS eso puede consumir mucha memoria. Ahora se crea una sola polyline.
-   */
-  private drawPolylines(): void {
-    if (!this.map || !this.asociaciones?.length) return;
-
-    if (this.routePolyline) {
-      this.map.removeLayer(this.routePolyline);
-      this.routePolyline = null;
-    }
-
-    const coords = this.asociaciones
-      .map(a => [a.lat, a.lng])
-      .filter(([lat, lng]) => Number.isFinite(lat) && Number.isFinite(lng));
-
-    if (coords.length < 2) return;
-
-    this.routePolyline = this.leaflet.polyline(coords, {
-      weight: 6,
-      renderer: this.svgRenderer,
-      color: this.isIos ? '#7c3aed' : '#7c3aed'
-    }).addTo(this.map);
-
-    this.applyRouteStroke(this.routePolyline, '#7c3aed');
+  private centerMapOnRoute(): void {
+    try {
+      if (!this.map) return;
+      if (this.extraPolyline) {
+        try {
+          const latlngs = (this.extraPolyline.getLatLngs && this.extraPolyline.getLatLngs()) || [];
+          if (Array.isArray(latlngs) && latlngs.length >= 2) {
+            const bounds = this.extraPolyline.getBounds();
+            if (bounds && bounds.isValid && bounds.isValid()) {
+              this.map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+            }
+          }
+        } catch (e) {}
+      }
+    } catch (e) {}
   }
 
   private applyRouteStroke(polyline: any, fallbackColor: string): void {
@@ -321,32 +298,50 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
   private clearMapLayers(): void {
     if (!this.map) return;
 
-    if (this.routePolyline) {
-      this.map.removeLayer(this.routePolyline);
-      this.routePolyline = null;
-    }
-
     if (this.extraPolyline) {
       this.map.removeLayer(this.extraPolyline);
       this.extraPolyline = null;
     }
 
     //this.liveLocationsLayer?.clearLayers();
+    //this.offscreenLayer?.clearLayers();
   }
 
   private destroyMap(): void {
     this.liveLocationsLayer?.clearLayers();
     this.liveLocationsLayer?.remove();
     this.liveLocationsLayer = null;
+    this.offscreenLayer?.clearLayers();
+    this.offscreenLayer?.remove();
+    this.offscreenLayer = null;
 
-    this.routePolyline = null;
     this.extraPolyline = null;
     this.svgRenderer = null;
 
     if (this.map) {
+      try {
+        if (this.scheduleDrawOnMoveBound) {
+          this.map.off('move', this.scheduleDrawOnMoveBound);
+          this.map.off('zoom', this.scheduleDrawOnMoveBound);
+          this.map.off('resize', this.scheduleDrawOnMoveBound);
+          this.scheduleDrawOnMoveBound = null;
+        }
+      } catch (e) {}
+
       this.map.remove();
       this.map = null;
     }
+  }
+
+  private scheduleDrawOnMove(): void {
+    if (this.mapMoveScheduled) return;
+    this.mapMoveScheduled = true;
+    requestAnimationFrame(() => {
+      try {
+        this.drawLiveLocations();
+      } catch (e) {}
+      this.mapMoveScheduled = false;
+    });
   }
 
   private loadLiveLocations(refreshMap = true): void {
@@ -364,9 +359,10 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
   }
 
   private drawLiveLocations(): void {
-    if (!this.map || !this.liveLocationsLayer) return;
+    if (!this.map ) return;
 
     this.liveLocationsLayer.clearLayers();
+    this.offscreenLayer?.clearLayers();
 
     this.ubicacionesVivas.forEach((location: UbicacionCompartida) => {
       const color = this.getZonaColor(location.zona);
@@ -388,8 +384,59 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
         : 'reciente';
 
       circle.bindPopup(`<div class="live-location-popup"><strong>${label}</strong><br>Zona: ${zona}<br>Última actualización: ${updatedAt}</div>`);
-      circle.addTo(this.liveLocationsLayer);
+      const latlng = this.leaflet.latLng(location.lat, location.lng);
+      const mapBounds = this.map.getBounds();
+
+      if (mapBounds.contains(latlng)) {
+        circle.addTo(this.liveLocationsLayer);
+      } else {
+        // fuera de vista: dibujar flecha en el borde
+        const colorForDot = this.getZonaColor(location.zona);
+        const arrow = this.createOffscreenArrow(latlng, colorForDot);
+        if (arrow) arrow.addTo(this.offscreenLayer);
+      }
     });
+  }
+
+  private createOffscreenArrow(latlng: any, dotColor = '#7c3aed'): any | null {
+    try {
+      const mapSize = this.map.getSize();
+      const point = this.map.latLngToContainerPoint(latlng);
+
+      // calcular punto clamped dentro del padding del borde
+      const pad = 20; // px padding from edge
+      const x = Math.max(pad, Math.min(mapSize.x - pad, point.x));
+      const y = Math.max(pad, Math.min(mapSize.y - pad, point.y));
+
+      // si está dentro del rect, no es offscreen
+      if (x === point.x && y === point.y) return null;
+
+      const center = this.map.getSize().divideBy(2);
+      const angle = Math.atan2(y - center.y, x - center.x);
+
+      const safeColor = this.escapeHtml(dotColor || '#7c3aed');
+      const html = `
+        <div class="offscreen-arrow-inner" style="transform: rotate(${angle}rad);">
+          <div class="offscreen-dot" style="background:${safeColor}"></div>
+          <div class="offscreen-arrow-symbol">▶</div>
+        </div>
+      `;
+
+      const icon = this.leaflet.divIcon({
+        className: 'offscreen-arrow',
+        html,
+        iconSize: [48, 48],
+        iconAnchor: [24, 24]
+      });
+
+      const containerPoint = this.leaflet.point(x, y);
+      const markerLatLng = this.map.containerPointToLatLng(containerPoint);
+
+      const marker = this.leaflet.marker(markerLatLng, { icon, interactive: false });
+      return marker;
+    } catch (e) {
+      return null;
+    }
   }
 
   private drawExtraLine(): void {
@@ -404,7 +451,9 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
       [40.425149, -3.690248],
       [40.419327, -3.692865],
       [40.415985, -3.693674],
-      [40.412416, -3.692842]
+      [40.412416, -3.692842],
+      [40.409568, -3.692149],
+      [40.408794, -3.691347]
     ];
 
     this.extraPolyline = this.leaflet.polyline(coords, {

@@ -3,7 +3,7 @@
 }
 .map-container {
   width: 100%;
-  height: calc(100vh - 56px); /* leave space if bottom nav is present */
+  height: calc(100vh - 90px); /* leave space if bottom nav is present */
 }
 
 .live-location-popup {
@@ -41,3 +41,33 @@
 }
 .floating-force-btn:hover { opacity: 0.95; transform: translateY(-2px); }
 .floating-force-btn:active { transform: translateY(0); }
+
+.offscreen-arrow {
+  pointer-events: none;
+}
+
+.offscreen-arrow-inner {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.offscreen-arrow-symbol {
+  font-size: 18px;
+  line-height: 1;
+  color: white;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+}
+
+.offscreen-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  position: absolute;
+  left: -10px;
+  border: 3px solid white;
+}

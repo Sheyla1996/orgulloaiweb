@@ -1,0 +1,85 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+
+.qr-mobile {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 14px;
+  box-sizing: border-box;
+}
+
+.card {
+  width: 100%;
+  max-width: 430px;
+  background: #171d27;
+  border-radius: 24px;
+  padding: 22px 16px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  h1 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: #e9edf5;
+  }
+
+  p {
+    margin: 0;
+    color: #b8c0d1;
+  }
+
+  .logo {
+    margin-bottom: 12px;
+    width: 250px;
+    align-self: center;
+  }
+}
+
+.subtitle {
+  margin-bottom: 8px;
+}
+
+.action-btn {
+  width: 100%;
+  text-align: center;
+  border: none;
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  gap: 8px;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+.action-btn-play {
+  background: linear-gradient(135deg, #810f9d, #9134a8);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(129, 15, 157, 0.35);
+}
+
+.action-btn-webapp {
+  background: linear-gradient(135deg, #9d4f0f, #a85934);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(157, 79, 15,  0.35);
+}
+
+.action-btn-whatsapp {
+  background: #1faa4b;
+  color: #fff;
+}
+
