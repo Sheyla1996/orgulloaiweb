@@ -6,6 +6,7 @@ export interface Asociacion {
   logo: string;
   isBatucada: boolean;
   position: number;
+  showPosition: number;
   lat: number; // convertiremos a number en runtime
   lng: number;
   zona: string;

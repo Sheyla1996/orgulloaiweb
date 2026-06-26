@@ -28,7 +28,7 @@ export class AdminEditorComponent implements OnInit {
   tab = 0;
   idParam = '';
 
-  asociacionForm: Partial<Asociacion> = { name: '', shortName: '', logo: '', zona: '', isBatucada: false };
+  asociacionForm: Partial<Asociacion> = { name: '', shortName: '', logo: '', zona: '', isBatucada: false, showPosition: 0 };
   carrozaForm: Partial<Carroza> = { name: '', logo: '', zona: '', status: 'pendiente', size: '' };
   telefonoForm: Partial<Telefono> = { name: '', telefono: '', zona: '' };
   whatsappForm: Partial<Whatsapp> = { zona: '', link: '' };
@@ -167,6 +167,7 @@ export class AdminEditorComponent implements OnInit {
       logo: (this.asociacionForm.logo || '').trim(),
       zona: (this.asociacionForm.zona || '').trim().toLowerCase(),
       isBatucada: !!this.asociacionForm.isBatucada,
+      showPosition: this.asociacionForm.showPosition ?? 0,
       sheet_row: this.asociacionForm.sheet_row
     };
 

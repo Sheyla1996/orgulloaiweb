@@ -256,7 +256,7 @@ export class AdminComponent implements OnInit {
         this.spinner.show();
         this.asociacionesService.getAsociaciones().subscribe({
             next: list => {
-                this.asociaciones = (list ?? []).map(a => ({ ...a, type: 'asociacion' }));
+                this.asociaciones = (list ?? []).map(a => ({ ...a, type: 'asociacion' })).sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
                 this.spinner.hide();
             },
             error: error => this.handleError('Error al cargar asociaciones', error)
@@ -267,7 +267,7 @@ export class AdminComponent implements OnInit {
         this.spinner.show();
         this.carrozasService.getCarrozas().subscribe({
             next: list => {
-                this.carrozas = (list ?? []).map(c => ({ ...c, type: 'carroza' }));
+                this.carrozas = (list ?? []).map(c => ({ ...c, type: 'carroza' })).sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
                 this.spinner.hide();
             },
             error: error => this.handleError('Error al cargar carrozas', error)
@@ -360,7 +360,7 @@ export class AdminComponent implements OnInit {
 
     cancelEditAsociacion(): void {
         this.editingAsociacionId = null;
-        this.asociacionForm = { name: '', shortName: '', logo: '', zona: '', isBatucada: false };
+        this.asociacionForm = { name: '', shortName: '', logo: '', zona: '', isBatucada: false, showPosition: 0 };
     }
 
     saveAsociacion(): void {
@@ -370,7 +370,8 @@ export class AdminComponent implements OnInit {
             logo: (this.asociacionForm.logo || '').trim(),
             zona: (this.asociacionForm.zona || '').trim().toLowerCase(),
             isBatucada: !!this.asociacionForm.isBatucada,
-            sheet_row: this.asociacionForm.sheet_row
+            sheet_row: this.asociacionForm.sheet_row,
+            showPosition: this.asociacionForm.showPosition ?? 0
         };
 
         if (!payload.name || !payload.zona) {

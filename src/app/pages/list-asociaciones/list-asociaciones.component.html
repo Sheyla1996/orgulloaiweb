@@ -37,10 +37,10 @@
           </div>
           <div class="list-item__name">
             @if(asociacion.shortName) {
-              <span>{{asociacion.position}}. {{asociacion.shortName}}</span><br>
+              <span>{{asociacion.showPosition}}. {{asociacion.shortName}}</span><br>
               <span class="list-item__desc"> {{ asociacion.name }}</span>
             } @else {
-              <span>{{asociacion.position}}. {{ asociacion.name }}</span>
+              <span>{{asociacion.showPosition}}. {{ asociacion.name }}</span>
             }
           </div>
         </div>

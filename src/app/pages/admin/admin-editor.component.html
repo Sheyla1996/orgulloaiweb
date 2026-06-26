@@ -11,6 +11,7 @@
       <input type="text" placeholder="Nombre" [(ngModel)]="asociacionForm.name" />
       <input type="text" placeholder="Nombre corto" [(ngModel)]="asociacionForm.shortName" />
       <input type="text" placeholder="Logo" [(ngModel)]="asociacionForm.logo" />
+      <input type="number" placeholder="Posición mostrada" [(ngModel)]="asociacionForm.showPosition" />
       <select [(ngModel)]="asociacionForm.zona">
         <option value="">Zona</option>
         @for (z of zonas; track $index) {

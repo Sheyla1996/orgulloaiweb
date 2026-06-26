@@ -20,7 +20,7 @@
             <article class="item-card"
               [ngClass]="'item-card--' + item.zona.toLocaleLowerCase()">
               <div class="item-card__content">
-                <strong>{{ item.position }}. {{ item.name }}</strong>
+                <strong>{{ item.position }} - {{ item.showPosition }}. {{ item.name }}</strong>
                 <span>{{ item.shortName }}</span>
                 <span>Zona: {{ item.zona | titlecase }}</span>
               </div>
