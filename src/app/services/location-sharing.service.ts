@@ -45,6 +45,7 @@ export class LocationSharingService {
   readonly state$ = this.stateSubject.asObservable();
 
   private timerId: ReturnType<typeof setInterval> | null = null;
+  private nightTimerId: ReturnType<typeof setTimeout> | null = null;
   private currentConfig: LocationSharingConfig & { clientId: string } | null = null;
 
   constructor(
@@ -103,12 +104,15 @@ export class LocationSharingService {
 
     void this.sendCurrentLocation();
     this.timerId = setInterval(() => void this.sendCurrentLocation(), this.currentConfig.intervalMinutes * 60_000);
+    // Programar desactivación automática diaria a las 23:30
+    this.scheduleAutoDisableAt2300();
   }
 
   stopSharing(removeRemoteLocation = true): void {
     const config = this.currentConfig ?? this.readConfigFromStorage();
 
     this.clearTimer();
+    this.clearNightTimer();
     this.currentConfig = null;
     this.clearStoredConfig();
 
@@ -245,6 +249,41 @@ export class LocationSharingService {
     if (this.timerId) {
       clearInterval(this.timerId);
       this.timerId = null;
+    }
+    // también limpiamos el temporizador nocturno
+    this.clearNightTimer();
+  }
+
+  private scheduleAutoDisableAt2300(): void {
+    this.clearNightTimer();
+    if (!this.canRunInBrowser()) return;
+
+    try {
+      const now = new Date();
+      const target = new Date(now);
+      target.setHours(23, 30, 0, 0);
+      if (now.getTime() >= target.getTime()) {
+        // si ya pasó hoy, programar para mañana
+        target.setDate(target.getDate() + 1);
+      }
+
+      const ms = target.getTime() - now.getTime();
+      this.nightTimerId = setTimeout(() => {
+        try {
+          this.stopSharing(true);
+        } catch (e) {
+          // ignore
+        }
+      }, ms);
+    } catch (e) {
+      // ignore scheduling errors
+    }
+  }
+
+  private clearNightTimer(): void {
+    if (this.nightTimerId) {
+      clearTimeout(this.nightTimerId);
+      this.nightTimerId = null;
     }
   }
 

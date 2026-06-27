@@ -1,13 +1,11 @@
 :host {
   display: block;
-  max-height: calc(100vh - 80px);
   height: 100%;
-  min-height: 0;
 }
 .ajustes-page {
       overflow-y: scroll;
     display: block;
-    height: 100%;
+    height: calc(100% - 70px);
   .card {
     max-width: 720px;
     margin: 16px auto;
