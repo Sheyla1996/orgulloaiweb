@@ -213,7 +213,7 @@ export class AdminEditorComponent implements OnInit {
     }
 
     this.spinner.show();
-    const payload = { nombre: name, zona, status, size, logo };
+    const payload = { nombre: name, zona, status, size, logo, sheet_row: 0 };
     if (this.idParam) {
       this.carrozasService.updateCarroza(Number(this.idParam), payload).subscribe({
         next: () => this.goBack(),
