@@ -34,7 +34,7 @@ export class AdminEditorComponent implements OnInit {
   whatsappForm: Partial<Whatsapp> = { zona: '', link: '' };
   pulseraForm: { uuid: string; zona: string; type: string; description?: string; year?: number } = { uuid: '', zona: '', type: '' };
 
-  readonly zonas = ['blanca', 'roja', 'naranja', 'amarilla', 'verde', 'azul', 'violeta', 'rosa', 'coor'];
+  readonly zonas = ['blanca', 'roja', 'naranja', 'amarilla', 'verde', 'azul', 'violeta', 'rosa', 'coor', 'grupo'];
   readonly carrozaStatusOptions = ['pendiente', 'aparcando', 'situado'];
   readonly carrozaSizeOptions = ['pequena', 'mediana', 'grande'];
   readonly typeOptions = ['normal', 'coor', 'coor_manana', 'boss'];

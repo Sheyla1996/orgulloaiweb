@@ -124,7 +124,7 @@ export class ListTelefonosComponent implements OnInit {
             this.linkGrupo = this.getUrlWhatsapp(item.link);
           }
         });
-        data.filter(item => !['comunidad', 'grupo'].includes(item.zona.toLocaleLowerCase())).forEach(item => {
+        data.filter(item => !['comunidad', 'grupo', 'coor'].includes(item.zona.toLocaleLowerCase())).forEach(item => {
           this.listZonas.push({
             zona: item.zona.toLocaleLowerCase(),
             link: this.getUrlWhatsapp(item.link),
@@ -132,6 +132,16 @@ export class ListTelefonosComponent implements OnInit {
             id: item.id
           });
         });
+        if (['coor', 'coor_manana', 'boss'].includes(this.userType || '')) {
+          data.filter(item => ['coor'].includes(item.zona.toLocaleLowerCase())).forEach(item => {
+            this.listZonas.push({
+              zona: item.zona.toLocaleLowerCase(),
+              link: this.getUrlWhatsapp(item.link),
+              sheet_row: item.sheet_row,
+              id: item.id
+            });
+          });
+        }
         localStorage.setItem('whatsapp', JSON.stringify(data));
         this.spinner.hide();
       },
