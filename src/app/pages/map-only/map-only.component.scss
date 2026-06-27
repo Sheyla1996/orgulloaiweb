@@ -3,7 +3,7 @@
 }
 .map-container {
   width: 100%;
-  height: calc(100vh - 90px); /* leave space if bottom nav is present */
+  height: calc(100% - 70px); /* leave space if bottom nav is present */
 }
 
 .live-location-popup {
