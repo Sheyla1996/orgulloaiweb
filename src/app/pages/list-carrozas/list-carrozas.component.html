@@ -44,7 +44,7 @@
               <div class="list-item__name list-carrozas-item__name" style="margin-left: 0;">{{carroza.position}}. {{ carroza.name }}</div>
               <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
               <div class="tag" [ngClass]="carroza.status?.toLocaleLowerCase()">{{carroza.status | titlecase}}</div>
-              <p style="margin: 4px 0;font-size: 0.8rem;">Tipo: {{carroza.size}}</p>
+              <p style="margin: 4px 0;font-size: 0.8rem;">Tipo: {{carroza.size ? (carroza.size === 'L' ? 'Trailer' : 'Autobús') : 'Desconocido'}}</p>
 
               </div>
             </div>
