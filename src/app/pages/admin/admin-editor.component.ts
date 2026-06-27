@@ -36,7 +36,16 @@ export class AdminEditorComponent implements OnInit {
 
   readonly zonas = ['blanca', 'roja', 'naranja', 'amarilla', 'verde', 'azul', 'violeta', 'rosa', 'coor', 'grupo'];
   readonly carrozaStatusOptions = ['pendiente', 'aparcando', 'situado'];
-  readonly carrozaSizeOptions = ['pequena', 'mediana', 'grande'];
+  readonly carrozaSizeOptions = [
+    {
+      label: 'Autobús',
+      value: 'M'
+    },
+    {
+      label: 'Trailer',
+      value: 'L'
+    }
+  ];
   readonly typeOptions = ['normal', 'coor', 'coor_manana', 'boss'];
 
   constructor(

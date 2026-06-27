@@ -44,7 +44,7 @@
       <select [(ngModel)]="carrozaForm.size">
         <option value="">Tamaño</option>
         @for (sz of carrozaSizeOptions; track $index) {
-          <option [value]="sz">{{ sz | titlecase }}</option>
+          <option [value]="sz.value">{{ sz.label | titlecase }}</option>
         }
       </select>
     </section>
