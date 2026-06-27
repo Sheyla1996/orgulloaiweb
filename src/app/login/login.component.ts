@@ -52,7 +52,7 @@ export class LoginComponent implements OnInit {
     if (pass && type) {
       this.password = pass;
       this.selectZone = type;
-      this.login();
+      this.goToQr();
     }
   }
 
@@ -186,7 +186,7 @@ export class LoginComponent implements OnInit {
       if (pass) {
         this.password = pass;
         this.selectZone = type || undefined;
-        this.login();
+        this.goToQr();
       }
     } catch {
       console.error('Invalid URL scanned:', event);
