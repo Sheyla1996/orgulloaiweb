@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { TelefonosService } from '../../services/telefonos.service';
 import { Telefono } from '../../models/telefono.model';
 import { FormsModule } from '@angular/forms';
@@ -23,8 +23,7 @@ import { Whatsapp } from '../../models/whatsapp.model';
     NgxSpinnerModule
   ],
   templateUrl: './list-telefonos.component.html',
-  styleUrls: ['./list-telefonos.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['./list-telefonos.component.scss']
 })
 export class ListTelefonosComponent implements OnInit {
   telefonos: Telefono[] = [];

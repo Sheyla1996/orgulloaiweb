@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID, ViewEncapsulation, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID, ViewEncapsulation } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { AsociacionesService, UbicacionCompartida } from '../../services/asociaciones.service';
@@ -11,8 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
   imports: [CommonModule, MatIconModule],
   templateUrl: './map-only.component.html',
   styleUrls: ['./map-only.component.scss'],
-  encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  encapsulation: ViewEncapsulation.None
 })
 export class MapOnlyComponent implements OnInit, OnDestroy {
   map: any = null;

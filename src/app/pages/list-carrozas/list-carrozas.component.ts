@@ -1,6 +1,6 @@
 import { CarrozasService } from '../../services/carrozas.service';
 import { Carroza } from '../../models/carroza.model';
-import { ChangeDetectionStrategy, Component, Inject, NO_ERRORS_SCHEMA, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, Inject, NO_ERRORS_SCHEMA, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -30,7 +30,6 @@ import { SearchComponent } from '../../components/search/search.component';
   ],
   templateUrl: './list-carrozas.component.html',
   styleUrls: ['./list-carrozas.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   schemas: [NO_ERRORS_SCHEMA]
 })
 export class ListCarrozasComponent implements OnInit, OnDestroy {
@@ -221,7 +220,7 @@ export class ListCarrozasComponent implements OnInit, OnDestroy {
     if (!this.showMap) return;
     if (!this.map) {
       this.map = this.leaflet.map('map-carrozas').setView([40.412, -3.692], 18);
-      this.leaflet.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
+      this.leaflet.tileLayer('/assets/map/{z}/{x}/{y}.webp', {
         attribution: '© OpenStreetMap',
         maxZoom: 18,
         minZoom: 15,

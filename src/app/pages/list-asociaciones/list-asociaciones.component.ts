@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, NO_ERRORS_SCHEMA, PLATFORM_ID, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, NO_ERRORS_SCHEMA, PLATFORM_ID, Inject } from '@angular/core';
 import { AsociacionesService } from '../../services/asociaciones.service';
 import { Asociacion } from '../../models/asociacion.model';
 import { FormsModule } from '@angular/forms';
@@ -29,7 +29,6 @@ import { SearchComponent } from '../../components/search/search.component';
   ],
   templateUrl: './list-asociaciones.component.html',
   styleUrls: ['./list-asociaciones.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   schemas: [NO_ERRORS_SCHEMA]
 })
 export class ListAsociacionesComponent implements OnInit, OnDestroy {
