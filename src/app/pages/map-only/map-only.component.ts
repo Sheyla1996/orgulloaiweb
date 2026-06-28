@@ -1,9 +1,8 @@
-import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID, ViewEncapsulation, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { AsociacionesService, UbicacionCompartida } from '../../services/asociaciones.service';
 import { LocationSharingService } from '../../services/location-sharing.service';
-import { NgxSpinnerService } from 'ngx-spinner';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -12,7 +11,8 @@ import { MatIconModule } from '@angular/material/icon';
   imports: [CommonModule, MatIconModule],
   templateUrl: './map-only.component.html',
   styleUrls: ['./map-only.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MapOnlyComponent implements OnInit, OnDestroy {
   map: any = null;
@@ -63,7 +63,10 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
 
     await this.loadDataAndInitMap();
 
-    this.liveLocationsTimer = setInterval(() => this.loadLiveLocations(true), 30000);
+    this.liveLocationsTimer = setInterval(() => {
+      if (document.hidden) return;
+      this.loadLiveLocations(true);
+    }, 30000);
   }
 
   /**
@@ -139,7 +142,7 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
         preferCanvas: this.isIos
       }).setView([40.414911, -3.691149], 14);
 
-      this.leaflet.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
+      this.leaflet.tileLayer('/assets/map/{z}/{x}/{y}.webp', {
         attribution: '© OpenStreetMap',
         maxZoom: 17,
         minZoom: 15,
@@ -351,10 +354,17 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
         this.ubicacionesVivas = (ubicaciones ?? [])
           .map(u => ({ ...u, lat: Number(u.lat), lng: Number(u.lng) }))
           .filter(u => Number.isFinite(u.lat) && Number.isFinite(u.lng));
+          localStorage.setItem('lastLiveLocations', JSON.stringify(this.ubicacionesVivas));
 
         if (refreshMap) this.drawLiveLocations();
       },
-      error: error => {}
+      error: () => {
+        const cached = localStorage.getItem('lastLiveLocations');
+        if (cached) {
+          this.ubicacionesVivas = JSON.parse(cached);
+          this.drawLiveLocations();
+        }
+      }
     });
   }
 

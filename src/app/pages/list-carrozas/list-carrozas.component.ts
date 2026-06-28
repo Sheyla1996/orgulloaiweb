@@ -1,6 +1,6 @@
 import { CarrozasService } from '../../services/carrozas.service';
 import { Carroza } from '../../models/carroza.model';
-import { Component, Inject, NO_ERRORS_SCHEMA, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, NO_ERRORS_SCHEMA, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,7 +10,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { WebSocketService } from '../../services/websocket.service';
 import { ModalStatusComponent } from '../admin/admin.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { NgxSpinnerService } from 'ngx-spinner';
+import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { ErrorModalService } from '../../components/error-modal/error-modal.service';
 import { SearchComponent } from '../../components/search/search.component';
 
@@ -25,10 +25,12 @@ import { SearchComponent } from '../../components/search/search.component';
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
-    SearchComponent
+    SearchComponent,
+    NgxSpinnerModule
   ],
   templateUrl: './list-carrozas.component.html',
   styleUrls: ['./list-carrozas.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   schemas: [NO_ERRORS_SCHEMA]
 })
 export class ListCarrozasComponent implements OnInit, OnDestroy {

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, NO_ERRORS_SCHEMA, PLATFORM_ID, Inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, NO_ERRORS_SCHEMA, PLATFORM_ID, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { AsociacionesService } from '../../services/asociaciones.service';
 import { Asociacion } from '../../models/asociacion.model';
 import { FormsModule } from '@angular/forms';
@@ -9,7 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ModalComponent } from '../../components/modal.component';
-import { NgxSpinnerService } from 'ngx-spinner';
+import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { ErrorModalService } from '../../components/error-modal/error-modal.service';
 import { SearchComponent } from '../../components/search/search.component';
 
@@ -24,10 +24,12 @@ import { SearchComponent } from '../../components/search/search.component';
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
-    SearchComponent
+    SearchComponent,
+    NgxSpinnerModule
   ],
   templateUrl: './list-asociaciones.component.html',
   styleUrls: ['./list-asociaciones.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   schemas: [NO_ERRORS_SCHEMA]
 })
 export class ListAsociacionesComponent implements OnInit, OnDestroy {
@@ -214,7 +216,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
 
     if (!this.map) {
       this.map = this.leaflet.map('map-asociaciones').setView([40.412, -3.692], 18);
-      this.leaflet.tileLayer('/assets/map/{z}/{x}/{y}.jpg', {
+      this.leaflet.tileLayer('/assets/map/{z}/{x}/{y}.webp', {
         attribution: '© OpenStreetMap',
         maxZoom: 18,
         minZoom: 15,

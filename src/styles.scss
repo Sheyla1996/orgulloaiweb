@@ -17,14 +17,36 @@ $my-theme: mat.define-light-theme((
 ));
 
 @include mat.all-component-themes($my-theme);*/
-@use 'material-symbols';
+
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/assets/fuente.woff2') format('woff2');
+  font-display: block;
+}
+
+.material-symbols-outlined,
+mat-icon {
+  font-family: 'Material Symbols Outlined';
+  font-weight: 400;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-feature-settings: 'liga';
+}
 
 html, body {
   -webkit-overflow-scrolling: touch;
   background: #0c1016;
   color: #eaf0fb;
-    user-select: none;
-
+  user-select: none;
 }
 
 :root {

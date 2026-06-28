@@ -12,49 +12,50 @@ import { HomeComponent } from './pages/home/home.component';
 import { QrComponent } from './pages/qr/qr.component';
 
 export const routes: Routes = [
-    { path: '', component: HomeComponent },
-    { path: 'qr', component: QrComponent },
+    { path: '', loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent) },
+    { path: 'qr', loadComponent: () => import('./pages/qr/qr.component').then(m => m.QrComponent) },
     { path: 'init', loadComponent: () => import('./pages/init/init.component').then(m => m.InitComponent) },
-    { path: 'login', component: LoginComponent },
+    { path: 'login', loadComponent: () => import('./login/login.component').then(m => m.LoginComponent) },
     {
         path: 'asociaciones',
-        component: ListAsociacionesComponent,
+        loadComponent: () => import('./pages/list-asociaciones/list-asociaciones.component').then(m => m.ListAsociacionesComponent),
         canActivate: [AuthGuard],
         data: { allowed: ['normal', 'coor_manana', 'coor', 'boss', 'test'] }
     },
     {
         path: 'mapa',
-        component: MapOnlyComponent,
+        loadComponent: () =>
+            import('./pages/map-only/map-only.component').then(m => m.MapOnlyComponent),
         canActivate: [AuthGuard],
         data: { allowed: ['normal', 'coor_manana', 'coor', 'boss', 'test'] }
     },
     {
         path: 'carrozas',
-        component: ListCarrozasComponent,
+        loadComponent: () => import('./pages/list-carrozas/list-carrozas.component').then(m => m.ListCarrozasComponent),
         canActivate: [AuthGuard],
         data: { allowed: ['boss', 'coor_manana', 'rosa', 'test'] }
     },
     {
         path: 'telefonos',
-        component: ListTelefonosComponent,
+        loadComponent: () => import('./pages/list-telefonos/list-telefonos.component').then(m => m.ListTelefonosComponent),
         canActivate: [AuthGuard],
         data: { allowed: ['normal', 'coor_manana', 'coor', 'boss', 'test'] }
     },
     {
         path: 'messages',
-        component: ChatComponent,
+        loadComponent: () => import('./pages/list-messages/list-messages.component').then(m => m.ChatComponent),
         canActivate: [AuthGuard],
         data: { allowed: ['boss'] }
     },
     {
         path: 'admin',
-        component: AdminComponent,
+        loadComponent: () => import('./pages/admin/admin.component').then(m => m.AdminComponent),
         canActivate: [AuthGuard],
         data: { allowed: ['boss'] }
     },
     {
         path: 'admin/editor',
-        component: AdminEditorComponent,
+        loadComponent: () => import('./pages/admin/admin-editor.component').then(m => m.AdminEditorComponent),
         canActivate: [AuthGuard],
         data: { allowed: ['boss'] }
     }

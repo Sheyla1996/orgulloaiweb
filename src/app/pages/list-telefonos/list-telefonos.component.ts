@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { TelefonosService } from '../../services/telefonos.service';
 import { Telefono } from '../../models/telefono.model';
 import { FormsModule } from '@angular/forms';
@@ -6,7 +6,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { VersionService } from '../../services/version.service';
 import { MatButtonModule } from '@angular/material/button';
-import { NgxSpinnerService } from 'ngx-spinner';
+import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { ErrorModalService } from '../../components/error-modal/error-modal.service';
 import { WhatsappService } from '../../services/whatsapp.service';
 import { Whatsapp } from '../../models/whatsapp.model';
@@ -19,10 +19,12 @@ import { Whatsapp } from '../../models/whatsapp.model';
     CommonModule,
     FormsModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    NgxSpinnerModule
   ],
   templateUrl: './list-telefonos.component.html',
-  styleUrls: ['./list-telefonos.component.scss']
+  styleUrls: ['./list-telefonos.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ListTelefonosComponent implements OnInit {
   telefonos: Telefono[] = [];

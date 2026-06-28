@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { NgxSpinnerService } from 'ngx-spinner';
+import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { Asociacion } from '../../models/asociacion.model';
 import { Carroza } from '../../models/carroza.model';
 import { Telefono } from '../../models/telefono.model';
@@ -19,7 +19,7 @@ import { WhatsappService } from '../../services/whatsapp.service';
 @Component({
   selector: 'app-admin-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule, FormsModule, MatButtonModule, MatIconModule, NgxSpinnerModule],
   templateUrl: './admin-editor.component.html',
   styleUrls: ['./admin-editor.component.scss']
 })
@@ -39,11 +39,11 @@ export class AdminEditorComponent implements OnInit {
   readonly carrozaSizeOptions = [
     {
       label: 'Autobús',
-      value: 'M'
+      value: 'm'
     },
     {
       label: 'Trailer',
-      value: 'L'
+      value: 'l'
     }
   ];
   readonly typeOptions = ['normal', 'coor', 'coor_manana', 'boss'];

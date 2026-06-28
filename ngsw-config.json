@@ -3,15 +3,29 @@
   "index": "/index.html",
   "dataGroups": [
     {
-      "name": "api-backend",
+      "name": "api-estatica",
       "urls": [
-        "https://apiorgullo.sheylamartinez.es/**"
+        "https://apiorgullo.sheylamartinez.es/asociacion",
+        "https://apiorgullo.sheylamartinez.es/telefono",
+        "https://apiorgullo.sheylamartinez.es/whtasapp"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 50,
+        "maxAge": "12h"
+      }
+    },
+    {
+      "name": "api-viva",
+      "urls": [
+        "https://apiorgullo.sheylamartinez.es/ubicacion",
+        "https://apiorgullo.sheylamartinez.es/carroza"
       ],
       "cacheConfig": {
         "strategy": "freshness",
-        "maxSize": 0,
-        "maxAge": "0s",
-        "timeout": "0s"
+        "maxSize": 20,
+        "maxAge": "30s",
+        "timeout": "3s"
       }
     }
   ],

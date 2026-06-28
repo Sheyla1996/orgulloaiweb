@@ -7,7 +7,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { WebSocketService } from './services/websocket.service';
 import { ToastrService } from 'ngx-toastr';
-import { NgxSpinnerModule } from "ngx-spinner";
 import { ErrorModalService } from './components/error-modal/error-modal.service';
 import { FcmService } from './services/fcm.service';
 import { BottomNavigation } from './components/bottom-navigation/bottom-navigation';
@@ -25,7 +24,6 @@ import { LocationSharingService } from './services/location-sharing.service';
     MatButtonModule,
     MatButtonToggleModule,
     RouterModule,
-    NgxSpinnerModule,
     BottomNavigation
   ],
   providers: [TitleCasePipe],
@@ -82,19 +80,26 @@ export class AppComponent implements OnInit {
         console.error('Error in viewport setup:', error);
       }
     }
+    this.router.events.subscribe(() => {
+      if (this.shouldUseWebSocket()) {
+        try {
+          this.wsService.connect();
+        } catch (error) {
+          console.error('Error in WebSocket connect:', error);
+        }
+        try {
+          this.subscribeToWebSocketMessages();
+        } catch (error) {
+          console.error('Error in subscribeToWebSocketMessages:', error);
+        }
 
-    try {
-      this.wsService.connect();
-    } catch (error) {
-      console.error('Error in WebSocket connect:', error);
-    }
+      } else {
+        this.wsService.disconnect();
+      }
+    });
+    
 
-    try {
-      this.subscribeToWebSocketMessages();
-    } catch (error) {
-      console.error('Error in subscribeToWebSocketMessages:', error);
-    }
-
+    
     try {
       this.cdr.detectChanges();
     } catch (error) {
@@ -161,5 +166,17 @@ export class AppComponent implements OnInit {
       },
       error: (err) => this.handleError('Error loading settings:', err)
     });
+  }
+
+  private shouldUseWebSocket(): boolean {
+    const userType = localStorage.getItem('userType')?.toLowerCase();
+    const currentUrl = this.router.url;
+
+    return (
+      userType === 'boss' ||
+      userType === 'coor_manana' ||
+      currentUrl.includes('/messages') ||
+      currentUrl.includes('/carrozas')
+    );
   }
 }

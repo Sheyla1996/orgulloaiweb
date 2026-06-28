@@ -63,7 +63,7 @@
                 <span>Zona: {{ item.zona | titlecase }}</span>
                 <span>Estado: {{ item.status | titlecase }}</span>
                 @if (item.size) {
-                  <span>Tamano: {{item.size ? (item.size === 'L' ? 'Trailer' : 'Autobús') : 'Desconocido'}}</span>
+                  <span>Tamano: {{item.size ? (item.size === 'l' ? 'Trailer' : 'Autobús') : 'Desconocido'}}</span>
                 }
               </div>
               <div class="item-card__actions">

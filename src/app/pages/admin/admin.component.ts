@@ -12,7 +12,7 @@ import { FormsModule } from "@angular/forms";
 import { MatIconModule } from "@angular/material/icon";
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from "@angular/material/dialog";
 import { MatButtonToggleModule } from "@angular/material/button-toggle";
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
 import { ErrorModalService } from "../../components/error-modal/error-modal.service";
 import { WhatsappService } from "../../services/whatsapp.service";
 import { Whatsapp } from "../../models/whatsapp.model";
@@ -29,7 +29,8 @@ import { c } from "../../../../node_modules/@angular/cdk/a11y-module.d-DBHGyKoh"
         MatTabsModule,
         MatButtonModule,
         FormsModule,
-        MatIconModule
+        MatIconModule,
+        NgxSpinnerModule
     ],
     templateUrl: './admin.component.html',
     styleUrls: ['./admin.component.scss'],
