@@ -230,9 +230,6 @@ export class LocationSharingService {
   private clearStoredConfig(): void {
     localStorage.removeItem(this.storageKeys.enabled);
     localStorage.removeItem(this.storageKeys.clientId);
-    localStorage.removeItem(this.storageKeys.uuid);
-    localStorage.removeItem(this.storageKeys.zona);
-    localStorage.removeItem(this.storageKeys.userType);
     localStorage.removeItem(this.storageKeys.intervalMinutes);
     localStorage.removeItem(this.storageKeys.displayName);
     localStorage.removeItem(this.storageKeys.source);
