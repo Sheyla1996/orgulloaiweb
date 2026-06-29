@@ -4,10 +4,11 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(180deg, #141a23, #10151d);
-  box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.45);
+  color: var(--color-text);
+  background: var(--color-background);
+  box-shadow: 0 -6px 18px color-mix(in srgb, var(--color-background) 45%, transparent);
   z-index: 1000;
-  border-top: 1px solid var(--app-border, #2f3b4e);
+  border-top: 1px solid color-mix(in srgb, var(--color-text) 38%, transparent);
 }
 
 .nav-container {
@@ -31,19 +32,11 @@
   background: transparent;
   cursor: pointer;
   transition: all 0.3s ease;
-  color: var(--app-muted, #9faac0);
+  color: var(--color-text, #9faac0);
   min-width: 0;
 
-  /*&:hover {
-    background-color: rgba(102, 182, 255, 0.1);
-  }
-
-  &:active {
-    background-color: rgba(0, 0, 0, 0.08);
-  }*/
-
   &.active {
-    color: var(--app-text, #eaf0fb);
+    color: var(--color-text, #eaf0fb);
 
     .nav-icon {
       transform: scale(1.1);
@@ -53,7 +46,7 @@
 
     .nav-label {
       font-weight: 600;
-      color: var(--app-accent, #66b6ff);
+      color: var(--color-text, #66b6ff);
     }
   }
 }

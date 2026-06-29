@@ -19,6 +19,8 @@
         <div
           class="list-item"
           [attr.id]="'asoc-' + asociacion.id"
+          [ngClass]="(['coor', 'coor_manana', 'boss'].includes(userType || 'normal') && asociacion.zona.toLowerCase() === coorZona?.toLowerCase())
+           || asociacion.zona.toLowerCase() === zona?.toLowerCase() ? 'list-item--highlight' : ''"
         >
           <div class="list-item__logo" [ngClass]="asociacion.zona">
             @if (asociacion.logo || asociacion.isBatucada) {

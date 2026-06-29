@@ -8,7 +8,7 @@
   --color-text: #000000;
   --color-background: #ffffff;
   --color-white: #ffffff;
-  --color-red: #ff2c14;
+  --color-red: #c71805;
   --color-orange: #f09f25;
   --color-yellow: #eeee3f;
   --color-green: #4caf50;
@@ -20,7 +20,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --color-text: #f0f0f0;
-    --color-background: #262626;
+    --color-background: #101010;
     --color-white: #f0f0f0;
     --color-red: #ff6659;
     --color-orange: #ffb74d;
@@ -32,78 +32,13 @@
   }
 }
 
-/*==========================
-  Navbar y Toolbar
-==========================*/
-.navbar {
-  position: fixed;
-  bottom: 0;
-  display: flex;
-  justify-content: space-around;
-  background: #e91e63;
-  padding: 0.75rem;
-  font-weight: bold;
-
-  a {
-    color: white;
-    text-decoration: none;
-    padding: 0.5rem 1rem;
-
-    &.active {
-      background: white;
-      color: #e91e63;
-      border-radius: 6px;
-    }
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 6px;
-    }
-  }
-}
-
-.toolbarNav {
-  position: fixed;
-  bottom: 0;
-  z-index: 1000;
-  display: flex;
-  justify-content: space-around;
-  background-color: var(--app-surface);
-  -webkit-box-shadow: 3px 3px 5px 6px #ccc;
-  -moz-box-shadow: 3px 3px 5px 6px #ccc;
-  box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.45);
-  border-top: 1px solid var(--app-border);
-
-  button {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-
-    span {
-      display: block;
-    }
-
-    & .mat-icon {
-      min-height: 1.125rem;
-    }
-  }
-}
-
-button:hover,
-.active-link {
-  color: var(--app-accent);
-}
-
-a {
-  color: inherit !important;
-}
-
-/*==========================
-  Main y Page
-==========================*/
 main {
   padding: 12px;
+  height: calc((var(--vh, 1vh) * 100) - 24px);
+  max-height: calc((var(--vh, 1vh) * 100) - 24px);
+  overflow: hidden;
+  background: transparent;
+  color: var(--color-text);
 }
 
 .head {
@@ -131,19 +66,6 @@ main {
   height: 100%;
 }
 
-/*==========================
-  Mat-Fab-Menu
-==========================*/
-mat-fab-menu {
-  position: absolute;
-  bottom: 35px;
-  right: 15px;
-  z-index: 1000;
-
-  .mdc-fab {
-    border-radius: 50%;
-  }
-}
 
 /*==========================
   Mapas y Leaflet
@@ -213,9 +135,6 @@ mat-fab-menu {
   object-fit: contain;
 }
 
-/*==========================
-  Search
-==========================*/
 
 
 /*==========================
@@ -229,7 +148,7 @@ mat-fab-menu {
   bottom: 0;
   z-index: 1000;
   padding: 0 10px;
-  background: rgba(7, 10, 15, 0.86);
+  background: color-mix(in srgb, var(--color-background) 86%, transparent);
   border-top-left-radius: 24px;
   border-top-right-radius: 24px;
   padding-top: 8px;
@@ -305,6 +224,7 @@ mat-fab-menu {
 .azul-fill    { fill: var(--color-blue); }
 .rosa-fill    { fill: var(--color-rose); }
 .blanca-fill  { fill: var(--color-white); }
+.coor-fill  { fill: var(--color-text); }
 
 /*==========================
   Botones y Formularios
@@ -391,37 +311,12 @@ mat-form-field {
   }
 }
 
-/*==========================
-  Otros
-==========================*/
-.mdc-tab__text-label {
-  color: var(--app-muted) !important;
-}
-
-.mdc-tab--active .mdc-tab__text-label {
-  color: var(--app-text) !important;
-}
-
-main {
-  height: calc((var(--vh, 1vh) * 100) - 24px);
-  max-height: calc((var(--vh, 1vh) * 100) - 24px);
-  overflow: hidden;
-  background: transparent;
-  color: var(--app-text);
-}
-
-app-list-telefonos {
-  overflow-y: scroll;
-    display: block;
-    height: calc((var(--vh, 1vh) * 100) - 24px);
-}
-
-.material-symbols-outlined {
-  font-weight: normal;
-  font-style: normal;
-  font-variation-settings:
-    'FILL' 0,
-    'wght' 400,
-    'GRAD' 0,
-    'opsz' 24;
+.mat-mdc-dialog-surface {
+  background: var(--color-background);
+  color: var(--color-text);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-background) 38%, transparent), 0 2px 6px color-mix(in srgb, var(--color-background) 25%, transparent);
+  & .mat-mdc-dialog-title {
+    color: var(--color-text)
+  }
 }

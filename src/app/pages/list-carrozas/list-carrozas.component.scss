@@ -10,12 +10,16 @@
       //min-width: 100px;
       //background: url('/assets/icons/bus.svg') no-repeat center center;
       //background-size: cover;
-      background: white;
-      padding-top: 5px;
+      background: #fc9afec1;
+      padding: 0 5px;
     }
 
     &__name {
       font-size: 0.9rem;
+    }
+
+    &:last-child {
+      margin-bottom: 150px;
     }
   }
   &--full {

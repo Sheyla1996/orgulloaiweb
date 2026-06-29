@@ -43,6 +43,9 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
   showKeyboard = true;
   private scrollContainer: HTMLElement | null = null;
   private scrollHandler?: () => void;
+  zona: string | null = null;
+  coorZona: string | null = null;
+  userType: string | null = null;
 
   constructor(
     private asociacionesService: AsociacionesService,
@@ -54,7 +57,9 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     if (!isPlatformBrowser(this.platformId)) return;
-
+    this.userType = localStorage.getItem('userType');
+    this.zona = localStorage.getItem('zona');
+    this.coorZona = localStorage.getItem('coor_zone');
     this.leaflet = await import('leaflet');
     this.handlePwaPrompt();
     this.setupViewportListener();
@@ -291,7 +296,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
     const term = searchText.toLowerCase();
     const index = this.asociaciones.findIndex(a =>
       a.name.toLowerCase().includes(term) ||
-      //a.shortName.toLowerCase().includes(term) ||
+      a.shortName?.toLowerCase().includes(term) ||
       a.position.toString().includes(term)
     );
     if (index !== -1) {

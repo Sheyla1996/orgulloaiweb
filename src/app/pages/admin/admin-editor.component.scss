@@ -1,7 +1,7 @@
 .admin-editor {
   min-height: 100%;
   padding: 12px;
-  color: var(--app-text, #eaf0fb);
+  color: var(--color-text, #eaf0fb);
 
   &__header {
     display: flex;
@@ -20,8 +20,8 @@
     gap: 10px;
     padding: 14px;
     border-radius: 12px;
-    border: 1px solid var(--app-border, #2f3b4e);
-    background: linear-gradient(180deg, #171d27, #111823);
+    border: 1px solid var(--color-border, #2f3b4e);
+    background: var(--color-background, linear-gradient(180deg, #171d27, #111823));
   }
 
   &__actions {
@@ -32,12 +32,12 @@
 
   input,
   select {
-    border: 1px solid var(--app-border, #2f3b4e);
+    border: 1px solid var(--color-border, #2f3b4e);
     border-radius: 10px;
     padding: 10px 12px;
     font-size: 0.95rem;
-    background: #0f141d;
-    color: var(--app-text, #eaf0fb);
+    background: var(--color-background, #0f141d);
+    color: var(--color-text, #eaf0fb);
   }
 }
 

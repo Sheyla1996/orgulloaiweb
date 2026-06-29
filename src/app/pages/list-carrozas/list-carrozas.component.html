@@ -43,9 +43,13 @@
             <div>
               <div class="list-item__name list-carrozas-item__name" style="margin-left: 0;">{{carroza.position}}. {{ carroza.name }}</div>
               <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
-              <div class="tag" [ngClass]="carroza.status?.toLocaleLowerCase()">{{carroza.status | titlecase}}</div>
-              <p style="margin: 4px 0;font-size: 0.8rem;">Tipo: {{carroza.size ? (carroza.size === 'l' ? 'Trailer' : 'Autobús') : 'Desconocido'}}</p>
-
+                
+                <p style="margin: 4px 0;font-size: 0.8rem;">
+                  Tipo: {{carroza.size ? (carroza.size === 'l' ? 'Trailer' : 'Autobús') : 'Desconocido'}}
+                </p>
+                <div class="tag" [ngClass]="carroza.status?.toLocaleLowerCase()">
+                  {{carroza.status?.replace("pendiente", "Pend.")?.replace("aparcando", "Aparc.")?.replace("situado", "Sit.") | titlecase}}
+                </div>
               </div>
             </div>
             <button matIconButton class="list-item__buttom" (click)="openDialog(carroza)" >
