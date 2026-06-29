@@ -43,6 +43,7 @@ export class ListCarrozasComponent implements OnInit, OnDestroy {
   private leaflet: any;
   showMap = true;
   showKeyboard = true;
+  isIos = false;
   private scrollContainer: HTMLElement | null = null;
   private scrollHandler?: () => void;
 
@@ -73,6 +74,7 @@ export class ListCarrozasComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     if (!isPlatformBrowser(this.platformId)) return;
+    this.isIos = this.checkIsIos();
 
     this.leaflet = await import('leaflet');
     this.setupViewportListener();
@@ -219,7 +221,15 @@ export class ListCarrozasComponent implements OnInit, OnDestroy {
   initMap(): void {
     if (!this.showMap) return;
     if (!this.map) {
-      this.map = this.leaflet.map('map-carrozas').setView([40.412, -3.692], 18);
+      const bounds = this.leaflet.latLngBounds(
+          [40.394212, -3.697794], // Suroeste
+          [40.408085, -3.675236]  // Noreste
+      );
+      this.map = this.leaflet.map('map-carrozas', {
+        maxBounds: bounds,
+        maxBoundsViscosity: 1.0,
+        preferCanvas: this.isIos
+      }).setView([40.412, -3.692], 18);
       this.leaflet.tileLayer('/assets/map/{z}/{x}/{y}.webp', {
         attribution: '© OpenStreetMap',
         maxZoom: 18,
@@ -419,6 +429,22 @@ export class ListCarrozasComponent implements OnInit, OnDestroy {
         this.initMap();
         this.initScrollSync();
       }, 100);
+    }
+  }
+
+  /**
+   * En iPhone/iPad, todos los navegadores usan WebKit, no solo Safari.
+   * Por eso aquí desactivamos gradientes/animaciones SVG en cualquier iOS.
+   */
+  private checkIsIos(): boolean {
+    try {
+      const ua = navigator.userAgent || '';
+      const platform = navigator.platform || '';
+      const maxTouchPoints = navigator.maxTouchPoints || 0;
+
+      return /iP(hone|od|ad)/i.test(ua) || (platform === 'MacIntel' && maxTouchPoints > 1);
+    } catch (e) {
+      return false;
     }
   }
 }

@@ -128,6 +128,10 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
   private initMap(): void {
     if (!this.map) {
       this.svgRenderer = this.leaflet.svg();
+      const bounds = this.leaflet.latLngBounds(
+          [40.405302, -3.698028], // Suroeste
+          [40.428125, -3.685217]  // Noreste
+      );
 
       this.map = this.leaflet.map('map-mapa', {
         /*zoomControl: false,
@@ -138,6 +142,8 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
         boxZoom: false,
         keyboard: false,
         tap: false,*/
+        maxBounds: bounds,
+        maxBoundsViscosity: 1.0,
         preferCanvas: this.isIos
       }).setView([40.414911, -3.691149], 14);
 
@@ -375,10 +381,10 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
 
     this.ubicacionesVivas.forEach((location: UbicacionCompartida) => {
       const color = this.getZonaColor(location.zona);
-      const borderColor = this.getCircleBorderColor(location.zona);
+      const borderColor = "#ffffff";
 
       const circle = this.leaflet.circleMarker([location.lat, location.lng], {
-        radius: this.isIos ? 9 : 12,
+        radius: this.isIos ? 9 : 10,
         color: borderColor,
         weight: this.isIos ? 2 : 3,
         fillColor: color,
@@ -392,7 +398,7 @@ export class MapOnlyComponent implements OnInit, OnDestroy {
         ? new Date(location.updatedAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
         : 'reciente';
 
-      circle.bindPopup(`<div class="live-location-popup"><strong>${label}</strong><br>Zona: ${zona}<br>Última actualización: ${updatedAt}</div>`);
+      circle.bindPopup(`<div class="live-location-popup"><strong>Zona: ${zona}</strong><br>Últ. act.: ${updatedAt}</div>`);
       const latlng = this.leaflet.latLng(location.lat, location.lng);
       const mapBounds = this.map.getBounds();
 

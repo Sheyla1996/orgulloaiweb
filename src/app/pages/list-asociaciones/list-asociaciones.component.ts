@@ -46,6 +46,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
   zona: string | null = null;
   coorZona: string | null = null;
   userType: string | null = null;
+  isIos = false;
 
   constructor(
     private asociacionesService: AsociacionesService,
@@ -57,6 +58,7 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     if (!isPlatformBrowser(this.platformId)) return;
+    this.isIos = this.checkIsIos();
     this.userType = localStorage.getItem('userType');
     this.zona = localStorage.getItem('zona');
     this.coorZona = localStorage.getItem('coor_zone');
@@ -219,7 +221,15 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
     if (!this.showMap) return;
 
     if (!this.map) {
-      this.map = this.leaflet.map('map-asociaciones').setView([40.412, -3.692], 18);
+      const bounds = this.leaflet.latLngBounds(
+          [40.405302, -3.698028], // Suroeste
+          [40.428125, -3.685217]  // Noreste
+      );
+      this.map = this.leaflet.map('map-asociaciones', {
+        maxBounds: bounds,
+        maxBoundsViscosity: 1.0,
+        preferCanvas: this.isIos
+      }).setView([40.412, -3.692], 18);
       this.leaflet.tileLayer('/assets/map/{z}/{x}/{y}.webp', {
         attribution: '© OpenStreetMap',
         maxZoom: 18,
@@ -399,5 +409,23 @@ export class ListAsociacionesComponent implements OnInit, OnDestroy {
       }, 100);
     }
   }
+
+  
+  /**
+   * En iPhone/iPad, todos los navegadores usan WebKit, no solo Safari.
+   * Por eso aquí desactivamos gradientes/animaciones SVG en cualquier iOS.
+   */
+  private checkIsIos(): boolean {
+    try {
+      const ua = navigator.userAgent || '';
+      const platform = navigator.platform || '';
+      const maxTouchPoints = navigator.maxTouchPoints || 0;
+
+      return /iP(hone|od|ad)/i.test(ua) || (platform === 'MacIntel' && maxTouchPoints > 1);
+    } catch (e) {
+      return false;
+    }
+  }
+
 
 }
