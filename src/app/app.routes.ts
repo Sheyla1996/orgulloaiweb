@@ -66,4 +66,8 @@ export const routes: Routes = [
         canActivate: [AuthGuard],
         data: { allowed: ['normal', 'coor_manana', 'coor', 'boss', 'test'] }
     }
+    ,{
+        path: 'politica-privacidad',
+        loadComponent: () => import('./pages/politica-privacidad/politica-privacidad.component').then(m => m.PoliticaPrivacidadComponent)
+    }
 ];
