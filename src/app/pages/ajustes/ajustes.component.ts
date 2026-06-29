@@ -115,15 +115,42 @@ export class AjustesComponent implements OnInit {
     }
   
     onInstallPwa(): void {
-      if (!isPlatformBrowser(this.platformId) || !this.installPromptEvent) return;
-  
+      if (!isPlatformBrowser(this.platformId)) return;
+
+      const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+      const isInStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as any).standalone === true;
+
+      if (isIos && !isInStandalone) {
+        this.dialog.open(ModalComponent, {
+          data: {
+            mode: 'ios-install',
+            text: 'Para instalar la app en iPhone: pulsa Compartir y luego “Añadir a pantalla de inicio”.'
+          }
+        });
+        return;
+      }
+
+      if (!this.installPromptEvent) {
+        this.dialog.open(ModalComponent, {
+          data: {
+            mode: 'not-available',
+            text: 'La instalación no está disponible ahora mismo. Prueba desde Chrome o Edge.'
+          }
+        });
+        return;
+      }
+
       const dialogRef = this.dialog.open(ModalComponent);
+
       dialogRef.afterClosed().subscribe((result: any) => {
         if (result === 'install') {
           this.installPromptEvent.prompt();
-          this.installPromptEvent.userChoice.then(() => {
+
+          this.installPromptEvent.userChoice.finally(() => {
           });
-        } 
+        }
       });
     }
 
