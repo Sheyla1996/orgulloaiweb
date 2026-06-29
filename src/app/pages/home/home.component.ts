@@ -22,7 +22,7 @@ export class HomeComponent implements OnInit {
         if (isPlatformBrowser(this.platformId)) {
             const userType = localStorage.getItem('userType')?.toLocaleLowerCase();
             if (!userType) {
-                this.router.navigate(['/login']);
+                this.router.navigate(['/init']);
             } else {
                 const isMorning = new Date().getHours() < 14;
                 if (['coor', 'boss', 'coor_manana'].includes(userType) && isMorning) {

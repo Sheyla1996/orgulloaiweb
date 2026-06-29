@@ -5,6 +5,7 @@ import { WhatsappService } from '../../services/whatsapp.service';
 import { ModalComponent } from '../../components/modal.component';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-init',
@@ -23,6 +24,7 @@ export class InitComponent implements OnInit {
   constructor(
     private whatsappService: WhatsappService,
     private dialog: MatDialog,
+    private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -114,6 +116,10 @@ export class InitComponent implements OnInit {
         });
       } 
     });
+  }
+
+  openWeb(): void {
+    this.router.navigate(['/login']);
   }
 
 }
