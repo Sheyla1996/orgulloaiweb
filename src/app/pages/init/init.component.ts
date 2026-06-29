@@ -119,7 +119,7 @@ export class InitComponent implements OnInit {
   }
 
   openWeb(): void {
-    this.router.navigate(['/login']);
+    this.router.navigate(['/']);
   }
 
 }
