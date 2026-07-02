@@ -200,6 +200,37 @@
 
     <mat-tab>
       <ng-template mat-tab-label>
+        <mat-icon fontSet="material-symbols-outlined">location_on</mat-icon>
+      </ng-template>
+      <section class="admin-section">
+        <div class="admin-section__top">
+          <input type="text" class="admin-mobile__search" [(ngModel)]="searchText" (input)="onSearchChange()"
+            placeholder="Buscar ubicacion" />
+          <div class="admin-section__actions">
+            <button mat-flat-button (click)="loadUbicaciones()">Actualizar</button>
+          </div>
+        </div>
+
+        <div class="cards-list" id="admin-list-ubic">
+          @for (item of getUbicacionesView(); track $index) {
+            <article class="item-card"
+              [ngClass]="'item-card--' + (item.zona || '').toLocaleLowerCase()">
+              <div class="item-card__content">
+                <strong>{{ item.displayName ? item.displayName : item.uuid }}</strong>
+                <span>ID cliente: {{ item.clientId }}</span>
+                <span>Zona: {{ item.zona | titlecase }}</span>
+                <span>Tipo: {{ item.userType }}</span>
+                <span>Coords: {{ item.lat }}, {{ item.lng }}</span>
+                <span *ngIf="item.updatedAt">Actualizado: {{ item.updatedAt | date:'short' }}</span>
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
         <mat-icon fontSet="material-symbols-outlined">tune</mat-icon>
       </ng-template>
       <section class="admin-section admin-section--settings">

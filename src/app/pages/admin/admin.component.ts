@@ -4,6 +4,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { AsociacionesService } from "../../services/asociaciones.service";
 import { CarrozasService } from "../../services/carrozas.service";
 import { TelefonosService } from "../../services/telefonos.service";
+import { UbicacionesService } from "../../services/ubicaciones.service";
 import { Asociacion } from "../../models/asociacion.model";
 import { Carroza } from "../../models/carroza.model";
 import { Telefono } from "../../models/telefono.model";
@@ -16,6 +17,7 @@ import { NgxSpinnerModule, NgxSpinnerService } from "ngx-spinner";
 import { ErrorModalService } from "../../components/error-modal/error-modal.service";
 import { WhatsappService } from "../../services/whatsapp.service";
 import { Whatsapp } from "../../models/whatsapp.model";
+import { Ubicacion } from "../../models/ubicacion.model";
 import { Pulsera, QrService } from "../../services/qr.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { SettingsService } from "../../services/settings.service";
@@ -49,6 +51,7 @@ export class AdminComponent implements OnInit {
     telefonos: Telefono[] = [];
     whatsapp: Whatsapp[] = [];
     pulseras: Pulsera[] = [];
+    ubicaciones: Ubicacion[] = [];
 
     asociacionForm: Partial<Asociacion> = { name: '', shortName: '', logo: '', zona: '', isBatucada: false };
     carrozaForm: Partial<Carroza> = { name: '', logo: '', zona: '', status: 'pendiente', size: '' };
@@ -72,6 +75,7 @@ export class AdminComponent implements OnInit {
         private asociacionesService: AsociacionesService,
         private carrozasService: CarrozasService,
         private telefonosService: TelefonosService,
+        private ubicacionesService: UbicacionesService,
         private whatsappService: WhatsappService,
         private qrService: QrService,
         private settingsService: SettingsService,
@@ -83,7 +87,7 @@ export class AdminComponent implements OnInit {
     ngOnInit(): void {
         const tabParam = this.route.snapshot.queryParamMap.get('tab');
         const parsed = Number(tabParam);
-        this.tab = Number.isInteger(parsed) && parsed >= 0 && parsed <= 5 ? parsed : 0;
+        this.tab = Number.isInteger(parsed) && parsed >= 0 && parsed <= 6 ? parsed : 0;
         this.loadDataForCurrentTab();
     }
 
@@ -94,11 +98,11 @@ export class AdminComponent implements OnInit {
     }
 
     openCreateForm(): void {
-        const type = this.tab === 0 ? 'asociacion' : this.tab === 1 ? 'carroza' : this.tab === 2 ? 'telefono' : this.tab === 3 ? 'whatsapp' : 'pulsera';
+        const type = this.tab === 0 ? 'asociacion' : this.tab === 1 ? 'carroza' : this.tab === 2 ? 'telefono' : this.tab === 3 ? 'whatsapp' : this.tab === 4 ? 'pulsera' : 'ubicacion';
         this.router.navigate(['/admin/editor'], { queryParams: { type, tab: this.tab } });
     }
 
-    goToEditor(type: 'asociacion' | 'carroza' | 'telefono' | 'whatsapp' | 'pulsera', id: number | string): void {
+    goToEditor(type: 'asociacion' | 'carroza' | 'telefono' | 'whatsapp' | 'pulsera' | 'ubicacion', id: number | string): void {
         this.router.navigate(['/admin/editor'], { queryParams: { type, id, tab: this.tab } });
     }
 
@@ -108,7 +112,8 @@ export class AdminComponent implements OnInit {
         if (this.tab === 2) this.loadTelefonos();
         if (this.tab === 3) this.loadWhatsapp();
         if (this.tab === 4) this.loadPulseras();
-        if (this.tab === 5) this.loadSettingsTab();
+        if (this.tab === 5) this.loadUbicaciones();
+        if (this.tab === 6) this.loadSettingsTab();
     }
 
     getSearchPlaceholder(): string {
@@ -116,7 +121,8 @@ export class AdminComponent implements OnInit {
         if (this.tab === 2) return 'Buscar telefono';
         if (this.tab === 3) return 'Buscar whatsapp';
         if (this.tab === 4) return 'Buscar pulsera';
-        if (this.tab === 5) return 'Ajustes';
+        if (this.tab === 5) return 'Buscar ubicacion';
+        if (this.tab === 6) return 'Ajustes';
         return 'Buscar asociacion';
     }
 
@@ -235,6 +241,15 @@ export class AdminComponent implements OnInit {
                         (p.type || '').toLowerCase().includes(term);
                 }
             },
+            {
+                listId: 'admin-list-ubic',
+                matches: i => {
+                    const u = this.getUbicacionesView()[i];
+                    return (u.displayName || u.uuid || u.clientId || u.zona || u.userType || '')
+                        .toString().toLowerCase().includes(term) ||
+                        `${u.lat}`.includes(term) || `${u.lng}`.includes(term);
+                }
+            },
         ];
 
         const cfg = configs[this.tab];
@@ -244,13 +259,60 @@ export class AdminComponent implements OnInit {
         if (!container) return;
 
         const items = Array.from(container.querySelectorAll<HTMLElement>('.item-card'));
-        const lists = [this.getAsociacionesView(), this.getCarrozasView(), this.telefonos, this.getWhatsappView(), this.getPulserasView()];
+        const lists = [this.getAsociacionesView(), this.getCarrozasView(), this.telefonos, this.getWhatsappView(), this.getPulserasView(), this.getUbicacionesView()];
         const currentList = lists[this.tab];
 
         const idx = currentList.findIndex((_, i) => cfg.matches(i));
         if (idx !== -1 && items[idx]) {
             items[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
+    }
+
+    getUbicacionesView(): Ubicacion[] {
+        return [...this.ubicaciones].sort((a, b) => (b.updatedAt ? new Date(b.updatedAt).getTime() : 0) - (a.updatedAt ? new Date(a.updatedAt).getTime() : 0));
+    }
+
+    loadUbicaciones(): void {
+        this.spinner.show();
+        this.ubicacionesService.getUbicaciones().subscribe({
+            next: list => {
+                // Ajustar updatedAt para evitar desfases de zona horaria
+                this.ubicaciones = (list ?? []).map(u => {
+                    const copy: any = { ...u };
+                    if (copy.updatedAt) {
+                        try {
+                            const raw = String(copy.updatedAt);
+                            const d = new Date(raw);
+                            // Si viene con 'Z' (UTC) el navegador convierte a hora local;
+                            // para mostrar la hora original sin sumar el offset, ajustamos
+                            // la fecha restando el desplazamiento del navegador.
+                            if (/Z$/.test(raw)) {
+                                const adjusted = new Date(d.getTime() + d.getTimezoneOffset() * 60000);
+                                copy.updatedAt = adjusted;
+                            } else {
+                                copy.updatedAt = new Date(raw);
+                            }
+                        } catch {
+                            // mantener el valor original si falla el parseo
+                            copy.updatedAt = copy.updatedAt;
+                        }
+                    }
+                    return copy as Ubicacion;
+                });
+                this.spinner.hide();
+            },
+            error: error => this.handleError('Error al cargar ubicaciones', error)
+        });
+    }
+
+    deleteUbicacion(clientId: string): void {
+        if (!clientId) return;
+        if (!confirm('¿Seguro que quieres borrar esta ubicación compartida?')) return;
+        this.spinner.show();
+        this.ubicacionesService.deleteUbicacion(clientId).subscribe({
+            next: () => this.loadUbicaciones(),
+            error: error => this.handleError('Error al borrar ubicacion', error)
+        });
     }
 
     private loadAsociaciones(): void {
